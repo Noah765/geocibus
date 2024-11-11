@@ -18,6 +18,12 @@ class MapPage extends StatefulWidget {
 class _MapPageState extends State<MapPage> {
   late MapShapeSource _mapSource;
 
+  Color _computeRegionColor(Region region) {
+    // TODO Should the absolute or relative difference be significant?
+    final missingResources = region.preferredFood - region.food + region.preferredWater - region.water;
+    return Color.lerp(Colors.green, Colors.red, clampDouble(missingResources / 200, 0, 1))!;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -29,7 +35,7 @@ class _MapPageState extends State<MapPage> {
       shapeDataField: 'CONTINENT',
       dataCount: regions.length,
       primaryValueMapper: (index) => regions[index].name,
-      //shapeColorValueMapper: (int index) => data[index].color,
+      shapeColorValueMapper: (index) => _computeRegionColor(regions[index]),
     );
   }
 
@@ -45,36 +51,40 @@ class _MapPageState extends State<MapPage> {
           IconButton(onPressed: () {}, tooltip: 'Einstellungen', icon: const Icon(Icons.settings)),
         ],
       ),
-      body: Center(
-        child: SfMaps(
-          layers: [
-            MapShapeLayer(
-              source: _mapSource,
-              showDataLabels: true,
-              dataLabelSettings: MapDataLabelSettings(textStyle: theme.textTheme.labelMedium),
-              shapeTooltipBuilder: (context, index) {
-                final region = game.regions[index];
-                return Padding(
-                  padding: const EdgeInsets.all(8),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(region.name, style: theme.textTheme.titleMedium),
-                      const Gap(16),
-                      Text('Essen', style: theme.textTheme.bodyMedium),
-                      _ResourceIndicator(value: region.food, preferredValue: region.preferredFood),
-                      const Gap(8),
-                      Text('Wasser', style: theme.textTheme.bodyMedium),
-                      //_ResourceIndicator(value: region.water, preferredValue: region.preferredWater),
-                    ],
-                  ),
-                );
-              },
-              tooltipSettings: MapTooltipSettings(color: theme.colorScheme.surfaceContainer, strokeColor: theme.colorScheme.surfaceContainer),
-              onSelectionChanged: (index) => Navigator.of(context).push(MaterialPageRoute(builder: (context) => InteractPage(game.regions[index]))),
-            ),
-          ],
-        ),
+      body: Column(
+        children: [
+          Text('Du besitzt ${game.food} Essen und ${game.water} Wasser'),
+          SfMaps(
+            layers: [
+              MapShapeLayer(
+                source: _mapSource,
+                showDataLabels: true,
+                dataLabelSettings: MapDataLabelSettings(textStyle: theme.textTheme.labelMedium),
+                shapeTooltipBuilder: (context, index) {
+                  final region = game.regions[index];
+                  return Padding(
+                    padding: const EdgeInsets.all(8),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(region.name, style: theme.textTheme.titleMedium),
+                        const Gap(16),
+                        Text('Essen', style: theme.textTheme.bodyMedium),
+                        _ResourceIndicator(value: region.food, preferredValue: region.preferredFood),
+                        const Gap(8),
+                        Text('Wasser', style: theme.textTheme.bodyMedium),
+                        _ResourceIndicator(value: region.water, preferredValue: region.preferredWater),
+                      ],
+                    ),
+                  );
+                },
+                tooltipSettings: MapTooltipSettings(color: theme.colorScheme.surfaceContainer, strokeColor: theme.colorScheme.surfaceContainer),
+                onSelectionChanged: (index) => Navigator.of(context).push(MaterialPageRoute(builder: (context) => InteractPage(game.regions[index]))),
+              ),
+            ],
+          ),
+          ElevatedButton(onPressed: () => game.finishRound(), child: const Text('Runde beenden')),
+        ],
       ),
     );
   }
@@ -96,20 +106,14 @@ class _ResourceIndicator extends StatelessWidget {
         preferredValue: preferredValue,
         color: theme.colorScheme.primary,
         backgroundColor: theme.colorScheme.primaryContainer,
-        labelTextStyle: theme.textTheme.labelSmall!,
-        labelColor: theme.colorScheme.secondary,
-        valueMarkerTextStyle: theme.textTheme.labelLarge!,
-        valueMarkerColor: theme.colorScheme.tertiary,
-        preferredValueMarkerTextStyle: theme.textTheme.labelMedium!,
-        preferredValueMarkerColor: theme.colorScheme.primary,
+        lineColor: theme.colorScheme.secondary,
+        textStyle: theme.textTheme.labelSmall!,
       ),
-      size: const Size(120, 40),
+      // TODO Calculate the height dynamically using the text height and bar height
+      size: const Size(120, 56),
     );
   }
 }
-
-typedef _LabelRects = ({Rect box, Rect text});
-typedef _MarkerTextRects = ({Rect value, Rect preferredValue});
 
 class _ResourceIndicatorPainter extends CustomPainter {
   const _ResourceIndicatorPainter({
@@ -117,67 +121,45 @@ class _ResourceIndicatorPainter extends CustomPainter {
     required this.preferredValue,
     required this.color,
     required this.backgroundColor,
-    required this.labelTextStyle,
-    required this.labelColor,
-    required this.valueMarkerTextStyle,
-    required this.valueMarkerColor,
-    required this.preferredValueMarkerTextStyle,
-    required this.preferredValueMarkerColor,
+    required this.lineColor,
+    required this.textStyle,
   });
+
+  static const barHeight = 12;
+  static const lineWidth = 2.0;
 
   final int value;
   final int preferredValue;
 
   final Color color;
   final Color backgroundColor;
-  final TextStyle labelTextStyle;
-  final Color labelColor;
-  final TextStyle valueMarkerTextStyle;
-  final Color valueMarkerColor;
-  final TextStyle preferredValueMarkerTextStyle;
-  final Color preferredValueMarkerColor;
+  final Color lineColor;
+  final TextStyle textStyle;
 
   @override
   void paint(Canvas canvas, Size size) {
     final maxValue = preferredValue > value ? preferredValue : (value * 1.25).round();
-
-    _drawBar(canvas, size.width, maxValue);
-    final markerTextRects = _drawMarkers(canvas, size, maxValue);
-    _drawLabels(canvas, size, maxValue, markerTextRects);
+    _drawBar(canvas, size, maxValue);
+    _drawLabels(canvas, size, maxValue);
   }
 
-  void _drawBar(Canvas canvas, double width, int maxValue) {
-    final reachedWidth = value / maxValue * width;
+  void _drawBar(Canvas canvas, Size size, int maxValue) {
+    final top = size.height / 2 - barHeight / 2;
+    final reachedWidth = value / maxValue * size.width;
+    final freeWidth = size.width - reachedWidth;
 
-    canvas.drawRect(Rect.fromLTRB(0, 0, reachedWidth, 12), Paint()..color = color);
-    canvas.drawRect(Rect.fromLTRB(reachedWidth, 0, width, 12), Paint()..color = backgroundColor);
+    canvas.drawRect(Rect.fromLTWH(0, top, reachedWidth, 12), Paint()..color = color);
+    canvas.drawRect(Rect.fromLTWH(reachedWidth, top, freeWidth, 12), Paint()..color = backgroundColor);
   }
 
-  _MarkerTextRects _drawMarkers(Canvas canvas, Size size, int maxValue) {
-    final valueRects = _computeLabelRects(value.toString(), valueMarkerTextStyle, value / maxValue * size.width, size);
-    final preferredValueRects = _computeLabelRects(preferredValue.toString(), preferredValueMarkerTextStyle, preferredValue / maxValue * size.width, size);
-
-    _paintLabel(canvas, valueRects, value.toString(), valueMarkerTextStyle);
-    _paintLabel(canvas, preferredValueRects, preferredValue.toString(), preferredValueMarkerTextStyle);
-
-    return (value: valueRects.text, preferredValue: preferredValueRects.text);
-  }
-
-  void _drawLabels(Canvas canvas, Size size, int maxValue, _MarkerTextRects markerTextRects) {
+  void _drawLabels(Canvas canvas, Size size, int maxValue) {
     final spacing = _computeLabelSpacing(maxValue);
-    final pixelSpacing = spacing / maxValue * size.width;
-
-    var pixelX = 0.0;
     for (var x = 0; x <= maxValue; x += spacing) {
-      final rects = _computeLabelRects(x.toString(), labelTextStyle, pixelX, size);
-
-      if (!(rects.text.right < markerTextRects.value.left || rects.text.left > markerTextRects.value.right) ||
-          !(rects.text.right < markerTextRects.preferredValue.left || rects.text.left > markerTextRects.preferredValue.right)) continue;
-
-      _paintLabel(canvas, rects, x.toString(), labelTextStyle);
-
-      pixelX += pixelSpacing;
+      _drawLabel(canvas: canvas, size: size, value: x, maxValue: maxValue);
     }
+
+    _drawLabel(canvas: canvas, size: size, value: value, maxValue: maxValue, upwards: true);
+    _drawLabel(canvas: canvas, size: size, value: preferredValue, maxValue: maxValue, upwards: true);
   }
 
   int _computeLabelSpacing(int maxValue) {
@@ -191,34 +173,24 @@ class _ResourceIndicatorPainter extends CustomPainter {
     return 10 * factor;
   }
 
-  _LabelRects _computeLabelRects(String text, TextStyle textStyle, double x, Size size) {
-    final textPainter = TextPainter(text: TextSpan(text: text, style: textStyle), textDirection: TextDirection.ltr)..layout();
-    final textRect = Rect.fromLTWH(
-      clampDouble(x - textPainter.width / 2, 0, size.width - textPainter.width),
-      size.height - textPainter.height,
-      textPainter.width,
-      textPainter.height,
-    );
+  void _drawLabel({required Canvas canvas, required Size size, required int value, required int maxValue, bool upwards = false}) {
+    final x = value / maxValue * size.width;
 
-    const boxWidth = 2.0;
-    final boxRect = Rect.fromLTWH(
-      clampDouble(x - boxWidth / 2, 0, size.width - boxWidth),
-      0,
-      boxWidth,
-      size.height - textPainter.height,
-    );
+    final textPainter = TextPainter(text: TextSpan(text: value.toString(), style: textStyle), textDirection: TextDirection.ltr)..layout();
 
-    textPainter.dispose();
+    final lineX = clampDouble(x, lineWidth / 2, size.width - lineWidth / 2);
+    final lineYStart = upwards ? size.height / 2 + barHeight / 2 : size.height / 2 - barHeight / 2;
+    final lineYEnd = upwards ? textPainter.height : size.height - textPainter.height;
+    final linePaint = Paint()
+      ..color = lineColor
+      ..strokeWidth = lineWidth;
+    canvas.drawLine(Offset(lineX, lineYStart), Offset(lineX, lineYEnd), linePaint);
 
-    return (box: boxRect, text: textRect);
-  }
-
-  void _paintLabel(Canvas canvas, _LabelRects rects, String text, TextStyle textStyle) {
-    canvas.drawRect(rects.box, Paint()..color = labelColor);
-
-    TextPainter(text: TextSpan(text: text, style: textStyle), textDirection: TextDirection.ltr)
-      ..layout()
-      ..paint(canvas, Offset(rects.text.left, rects.text.top));
+    final textX = clampDouble(x - textPainter.width / 2, 0, size.width - textPainter.width);
+    final textY = upwards ? 0.0 : size.height - textPainter.height;
+    textPainter
+      ..paint(canvas, Offset(textX, textY))
+      ..dispose();
   }
 
   @override
