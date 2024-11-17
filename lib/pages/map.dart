@@ -3,9 +3,11 @@ import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:provider/provider.dart';
-import 'package:sowi/game.dart';
+import 'package:sowi/logic/game.dart';
+import 'package:sowi/logic/region.dart';
 import 'package:sowi/pages/interact.dart';
+import 'package:sowi/pages/intro.dart';
+import 'package:sowi/pages/market.dart';
 import 'package:syncfusion_flutter_maps/maps.dart';
 
 class MapPage extends StatefulWidget {
@@ -19,16 +21,13 @@ class _MapPageState extends State<MapPage> {
   late MapShapeSource _mapSource;
 
   Color _computeRegionColor(Region region) {
-    // TODO Should the absolute or relative difference be significant?
-    final missingResources = region.preferredFood - region.food + region.preferredWater - region.water;
-    return Color.lerp(Colors.green, Colors.red, clampDouble(missingResources / 200, 0, 1))!;
+    final missingResourcesPercentage = (region.food / region.preferredFood + region.water / region.preferredWater) / 2;
+    return Color.lerp(Colors.red, Colors.green, missingResourcesPercentage)!;
   }
 
   @override
   void initState() {
     super.initState();
-
-    final regions = context.read<Game>().regions;
 
     _mapSource = MapShapeSource.asset(
       'assets/continents.json',
@@ -42,7 +41,6 @@ class _MapPageState extends State<MapPage> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final game = context.watch<Game>();
 
     return Scaffold(
       appBar: AppBar(
@@ -53,37 +51,49 @@ class _MapPageState extends State<MapPage> {
       ),
       body: Column(
         children: [
-          Text('Du besitzt ${game.food} Essen und ${game.water} Wasser'),
-          SfMaps(
-            layers: [
-              MapShapeLayer(
-                source: _mapSource,
-                showDataLabels: true,
-                dataLabelSettings: MapDataLabelSettings(textStyle: theme.textTheme.labelMedium),
-                shapeTooltipBuilder: (context, index) {
-                  final region = game.regions[index];
-                  return Padding(
-                    padding: const EdgeInsets.all(8),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(region.name, style: theme.textTheme.titleMedium),
-                        const Gap(16),
-                        Text('Essen', style: theme.textTheme.bodyMedium),
-                        _ResourceIndicator(value: region.food, preferredValue: region.preferredFood),
-                        const Gap(8),
-                        Text('Wasser', style: theme.textTheme.bodyMedium),
-                        _ResourceIndicator(value: region.water, preferredValue: region.preferredWater),
-                      ],
-                    ),
-                  );
-                },
-                tooltipSettings: MapTooltipSettings(color: theme.colorScheme.surfaceContainer, strokeColor: theme.colorScheme.surfaceContainer),
-                onSelectionChanged: (index) => Navigator.of(context).push(MaterialPageRoute(builder: (context) => InteractPage(game.regions[index]))),
-              ),
-            ],
+          Text('Du besitzt ${game.food} Essen, ${game.water} Wasser und ${game.money} Geld'),
+          Expanded(
+            child: SfMaps(
+              layers: [
+                MapShapeLayer(
+                  source: _mapSource,
+                  showDataLabels: true,
+                  dataLabelSettings: MapDataLabelSettings(textStyle: theme.textTheme.labelMedium),
+                  shapeTooltipBuilder: (context, index) {
+                    final region = regions[index];
+                    return Padding(
+                      padding: const EdgeInsets.all(8),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(region.name, style: theme.textTheme.titleMedium),
+                          const Gap(16),
+                          Text('Essen', style: theme.textTheme.bodyMedium),
+                          _ResourceIndicator(value: region.food, preferredValue: region.preferredFood),
+                          const Gap(8),
+                          Text('Wasser', style: theme.textTheme.bodyMedium),
+                          _ResourceIndicator(value: region.water, preferredValue: region.preferredWater),
+                        ],
+                      ),
+                    );
+                  },
+                  tooltipSettings: MapTooltipSettings(color: theme.colorScheme.surfaceContainer, strokeColor: theme.colorScheme.surfaceContainer),
+                  onSelectionChanged: (index) => Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => InteractPage(regions[index]))),
+                ),
+              ],
+            ),
           ),
-          ElevatedButton(onPressed: () => game.finishRound(), child: const Text('Runde beenden')),
+          ElevatedButton(
+            onPressed: () {
+              game.finishRound();
+              Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => const IntroPage()));
+            },
+            child: const Text('Runde beenden'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => const MarketPage())),
+            child: const Text('Ressourcen umwandeln'),
+          ),
         ],
       ),
     );
@@ -164,7 +174,7 @@ class _ResourceIndicatorPainter extends CustomPainter {
 
   int _computeLabelSpacing(int maxValue) {
     final preferredSpacing = maxValue / 3;
-    final factor = pow(10, (log(preferredSpacing) / ln10).floor()) as int;
+    final factor = pow(10, max((log(preferredSpacing) / ln10).floor(), 0)) as int;
 
     if (preferredSpacing < 2 * factor) return 2 * factor;
     if (preferredSpacing < 2.5 * factor) return (2.5 * factor).round();

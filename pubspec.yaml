@@ -8,7 +8,6 @@ dependencies:
   flutter:
     sdk: flutter
   gap: ^3.0.1
-  provider: ^6.1.2
   syncfusion_flutter_maps: ^27.1.58
 dev_dependencies:
   lint: ^2.3.0
