@@ -1,72 +1,70 @@
-final regions = [Europe(), Asia(), NorthAmerica(), SouthAmerica(), Africa(), Australia(), Oceania(), Antarctica()];
+import 'package:sowi/constants.dart';
 
 sealed class Region {
-  Region({required this.name, required int startFood, required this.preferredFood, required int startWater, required this.preferredWater})
-      : food = startFood,
-        water = startWater;
+  Region({
+    required this.name,
+    required int startPopulation,
+    required this.defaultPopulationGrowthRate,
+    required this.foodPerPerson,
+    required this.waterPerPerson,
+  }) : population = startPopulation;
 
   final String name;
 
-  int food;
-  final int preferredFood;
+  int population;
+  final double defaultPopulationGrowthRate;
 
-  int water;
-  final int preferredWater;
+  int food = 0;
+  int water = 0;
+  final double foodPerPerson;
+  final double waterPerPerson;
+
+  int get requiredFood => (population * foodPerPerson).round();
+  int get requiredWater => (population * waterPerPerson).round();
+  int get maximumFood => (population * (1 + maximumPopulationGrowthRate) * foodPerPerson).round();
+  int get maximumWater => (population * (1 + maximumPopulationGrowthRate) * waterPerPerson).round();
 
   String reactTo(int food, int water);
 }
 
 class Europe extends Region {
-  Europe() : super(name: 'Europa', startFood: 75, preferredFood: 745, startWater: 75, preferredWater: 745);
+  Europe() : super(name: 'Europa', startPopulation: 746, defaultPopulationGrowthRate: -0.001, foodPerPerson: 3.555, waterPerPerson: 3.555);
 
   @override
   String reactTo(int food, int water) => 'Reaktion';
 }
 
 class Asia extends Region {
-  Asia() : super(name: 'Asien', startFood: 470, preferredFood: 4695, startWater: 470, preferredWater: 4695);
+  Asia() : super(name: 'Asien', startPopulation: 4778, defaultPopulationGrowthRate: 0.0058, foodPerPerson: 2.944, waterPerPerson: 2.944);
 
   @override
   String reactTo(int food, int water) => 'Reaktion';
 }
 
 class NorthAmerica extends Region {
-  NorthAmerica() : super(name: 'Nordamerika', startFood: 60, preferredFood: 595, startWater: 60, preferredWater: 595);
+  NorthAmerica() : super(name: 'Nordamerika', startPopulation: 383, defaultPopulationGrowthRate: 0.0056, foodPerPerson: 3.881, waterPerPerson: 3.881);
 
   @override
   String reactTo(int food, int water) => 'Reaktion';
 }
 
 class SouthAmerica extends Region {
-  SouthAmerica() : super(name: 'Südamerika', startFood: 43, preferredFood: 434, startWater: 43, preferredWater: 434);
+  SouthAmerica() : super(name: 'Südamerika', startPopulation: 659, defaultPopulationGrowthRate: 0.0065, foodPerPerson: 3.111, waterPerPerson: 3.111);
 
   @override
   String reactTo(int food, int water) => 'Reaktion';
 }
 
 class Africa extends Region {
-  Africa() : super(name: 'Afrika', startFood: 139, preferredFood: 1394, startWater: 139, preferredWater: 1394);
+  Africa() : super(name: 'Afrika', startPopulation: 1481, defaultPopulationGrowthRate: 0.0226, foodPerPerson: 2.567, waterPerPerson: 2.567);
 
   @override
   String reactTo(int food, int water) => 'Reaktion';
 }
 
 class Australia extends Region {
-  Australia() : super(name: 'Australien', startFood: 2, preferredFood: 26, startWater: 2, preferredWater: 26);
-
-  @override
-  String reactTo(int food, int water) => 'Reaktion';
-}
-
-class Oceania extends Region {
-  Oceania() : super(name: 'Ozeanien', startFood: 1, preferredFood: 18, startWater: 1, preferredWater: 18);
-
-  @override
-  String reactTo(int food, int water) => 'Reaktion';
-}
-
-class Antarctica extends Region {
-  Antarctica() : super(name: 'Antarktis', startFood: 0, preferredFood: 1, startWater: 0, preferredWater: 1);
+  // TODO Missing actual numbers for food and water per person
+  Australia() : super(name: 'Australien', startPopulation: 46, defaultPopulationGrowthRate: 0.0111, foodPerPerson: 3.6, waterPerPerson: 3.6);
 
   @override
   String reactTo(int food, int water) => 'Reaktion';
