@@ -78,6 +78,14 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  font_awesome_flutter:
+    dependency: "direct main"
+    description:
+      name: font_awesome_flutter
+      sha256: d3a89184101baec7f4600d58840a764d2ef760fe1c5a20ef9e6b0e9b24a07a3a
+      url: "https://pub.dev"
+    source: hosted
+    version: "10.8.0"
   gap:
     dependency: "direct main"
     description:
@@ -134,6 +142,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.15.0"
+  nested:
+    dependency: transitive
+    description:
+      name: nested
+      sha256: "03bac4c528c64c95c722ec99280375a6f2fc708eec17c7b3f07253b626cd2a20"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.0"
   path:
     dependency: transitive
     description:
@@ -150,6 +166,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.8"
+  popover:
+    dependency: "direct main"
+    description:
+      name: popover
+      sha256: "0606f3e10f92fc0459f5c52fd917738c29e7552323b28694d50c2d3312d0e1a2"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.3.1"
+  provider:
+    dependency: "direct main"
+    description:
+      name: provider
+      sha256: c8a055ee5ce3fd98d6fc872478b03823ffdb448699c6ebdbbc71d59b596fd48c
+      url: "https://pub.dev"
+    source: hosted
+    version: "6.1.2"
   screen_retriever:
     dependency: transitive
     description:
@@ -211,22 +243,30 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.4.0"
+  svg_path_parser:
+    dependency: "direct main"
+    description:
+      name: svg_path_parser
+      sha256: adff09b1099a0c9e0dc81e1975de70999889f825c1a2e8e9139bab03464a3657
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.1.2"
   syncfusion_flutter_core:
     dependency: transitive
     description:
       name: syncfusion_flutter_core
-      sha256: "795530addc930b3b06f4f2fe99a039de276860af505fcf54c4516fbcb838a3cb"
+      sha256: "325f519ce4ad8edd81811c21b853d72018529e353584490824da0555156ba076"
       url: "https://pub.dev"
     source: hosted
-    version: "27.2.4"
+    version: "27.2.5"
   syncfusion_flutter_maps:
     dependency: "direct main"
     description:
       name: syncfusion_flutter_maps
-      sha256: b8aee7d8dcda4f74d92fcf01ca8e57d60b05978d4881f1bae013ec300c0e5f06
+      sha256: a569b8d439ad607dc1b48a59ea752d068f9100b1b7780f1ed02e3c86da924efe
       url: "https://pub.dev"
     source: hosted
-    version: "27.2.4"
+    version: "27.2.5"
   term_glyph:
     dependency: transitive
     description:
@@ -277,4 +317,4 @@ packages:
     version: "0.4.3"
 sdks:
   dart: ">=3.5.4 <4.0.0"
-  flutter: ">=3.7.0"
+  flutter: ">=3.24.0"

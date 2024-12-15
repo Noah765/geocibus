@@ -1,13 +1,12 @@
 import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:flutter/material.dart';
-import 'package:gap/gap.dart';
-import 'package:sowi/game/page.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:sowi/game/main/page.dart';
 
-class StartPage extends StatelessWidget {
-  const StartPage({super.key});
+class MainMenu extends StatelessWidget {
+  const MainMenu({super.key});
 
-  void _start(BuildContext context) => Navigator.of(context)
-      .push(MaterialPageRoute(builder: (context) => const GamePage()));
+  void _start(BuildContext context) => Navigator.of(context).push(MaterialPageRoute(builder: (context) => const MainPage()));
 
   void _options() {}
 
@@ -21,24 +20,18 @@ class StartPage extends StatelessWidget {
       body: SizedBox.expand(
         child: Column(
           children: [
-            SizedBox(
-              width: double.infinity,
-              child: FittedBox(
-                child: Text.rich(
-                  TextSpan(
-                    children: [
-                      const TextSpan(text: 'GE'),
-                      WidgetSpan(
-                        child: Image.asset(
-                          'assets/globe.png',
-                          height: theme.textTheme.displayLarge!.fontSize,
-                        ),
-                      ),
-                      const TextSpan(text: 'CIBUS'),
-                    ],
+            Text.rich(
+              TextSpan(
+                style: theme.textTheme.displayLarge,
+                children: [
+                  const TextSpan(text: 'GE'),
+                  WidgetSpan(
+                    // TODO Correctly size and align the Icon
+                    alignment: PlaceholderAlignment.middle,
+                    child: FaIcon(FontAwesomeIcons.earthEurope, size: theme.textTheme.displayLarge!.fontSize),
                   ),
-                  style: theme.textTheme.displayLarge,
-                ),
+                  const TextSpan(text: 'CIBUS'),
+                ],
               ),
             ),
             FractionallySizedBox(
@@ -46,16 +39,14 @@ class StartPage extends StatelessWidget {
               alignment: Alignment.centerLeft,
               child: Column(
                 children: [
-                  OutlinedButton(
+                  FilledButton(
                     onPressed: () => _start(context),
                     child: const Text('START'),
                   ),
-                  const Gap(32),
                   OutlinedButton(
                     onPressed: _options,
                     child: const Text('OPTIONEN'),
                   ),
-                  const Gap(32),
                   OutlinedButton(
                     onPressed: _leave,
                     child: const Text('SPIEL VERLASSEN'),

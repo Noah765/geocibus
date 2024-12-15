@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:sowi/logic/region.dart';
+import 'package:provider/provider.dart';
+import 'package:sowi/game/dialog/page.dart';
+import 'package:sowi/models/game.dart';
+import 'package:sowi/models/region.dart';
 import 'package:syncfusion_flutter_maps/maps.dart';
 
 class GameMap extends StatefulWidget {
-  const GameMap({super.key, required this.regions});
-
-  final List<Region> regions;
+  const GameMap({super.key});
 
   @override
   State<GameMap> createState() => _GameMapState();
@@ -18,12 +19,13 @@ class _GameMapState extends State<GameMap> {
   void initState() {
     super.initState();
 
+    final game = context.read<Game>();
     _mapSource = MapShapeSource.asset(
       'assets/continents.json',
       shapeDataField: 'CONTINENT',
-      dataCount: widget.regions.length,
-      primaryValueMapper: (index) => widget.regions[index].name,
-      shapeColorValueMapper: (index) => _computeRegionColor(widget.regions[index]),
+      dataCount: game.regions.length,
+      primaryValueMapper: (index) => game.regions[index].name,
+      shapeColorValueMapper: (index) => _computeRegionColor(game.regions[index]),
     );
   }
 
@@ -34,6 +36,7 @@ class _GameMapState extends State<GameMap> {
 
   @override
   Widget build(BuildContext context) {
+    final game = context.watch<Game>();
     final theme = Theme.of(context);
 
     return SfMaps(
@@ -41,11 +44,9 @@ class _GameMapState extends State<GameMap> {
         MapShapeLayer(
           source: _mapSource,
           showDataLabels: true,
-          dataLabelSettings: MapDataLabelSettings(
-            textStyle: theme.textTheme.labelMedium,
-          ),
+          dataLabelSettings: MapDataLabelSettings(textStyle: theme.textTheme.labelMedium),
           shapeTooltipBuilder: (context, index) {
-            final region = widget.regions[index];
+            final region = game.regions[index];
             return Padding(
               padding: const EdgeInsets.all(8),
               child: Column(
@@ -53,8 +54,8 @@ class _GameMapState extends State<GameMap> {
                 children: [
                   Text(region.name, style: theme.textTheme.titleMedium),
                   Text('Population: ${region.population}'),
-                  Text('Essen: ${region.food}/${region.requiredFood}/${region.maximumFood}', style: theme.textTheme.bodyMedium),
                   Text('Wasser: ${region.water}/${region.requiredWater}/${region.maximumWater}', style: theme.textTheme.bodyMedium),
+                  Text('Essen: ${region.food}/${region.requiredFood}/${region.maximumFood}', style: theme.textTheme.bodyMedium),
                 ],
               ),
             );
@@ -63,11 +64,7 @@ class _GameMapState extends State<GameMap> {
             color: theme.colorScheme.surfaceContainer,
             strokeColor: theme.colorScheme.surfaceContainer,
           ),
-          //onSelectionChanged: (index) => Navigator.of(context).pushReplacement(
-          //  MaterialPageRoute(
-          //    builder: (context) => InteractPage(regions[index]),
-          //  ),
-          //),
+          onSelectionChanged: (index) => Navigator.of(context).push(MaterialPageRoute(builder: (context) => DialogPage(game: game, region: game.regions[index]))),
         ),
       ],
     );

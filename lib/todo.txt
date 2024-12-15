@@ -1,2 +1,0 @@
-- Move away from Scaffold?
-- Correctly use the material theming system

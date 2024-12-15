@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:sowi/logic/disaster.dart';
-import 'package:sowi/logic/game.dart';
+import 'package:sowi/models/event.dart';
+import 'package:sowi/models/game.dart';
 import 'package:sowi/widgets/elevation.dart';
 
 class RoundBeginningOverlay extends StatelessWidget {
@@ -23,23 +23,26 @@ class RoundBeginningOverlay extends StatelessWidget {
             children: [
               Elevation(
                 symmetricalPadding: false,
-                child: Text('RUNDE ${game.round}', style: theme.textTheme.displaySmall!.copyWith(color: Colors.black, fontWeight: FontWeight.bold)),
+                child: Text('RUNDE ${game.round + 1}', style: theme.textTheme.displaySmall!.copyWith(color: Colors.black, fontWeight: FontWeight.bold)),
               ),
               const Gap(16),
               Expanded(
                 child: Elevation(
                   child: Row(
                     children: [
-                      Expanded(child: _DisasterColumn(text: 'NEUE EVENTS:', disasters: game.newDisasters)),
+                      Expanded(child: _EventColumn(text: 'NEUE EVENTS:', events: game.newEvents)),
                       const Gap(16),
-                      Expanded(child: _DisasterColumn(text: 'ABGELAUFENE EVENTS:', disasters: game.finishedDisasters)),
+                      Expanded(child: _EventColumn(text: 'ABGELAUFENE EVENTS:', events: game.finishedEvents)),
                     ],
                   ),
                 ),
               ),
               const Gap(16),
               OutlinedButton(
-                onPressed: () => Navigator.of(context).pop(),
+                onPressed: () {
+                  game.startRound();
+                  Navigator.of(context).pop();
+                },
                 child: const Text('Runde starten'),
               ),
             ],
@@ -50,11 +53,11 @@ class RoundBeginningOverlay extends StatelessWidget {
   }
 }
 
-class _DisasterColumn extends StatelessWidget {
-  const _DisasterColumn({required this.text, required this.disasters});
+class _EventColumn extends StatelessWidget {
+  const _EventColumn({required this.text, required this.events});
 
   final String text;
-  final Set<Disaster> disasters;
+  final Set<Event> events;
 
   @override
   Widget build(BuildContext context) {
@@ -66,11 +69,11 @@ class _DisasterColumn extends StatelessWidget {
           child: Elevation(
             child: Column(
               children: [
-                for (final disaster in disasters) ...[
-                  _DisasterCard(disaster),
-                  if (disaster != disasters.last) const Gap(4),
+                for (final event in events) ...[
+                  _EventCard(event),
+                  if (event != events.last) const Gap(4),
                 ],
-                if (disasters.isEmpty) const SizedBox(width: double.infinity, child: Text('Leer...', textAlign: TextAlign.center)),
+                if (events.isEmpty) const SizedBox(width: double.infinity, child: Text('Leer...', textAlign: TextAlign.center)),
               ],
             ),
           ),
@@ -80,21 +83,21 @@ class _DisasterColumn extends StatelessWidget {
   }
 }
 
-class _DisasterCard extends StatelessWidget {
-  const _DisasterCard(this.disaster);
+class _EventCard extends StatelessWidget {
+  const _EventCard(this.event);
 
-  final Disaster disaster;
+  final Event event;
 
   @override
   Widget build(BuildContext context) {
     return Elevation(
       child: Row(
         children: [
-          Icon(disaster.icon),
+          Icon(event.icon),
           const Gap(4),
-          Text(disaster.name),
+          Text(event.name),
           const Spacer(),
-          Text('(STF. ${disaster.level})'),
+          Text('(STF. ${event.level})'),
         ],
       ),
     );
