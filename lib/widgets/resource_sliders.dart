@@ -55,7 +55,7 @@ class _LabeledSliderState extends State<_LabeledSlider> {
   var _value = 0.0;
 
   int _convertValue() => switch (_value) {
-        < 0 => (-_value * widget.leftMax).round(),
+        < 0 => (_value * widget.leftMax).round(),
         > 0 => (_value * widget.rightMax).round(),
         _ => 0,
       };
@@ -93,7 +93,7 @@ class _LabeledSliderState extends State<_LabeledSlider> {
               onChanged: (value) => setState(() => _value = value),
               onChangeEnd: (value) => widget.onChanged(_convertValue()),
               min: -1,
-              label: _convertValue().toString(),
+              label: _convertValue().abs().toString(),
             ),
           ),
         ),

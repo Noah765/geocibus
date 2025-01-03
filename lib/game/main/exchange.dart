@@ -5,8 +5,8 @@ import 'package:provider/provider.dart';
 import 'package:sowi/models/game.dart';
 import 'package:sowi/widgets/resource_sliders.dart';
 
-class GameExchange extends StatelessWidget {
-  const GameExchange({super.key});
+class MainExchange extends StatelessWidget {
+  const MainExchange({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -33,6 +33,31 @@ class _PopoverState extends State<_Popover> {
   var _water = 0;
   var _food = 0;
 
+  late final WidgetStatesController _finishButtonController;
+
+  @override
+  void initState() {
+    super.initState();
+    _finishButtonController = WidgetStatesController();
+  }
+
+  @override
+  void dispose() {
+    _finishButtonController.dispose();
+    super.dispose();
+  }
+
+  bool get isTradePossible => (_water * widget.game.waterPrice).round() + (_food * widget.game.foodPrice).round() <= widget.game.money;
+  void _onWaterChanged(int value) {
+    _water = value;
+    setState(() => _finishButtonController.update(WidgetState.disabled, !isTradePossible));
+  }
+
+  void _onFoodChanged(int value) {
+    _food = value;
+    setState(() => _finishButtonController.update(WidgetState.disabled, !isTradePossible));
+  }
+
   void _onFinish() {
     widget.game.exchangeResources(_water, _food);
     Navigator.of(context).pop();
@@ -52,13 +77,18 @@ class _PopoverState extends State<_Popover> {
               leftText: 'Verkaufen',
               rightText: 'Kaufen',
               waterLeftMax: widget.game.water,
-              waterRightMax: (widget.game.money * widget.game.waterPrice).round(),
-              onWaterChanged: (value) => _water = value,
+              waterRightMax: (widget.game.money / widget.game.waterPrice).round(),
+              onWaterChanged: _onWaterChanged,
               foodLeftMax: widget.game.food,
-              foodRightMax: (widget.game.money * widget.game.foodPrice).round(),
-              onFoodChanged: (value) => _food = value,
+              foodRightMax: (widget.game.money / widget.game.foodPrice).round(),
+              onFoodChanged: _onFoodChanged,
             ),
-            OutlinedButton(onPressed: _onFinish, child: const Text('Fertig')),
+            if (!isTradePossible) const Text('Handel nicht möglich'),
+            OutlinedButton(
+              onPressed: _onFinish,
+              statesController: _finishButtonController,
+              child: const Text('Fertig'),
+            ),
           ],
         ),
       ),

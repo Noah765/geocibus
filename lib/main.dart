@@ -17,14 +17,17 @@ class App extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = ColorScheme.fromSeed(
+      seedColor: Colors.green,
+      brightness: Brightness.dark,
+      dynamicSchemeVariant: DynamicSchemeVariant.vibrant, // TODO: Test out all of these options
+    );
+
     return MaterialApp(
       title: 'Geocibus',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.green,
-          brightness: Brightness.dark,
-          dynamicSchemeVariant: DynamicSchemeVariant.vibrant, // TODO: Test out all of these options
-        ),
+        colorScheme: colorScheme,
+        iconTheme: IconThemeData(color: colorScheme.onSurface, applyTextScaling: true),
       ),
       debugShowCheckedModeBanner: false,
       home: const MainMenu(),

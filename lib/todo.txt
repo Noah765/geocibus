@@ -1,0 +1,15 @@
+Dialog:
+- Results: Trade possible / impossible
+
+Options:
+- Exit
+- Dialog
+
+Your messages:
+- "Ja, ich helfe dir"
+
+
+Meldungen, von Kontineneten, welche deine Hilfe brauchen
+- Reden: Selben Meldungen, oder Standard-startnachricht
+
+- Link sources (other page with links)

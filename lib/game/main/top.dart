@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gap/gap.dart';
 import 'package:provider/provider.dart';
-import 'package:sowi/constants.dart';
 import 'package:sowi/models/game.dart';
 import 'package:sowi/widgets/settings_button.dart';
 
@@ -27,7 +26,7 @@ class MainTop extends StatelessWidget {
               Card.filled(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-                  child: Text('Runde ${game.round}/$numberOfRounds'),
+                  child: Text('${game.month} des Jahres ${game.round}/10'),
                 ),
               ),
             ],
@@ -40,7 +39,7 @@ class MainTop extends StatelessWidget {
               Card.filled(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-                  child: Text('Ürige Züge ${game.movesLeft}'),
+                  child: Text('Score: ${game.score}'),
                 ),
               ),
               const Gap(8),

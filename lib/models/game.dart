@@ -1,7 +1,6 @@
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
-import 'package:sowi/constants.dart';
 import 'package:sowi/models/event.dart';
 import 'package:sowi/models/region.dart';
 
@@ -15,24 +14,81 @@ class Game extends ChangeNotifier {
     Australia(),
   ];
 
+  int score = 0;
+
   int round = 0;
   RoundState roundState = RoundState.beginning;
-  int movesLeft = numberOfMoves;
+  int movesLeft = 6;
+
+  String get month => switch (movesLeft) {
+        6 => 'Januar',
+        5 => 'März',
+        4 => 'Mai',
+        3 => 'Juli',
+        2 => 'September',
+        1 => 'November',
+        0 => 'Dezember',
+        _ => throw Error(),
+      };
 
   int food = 0;
   int water = 0;
-  int money = 500;
+  int money = 5000;
 
   double foodPrice = 1;
   double waterPrice = 1;
 
-  int generatedMoney = 10;
+  int generatedMoney = 100; // TODO Change based on events
   double moneyMultiplicationRate = 1.1;
 
-  final activeEvents = <Event>{};
-  final newEvents = <Event>{};
-  final finishedEvents = <Event>{};
-  final scheduledEvents = <Event>{};
+  late final List<List<Event>> events = _generateEvents();
+  final activeEvents = <Event>[];
+  List<Event> newEvents = [];
+  List<Event> finishedEvents = [];
+
+  // TODO More sophisticated generator (same events in a row should be unlikely)
+  List<List<Event>> _generateEvents() {
+    final events = List.generate(10, (i) => <Event>[]);
+
+    final activeEvents = <Event>[];
+    for (var round = 1; round < 10; round++) {
+      for (var i = 0; i < activeEvents.length; i++) {
+        final event = activeEvents[i];
+        event.round++;
+
+        if (event.duration < event.round) {
+          event.round = 1;
+          activeEvents.remove(event);
+          i--;
+        }
+      }
+
+      final numberOfNewEvents = Random().nextInt(round ~/ 2 + 1);
+      for (var i = 0; i < numberOfNewEvents; i++) {
+        final level = Random().nextInt(round ~/ 2) + 1;
+
+        final possibleEvents = [
+          PandemicEvent(game: this, level: level),
+          InflationEvent(game: this, level: level),
+          WarEvent(game: this, level: level),
+          NatureEvent(game: this, level: level),
+          PlantDiseaseEvent(game: this, level: level),
+          WaterPollutionEvent(game: this, level: level),
+        ].where((e) => e.maximumRound >= round && !activeEvents.any((activeEvent) => e.runtimeType == activeEvent.runtimeType)).toList();
+
+        if (possibleEvents.isEmpty) continue;
+
+        final event = possibleEvents[Random().nextInt(possibleEvents.length)];
+
+        events[round - 1].add(event);
+        activeEvents.add(event);
+      }
+    }
+
+    return events;
+  }
+
+  void scheduleEvent(Event event, {int waitRounds = 0}) => events[round + waitRounds].add(event);
 
   Region selectRandomRegion() => regions[Random().nextInt(regions.length)];
 
@@ -44,6 +100,8 @@ class Game extends ChangeNotifier {
     region.water += water;
 
     movesLeft--;
+
+    if (movesLeft == 0) finishRound();
 
     notifyListeners();
   }
@@ -60,34 +118,10 @@ class Game extends ChangeNotifier {
       region.finishRound();
     }
 
-    newEvents.clear();
-    finishedEvents.clear();
+    score += regions.fold(0, (sum, e) => sum + e.population);
 
-    for (final event in activeEvents) {
-      if (event.duration <= event.round) {
-        finishedEvents.add(event);
-      }
-    }
-
-    for (final event in scheduledEvents) {
-      newEvents.add(event);
-    }
-    scheduledEvents.clear();
-
-    final numberOfNewEvents = Random().nextInt(round ~/ 2 + 1);
-    for (var i = 0; i < numberOfNewEvents; i++) {
-      final level = Random().nextInt(round ~/ 2 + 1);
-
-      final event = [
-        PandemicEvent(game: this, level: level),
-        InflationEvent(game: this, level: level),
-        WarEvent(game: this, level: level),
-        NatureEvent(game: this, level: level),
-        PlantDiseaseEvent(game: this, level: level),
-        WaterPollutionEvent(game: this, level: level),
-      ][Random().nextInt(5)];
-      newEvents.add(event);
-    }
+    newEvents = round == 10 ? [] : events[round];
+    finishedEvents = activeEvents.where((e) => e.duration == e.round).toList();
 
     roundState = RoundState.beginning;
 
@@ -96,11 +130,12 @@ class Game extends ChangeNotifier {
 
   void startRound() {
     round++;
+    movesLeft = 6;
 
     money += generatedMoney;
     money = (money * moneyMultiplicationRate).round();
 
-    final removedEvents = <Event>{};
+    final removedEvents = <Event>[];
     for (final event in activeEvents) {
       event.round++;
       if (event.duration < event.round) {

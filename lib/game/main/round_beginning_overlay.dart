@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gap/gap.dart';
 import 'package:sowi/models/event.dart';
 import 'package:sowi/models/game.dart';
-import 'package:sowi/widgets/elevation.dart';
 
 class RoundBeginningOverlay extends StatelessWidget {
   const RoundBeginningOverlay(this.game, {super.key});
@@ -11,42 +11,48 @@ class RoundBeginningOverlay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final textTheme = Theme.of(context).textTheme;
 
     return Material(
       color: Colors.transparent,
-      child: Center(
-        child: FractionallySizedBox(
-          widthFactor: 0.5,
-          heightFactor: 0.7,
-          child: Column(
-            children: [
-              Elevation(
-                symmetricalPadding: false,
-                child: Text('RUNDE ${game.round + 1}', style: theme.textTheme.displaySmall!.copyWith(color: Colors.black, fontWeight: FontWeight.bold)),
+      child: FractionallySizedBox(
+        widthFactor: 0.5,
+        heightFactor: 0.7,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Card.filled(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                child: Text('Jahr ${game.round + 1}', style: textTheme.displaySmall!.copyWith()),
               ),
-              const Gap(16),
+            ),
+            const Gap(16),
+            if (game.newEvents.isNotEmpty || game.finishedEvents.isNotEmpty) ...[
               Expanded(
-                child: Elevation(
-                  child: Row(
-                    children: [
-                      Expanded(child: _EventColumn(text: 'NEUE EVENTS:', events: game.newEvents)),
-                      const Gap(16),
-                      Expanded(child: _EventColumn(text: 'ABGELAUFENE EVENTS:', events: game.finishedEvents)),
-                    ],
+                child: Card.filled(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Row(
+                      children: [
+                        Expanded(child: _EventColumn(text: 'Neue Events:', events: game.newEvents)),
+                        const Gap(16),
+                        Expanded(child: _EventColumn(text: 'Abgelaufene Events:', events: game.finishedEvents)),
+                      ],
+                    ),
                   ),
                 ),
               ),
               const Gap(16),
-              OutlinedButton(
-                onPressed: () {
-                  game.startRound();
-                  Navigator.of(context).pop();
-                },
-                child: const Text('Runde starten'),
-              ),
             ],
-          ),
+            OutlinedButton(
+              onPressed: () {
+                game.startRound();
+                Navigator.of(context).pop();
+              },
+              child: const Text('Jahr starten'),
+            ),
+          ],
         ),
       ),
     );
@@ -57,23 +63,25 @@ class _EventColumn extends StatelessWidget {
   const _EventColumn({required this.text, required this.events});
 
   final String text;
-  final Set<Event> events;
+  final List<Event> events;
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+
     return Column(
       children: [
-        Text(text),
+        Text(text, style: textTheme.titleMedium),
         const Gap(8),
         Expanded(
-          child: Elevation(
+          child: Card.filled(
             child: Column(
               children: [
                 for (final event in events) ...[
                   _EventCard(event),
                   if (event != events.last) const Gap(4),
                 ],
-                if (events.isEmpty) const SizedBox(width: double.infinity, child: Text('Leer...', textAlign: TextAlign.center)),
+                if (events.isEmpty) const Text('Leer...'),
               ],
             ),
           ),
@@ -90,14 +98,14 @@ class _EventCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Elevation(
+    return Card.filled(
       child: Row(
         children: [
-          Icon(event.icon),
+          FaIcon(event.icon),
           const Gap(4),
           Text(event.name),
           const Spacer(),
-          Text('(STF. ${event.level})'),
+          Text('(Lvl. ${event.level})'),
         ],
       ),
     );

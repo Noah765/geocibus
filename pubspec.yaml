@@ -13,10 +13,10 @@ dependencies:
   popover: ^0.3.1
   provider: ^6.1.2
   svg_path_parser: ^1.1.2
-  syncfusion_flutter_maps: ^27.1.58
   window_manager: ^0.4.3
 dev_dependencies:
   lint: ^2.3.0
 flutter:
   assets:
     - assets/
+    - assets/characters/
