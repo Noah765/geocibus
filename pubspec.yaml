@@ -12,6 +12,7 @@ dependencies:
   gap: ^3.0.1
   popover: ^0.3.1
   provider: ^6.1.2
+  shared_preferences: ^2.3.5
   svg_path_parser: ^1.1.2
   window_manager: ^0.4.3
 dev_dependencies:
