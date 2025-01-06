@@ -69,8 +69,7 @@ class _ChatState extends State<Chat> {
         else if (lastInteraction.isRequestSuccessful == true)
           Row(
             children: [
-              Text(lastInteraction.requestValue.toString()),
-              // TODO
+              // TODO Adjust slider (padding, appearance, snapping to specific values), maybe add an additional input field
               Slider(
                 value: lastInteraction.requestValue.toDouble(),
                 onChanged: (newValue) => setState(() => lastInteraction.requestValue = newValue.round()),
@@ -82,7 +81,10 @@ class _ChatState extends State<Chat> {
                   _Request.distributeFood => game.food.toDouble(),
                 },
               ),
+              Text('(${lastInteraction.requestValue})'),
+              const Gap(8),
               OutlinedButton(onPressed: () => _distribute(game, region, lastInteraction), child: const Text('Senden')),
+              const Gap(8),
               // TODO Restart chat instead of exiting (restart instead of exiting when finishing?, only when resourcestate changes?)
               OutlinedButton(onPressed: () => _resetInteraction(game, region), child: const Text('Zurück')),
             ],
