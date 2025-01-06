@@ -3,9 +3,9 @@ import 'package:flutter/rendering.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gap/gap.dart';
 import 'package:provider/provider.dart';
-import 'package:sowi/models/event.dart';
-import 'package:sowi/models/game.dart';
-import 'package:sowi/widgets/popup.dart';
+import 'package:geocibus/models/event.dart';
+import 'package:geocibus/models/game.dart';
+import 'package:geocibus/widgets/popup.dart';
 
 class MainEvents extends StatefulWidget {
   const MainEvents({super.key});

@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gap/gap.dart';
 import 'package:provider/provider.dart';
-import 'package:sowi/game/interact/character.dart';
-import 'package:sowi/game/interact/chat.dart';
-import 'package:sowi/game/interact/resources.dart';
-import 'package:sowi/models/game.dart';
-import 'package:sowi/models/region.dart';
-import 'package:sowi/widgets/settings_button.dart';
+import 'package:geocibus/game/interact/character.dart';
+import 'package:geocibus/game/interact/chat.dart';
+import 'package:geocibus/game/interact/resources.dart';
+import 'package:geocibus/models/game.dart';
+import 'package:geocibus/models/region.dart';
+import 'package:geocibus/widgets/settings_button.dart';
 
 class InteractPage extends StatelessWidget {
   const InteractPage({super.key, required this.game, required this.region});

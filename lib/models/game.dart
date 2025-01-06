@@ -1,8 +1,8 @@
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
-import 'package:sowi/models/event.dart';
-import 'package:sowi/models/region.dart';
+import 'package:geocibus/models/event.dart';
+import 'package:geocibus/models/region.dart';
 
 class Game extends ChangeNotifier {
   final regions = [

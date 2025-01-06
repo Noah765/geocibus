@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:sowi/models/region.dart';
+import 'package:geocibus/models/region.dart';
 
 class InteractMessage extends StatefulWidget {
   const InteractMessage({super.key});

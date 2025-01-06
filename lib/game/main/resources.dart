@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
-import 'package:sowi/constants.dart';
-import 'package:sowi/models/game.dart';
+import 'package:geocibus/constants.dart';
+import 'package:geocibus/models/game.dart';
 
 class MainResources extends StatelessWidget {
   const MainResources({super.key});

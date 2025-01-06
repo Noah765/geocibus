@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:sowi/models/game.dart';
-import 'package:sowi/models/region.dart';
-import 'package:sowi/widgets/resource_sliders.dart';
+import 'package:geocibus/models/game.dart';
+import 'package:geocibus/models/region.dart';
+import 'package:geocibus/widgets/resource_sliders.dart';
 
 class InteractDistribute extends StatefulWidget {
   const InteractDistribute({super.key, required this.region});

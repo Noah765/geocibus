@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gap/gap.dart';
-import 'package:sowi/models/event.dart';
-import 'package:sowi/models/game.dart';
+import 'package:geocibus/models/event.dart';
+import 'package:geocibus/models/game.dart';
 
 class RoundBeginningOverlay extends StatelessWidget {
   const RoundBeginningOverlay(this.game, {super.key});

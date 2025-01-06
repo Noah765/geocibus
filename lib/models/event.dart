@@ -2,8 +2,8 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:sowi/models/game.dart';
-import 'package:sowi/models/region.dart';
+import 'package:geocibus/models/game.dart';
+import 'package:geocibus/models/region.dart';
 
 sealed class Event {
   Event({required this.game, required this.level});

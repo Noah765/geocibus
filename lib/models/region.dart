@@ -1,7 +1,7 @@
 import 'dart:math';
 
-import 'package:sowi/constants.dart';
-import 'package:sowi/models/event.dart';
+import 'package:geocibus/constants.dart';
+import 'package:geocibus/models/event.dart';
 
 sealed class Region {
   Region({

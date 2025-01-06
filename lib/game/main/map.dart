@@ -4,11 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:gap/gap.dart';
 import 'package:provider/provider.dart';
-import 'package:sowi/game/interact/page.dart';
-import 'package:sowi/models/game.dart';
-import 'package:sowi/models/region.dart';
-import 'package:sowi/widgets/popup.dart';
-import 'package:sowi/widgets/resource_indicator.dart';
+import 'package:geocibus/game/interact/page.dart';
+import 'package:geocibus/models/game.dart';
+import 'package:geocibus/models/region.dart';
+import 'package:geocibus/widgets/popup.dart';
+import 'package:geocibus/widgets/resource_indicator.dart';
 import 'package:svg_path_parser/svg_path_parser.dart';
 
 class MainMap extends StatefulWidget {

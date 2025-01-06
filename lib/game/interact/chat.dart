@@ -3,9 +3,9 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:provider/provider.dart';
-import 'package:sowi/models/event.dart';
-import 'package:sowi/models/game.dart';
-import 'package:sowi/models/region.dart';
+import 'package:geocibus/models/event.dart';
+import 'package:geocibus/models/game.dart';
+import 'package:geocibus/models/region.dart';
 
 // TODO Other message for starting a new interaction
 

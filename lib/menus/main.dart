@@ -1,7 +1,7 @@
 import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:sowi/game/main/page.dart';
+import 'package:geocibus/game/main/page.dart';
 
 class MainMenu extends StatelessWidget {
   const MainMenu({super.key});

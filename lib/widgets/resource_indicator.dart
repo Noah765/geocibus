@@ -3,7 +3,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:sowi/models/region.dart';
+import 'package:geocibus/models/region.dart';
 
 class ResourceIndicator extends StatelessWidget {
   const ResourceIndicator(this.region, {super.key});

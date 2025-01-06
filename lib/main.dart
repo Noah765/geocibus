@@ -1,6 +1,6 @@
 import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:flutter/material.dart';
-import 'package:sowi/menus/main.dart';
+import 'package:geocibus/menus/main.dart';
 import 'package:window_manager/window_manager.dart';
 
 void main() {

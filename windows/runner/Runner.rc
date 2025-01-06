@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "com.example" "\0"
-            VALUE "FileDescription", "sowi" "\0"
+            VALUE "FileDescription", "geocibus" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "sowi" "\0"
+            VALUE "InternalName", "geocibus" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2024 com.example. All rights reserved." "\0"
-            VALUE "OriginalFilename", "sowi.exe" "\0"
-            VALUE "ProductName", "sowi" "\0"
+            VALUE "OriginalFilename", "geocibus.exe" "\0"
+            VALUE "ProductName", "geocibus" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END
