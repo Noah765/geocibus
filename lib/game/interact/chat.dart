@@ -18,12 +18,22 @@ class Chat extends StatefulWidget {
 
 class _ChatState extends State<Chat> {
   final _interactions = <_Interaction>[];
+  late final ScrollController _messagesScrollController;
 
   @override
   void initState() {
     super.initState();
     _interactions.add(_Interaction(context.read<Game>(), context.read<Region>()));
+    _messagesScrollController = ScrollController();
   }
+
+  @override
+  void dispose() {
+    _messagesScrollController.dispose();
+    super.dispose();
+  }
+
+  void _scrollToBottom() => WidgetsBinding.instance.addPostFrameCallback((timeStamp) => _messagesScrollController.jumpTo(_messagesScrollController.position.maxScrollExtent));
 
   void _distribute(Game game, Region region, _Interaction interaction) {
     game.distributeResources(
@@ -34,7 +44,20 @@ class _ChatState extends State<Chat> {
     _resetInteraction(game, region);
   }
 
-  void _resetInteraction(Game game, Region region) => setState(() => _interactions.add(_Interaction(game, region)));
+  void _resetInteraction(Game game, Region region) {
+    setState(() => _interactions.add(_Interaction(game, region)));
+    _scrollToBottom();
+  }
+
+  void _requestResources(_Request request) {
+    setState(() => _interactions.last.requestResources(context.read<Region>(), request));
+    _scrollToBottom();
+  }
+
+  void _distributeResources(_Request request) {
+    setState(() => _interactions.last.distributeResources(request));
+    _scrollToBottom();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -45,23 +68,29 @@ class _ChatState extends State<Chat> {
 
     return Column(
       children: [
-        for (final interaction in _interactions) ...[
-          _RegionMessage(interaction.state),
-          if (interaction.forshadowing != null) _RegionMessage(interaction.forshadowing!),
-          if (interaction.request != null) _YourMessage(interaction.request!.message),
-          if (interaction.response != null) _RegionMessage(interaction.response!),
-        ],
-        const Spacer(),
+        Expanded(
+          child: ListView(
+            controller: _messagesScrollController,
+            children: [
+              for (final interaction in _interactions) ...[
+                _RegionMessage(interaction.state),
+                if (interaction.forshadowing != null) _RegionMessage(interaction.forshadowing!),
+                if (interaction.request != null) _YourMessage(interaction.request!.message),
+                if (interaction.response != null) _RegionMessage(interaction.response!),
+              ],
+            ],
+          ),
+        ),
         if (lastInteraction.request == null)
           Row(
             children: [
-              ActionChip(label: const Text('Wasser anfragen'), onPressed: () => setState(() => lastInteraction.requestResources(region, _Request.requestWater))),
+              ActionChip(label: const Text('Wasser anfragen'), onPressed: () => _requestResources(_Request.requestWater)),
               const Gap(8),
-              ActionChip(label: const Text('Essen anfragen'), onPressed: () => setState(() => lastInteraction.requestResources(region, _Request.requestFood))),
+              ActionChip(label: const Text('Essen anfragen'), onPressed: () => _requestResources(_Request.requestFood)),
               const Gap(8),
-              ActionChip(label: const Text('Wasser abgeben'), onPressed: game.water == 0 ? null : () => setState(() => lastInteraction.distributeResources(_Request.distributeWater))),
+              ActionChip(label: const Text('Wasser abgeben'), onPressed: game.water == 0 ? null : () => _distributeResources(_Request.distributeWater)),
               const Gap(8),
-              ActionChip(label: const Text('Essen abgeben'), onPressed: game.food == 0 ? null : () => setState(() => lastInteraction.distributeResources(_Request.distributeFood))),
+              ActionChip(label: const Text('Essen abgeben'), onPressed: game.food == 0 ? null : () => _distributeResources(_Request.distributeFood)),
             ],
           )
         else if (lastInteraction.isRequestSuccessful == false)
