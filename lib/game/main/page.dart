@@ -37,7 +37,7 @@ class _MainPageState extends State<MainPage> {
                 navigator.pushReplacement(MaterialPageRoute(builder: (context) => FinishPage(_game)));
               } else {
                 if (navigator.canPop()) navigator.pop();
-                showDialog(context: context, builder: (context) => RoundBeginningOverlay(game));
+                showDialog(context: context, barrierDismissible: false, builder: (context) => RoundBeginningOverlay(game));
               }
             });
           }
