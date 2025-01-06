@@ -46,10 +46,10 @@ class PandemicEvent extends Event {
   IconData get icon => FontAwesomeIcons.virus;
   @override
   String get description => '''
-Eine Krankheit verbreitet sich ${level == 1 ? 'in der Region' : 'auf der Welt'}. Viele Grenzen
-machen dicht, weswegen der Handel ins Stocken gerät.
-Dazu kommt noch eine hohe Inflationsrate, die vielen
-Menschen durch hohe Lebensmittelpreise das Leben
+Eine Krankheit verbreitet sich ${level == 1 ? 'in ${regions[0].name}.' : 'auf der Welt.\n${regions.length == 1 ? '${regions[0].name} ist' : '${regions.take(regions.length - 1).map((e) => e.name).join(', ')} und ${regions.last.name} sind'} bereits betroffen.'}
+Viele Grenzen machen dicht, weswegen der Handel ins Stocken
+gerät. Dazu kommt noch eine hohe Inflationsrate, die
+vielen Menschen durch hohe Lebensmittelpreise das Leben
 erschwert. Und das Schlimmste von allen ist: Es gibt
 kein Toilettenpapier mehr!''';
 

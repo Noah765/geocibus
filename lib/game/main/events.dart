@@ -46,6 +46,7 @@ class _MainEventsState extends State<MainEvents> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Row(
+              mainAxisSize: MainAxisSize.min,
               children: [
                 // TODO Size icon according to upper case letters
                 FaIcon(event.icon, size: textTheme.titleLarge!.fontSize),
