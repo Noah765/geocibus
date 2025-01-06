@@ -10,7 +10,6 @@ dependencies:
     sdk: flutter
   font_awesome_flutter: ^10.8.0
   gap: ^3.0.1
-  popover: ^0.3.1
   provider: ^6.1.2
   shared_preferences: ^2.3.5
   svg_path_parser: ^1.1.2

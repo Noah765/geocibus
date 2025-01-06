@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:popover/popover.dart';
 import 'package:provider/provider.dart';
 import 'package:sowi/models/game.dart';
+import 'package:sowi/widgets/popup.dart';
 import 'package:sowi/widgets/resource_sliders.dart';
 
 class MainExchange extends StatelessWidget {
@@ -12,10 +12,10 @@ class MainExchange extends StatelessWidget {
   Widget build(BuildContext context) {
     final game = context.read<Game>();
 
-    return IconButton(
-      icon: const FaIcon(FontAwesomeIcons.arrowRightArrowLeft),
-      onPressed: () => showPopover(context: context, bodyBuilder: (context) => _Popover(game)),
-      tooltip: 'Handeln',
+    return Popup(
+      direction: Direction.up,
+      popupBuilder: (context, position) => _Popover(game),
+      child: const FaIcon(FontAwesomeIcons.arrowRightArrowLeft),
     );
   }
 }
@@ -65,33 +65,27 @@ class _PopoverState extends State<_Popover> {
 
   @override
   Widget build(BuildContext context) {
-    return DefaultTextStyle.merge(
-      style: const TextStyle(color: Colors.black),
-      child: IconTheme.merge(
-        data: const IconThemeData(color: Colors.black),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text('Markt'),
-            ResourceSliders(
-              leftText: 'Verkaufen',
-              rightText: 'Kaufen',
-              waterLeftMax: widget.game.water,
-              waterRightMax: (widget.game.money / widget.game.waterPrice).round(),
-              onWaterChanged: _onWaterChanged,
-              foodLeftMax: widget.game.food,
-              foodRightMax: (widget.game.money / widget.game.foodPrice).round(),
-              onFoodChanged: _onFoodChanged,
-            ),
-            if (!isTradePossible) const Text('Handel nicht möglich'),
-            OutlinedButton(
-              onPressed: _onFinish,
-              statesController: _finishButtonController,
-              child: const Text('Fertig'),
-            ),
-          ],
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const Text('Markt'),
+        ResourceSliders(
+          leftText: 'Verkaufen',
+          rightText: 'Kaufen',
+          waterLeftMax: widget.game.water,
+          waterRightMax: (widget.game.money / widget.game.waterPrice).round(),
+          onWaterChanged: _onWaterChanged,
+          foodLeftMax: widget.game.food,
+          foodRightMax: (widget.game.money / widget.game.foodPrice).round(),
+          onFoodChanged: _onFoodChanged,
         ),
-      ),
+        if (!isTradePossible) const Text('Handel nicht möglich'),
+        OutlinedButton(
+          onPressed: _onFinish,
+          statesController: _finishButtonController,
+          child: const Text('Fertig'),
+        ),
+      ],
     );
   }
 }
