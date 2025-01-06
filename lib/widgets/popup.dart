@@ -97,7 +97,7 @@ class _PopupState extends State<Popup> {
   Widget build(BuildContext context) {
     return OverlayPortal(
       controller: _overlayController,
-      overlayChildBuilder: (_) {
+      overlayChildBuilder: (overlayContext) {
         final (localOffset, direction) = _getPopupData(_tapPosition ?? _hoverPosition!);
         final offset = (context.findRenderObject()! as RenderBox).localToGlobal(localOffset);
 
@@ -112,12 +112,12 @@ class _PopupState extends State<Popup> {
             child: _Overlay(
               direction: direction,
               offset: offset,
-              arrowColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+              arrowColor: Theme.of(overlayContext).colorScheme.surfaceContainerHighest,
               child: Card.filled(
                 margin: EdgeInsets.zero,
                 child: Padding(
                   padding: const EdgeInsets.all(16),
-                  child: widget.popupBuilder(context, _tapPosition ?? _hoverPosition!),
+                  child: widget.popupBuilder(overlayContext, _tapPosition ?? _hoverPosition!),
                 ),
               ),
             ),
@@ -238,7 +238,7 @@ class _RenderOverlay extends RenderBox with RenderObjectWithChildMixin<RenderBox
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    child!.paint(context, offset + (child!.parentData! as BoxParentData).offset);
+    context.paintChild(child!, offset + (child!.parentData! as BoxParentData).offset);
 
     final arrowPath = switch (_direction) {
       Direction.up => Path()
