@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gap/gap.dart';
+import 'package:geocibus/menus/main.dart';
 import 'package:geocibus/models/game.dart';
 import 'package:geocibus/widgets/settings_button.dart';
 import 'package:provider/provider.dart';
@@ -19,7 +20,7 @@ class MainTop extends StatelessWidget {
             children: [
               IconButton(
                 icon: const FaIcon(FontAwesomeIcons.rightFromBracket),
-                onPressed: Navigator.of(context).pop,
+                onPressed: () => Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => const MainMenu())),
                 tooltip: 'Zurück zum Hauptmenü',
               ),
               const Gap(8),

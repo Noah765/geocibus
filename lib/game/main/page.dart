@@ -32,9 +32,11 @@ class _MainPageState extends State<MainPage> {
 
           if (game.roundState == RoundState.beginning) {
             WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+              final navigator = Navigator.of(context);
               if (game.round == 10) {
-                Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => FinishPage(_game)));
+                navigator.pushReplacement(MaterialPageRoute(builder: (context) => FinishPage(_game)));
               } else {
+                if (navigator.canPop()) navigator.pop();
                 showDialog(context: context, builder: (context) => RoundBeginningOverlay(game));
               }
             });

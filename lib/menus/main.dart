@@ -6,7 +6,7 @@ import 'package:geocibus/game/main/page.dart';
 class MainMenu extends StatelessWidget {
   const MainMenu({super.key});
 
-  void _start(BuildContext context) => Navigator.of(context).push(MaterialPageRoute(builder: (context) => const MainPage()));
+  void _start(BuildContext context) => Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => const MainPage()));
 
   void _options() {}
 
