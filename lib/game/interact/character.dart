@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:geocibus/models/region.dart';
+import 'package:provider/provider.dart';
 
 class InteractCharacter extends StatelessWidget {
   const InteractCharacter({super.key});

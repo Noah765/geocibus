@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:provider/provider.dart';
 import 'package:geocibus/game/finish/page.dart';
 import 'package:geocibus/game/main/events.dart';
 import 'package:geocibus/game/main/exchange.dart';
@@ -9,6 +8,7 @@ import 'package:geocibus/game/main/resources.dart';
 import 'package:geocibus/game/main/round_beginning_overlay.dart';
 import 'package:geocibus/game/main/top.dart';
 import 'package:geocibus/models/game.dart';
+import 'package:provider/provider.dart';
 
 // TODO Intro story for a tutorial
 

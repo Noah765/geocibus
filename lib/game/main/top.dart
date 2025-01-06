@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gap/gap.dart';
-import 'package:provider/provider.dart';
 import 'package:geocibus/models/game.dart';
 import 'package:geocibus/widgets/settings_button.dart';
+import 'package:provider/provider.dart';
 
 class MainTop extends StatelessWidget {
   const MainTop({super.key});

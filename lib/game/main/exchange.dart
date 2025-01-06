@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:provider/provider.dart';
 import 'package:geocibus/models/game.dart';
 import 'package:geocibus/widgets/popup.dart';
 import 'package:geocibus/widgets/resource_sliders.dart';
+import 'package:provider/provider.dart';
 
 class MainExchange extends StatelessWidget {
   const MainExchange({super.key});

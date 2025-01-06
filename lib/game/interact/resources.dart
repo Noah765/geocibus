@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gap/gap.dart';
-import 'package:provider/provider.dart';
 import 'package:geocibus/constants.dart';
 import 'package:geocibus/models/game.dart';
 import 'package:geocibus/models/region.dart';
 import 'package:geocibus/widgets/resource_indicator.dart';
+import 'package:provider/provider.dart';
 
 class InteractResources extends StatelessWidget {
   const InteractResources({super.key});

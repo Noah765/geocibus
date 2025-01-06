@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:geocibus/models/game.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class FinishPage extends StatefulWidget {
   const FinishPage(this.game, {super.key});

@@ -2,10 +2,10 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:provider/provider.dart';
 import 'package:geocibus/models/event.dart';
 import 'package:geocibus/models/game.dart';
 import 'package:geocibus/models/region.dart';
+import 'package:provider/provider.dart';
 
 // TODO Other message for starting a new interaction
 
