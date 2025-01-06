@@ -12,7 +12,7 @@ class InteractResources extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final game = context.read<Game>();
+    final game = context.watch<Game>();
     final region = context.read<Region>();
     final textTheme = Theme.of(context).textTheme;
 
