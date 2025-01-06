@@ -14,53 +14,46 @@ class MainExchange extends StatelessWidget {
 
     return Popup(
       direction: Direction.up,
-      popupBuilder: (context, position) => _Popover(game),
+      popupBuilder: (context, position) => _Popup(game),
       child: const FaIcon(FontAwesomeIcons.arrowRightArrowLeft),
     );
   }
 }
 
-class _Popover extends StatefulWidget {
-  const _Popover(this.game);
+class _Popup extends StatefulWidget {
+  const _Popup(this.game);
 
   final Game game;
 
   @override
-  State<_Popover> createState() => _PopoverState();
+  State<_Popup> createState() => _PopupState();
 }
 
-class _PopoverState extends State<_Popover> {
-  var _water = 0;
-  var _food = 0;
-
+class _PopupState extends State<_Popup> {
+  late final ResourceSlidersController _controller;
   late final WidgetStatesController _finishButtonController;
 
   @override
   void initState() {
     super.initState();
+    _controller = ResourceSlidersController();
     _finishButtonController = WidgetStatesController();
+    _controller.water.addListener(() => _finishButtonController.update(WidgetState.disabled, !isTradePossible));
+    _controller.food.addListener(() => _finishButtonController.update(WidgetState.disabled, !isTradePossible));
   }
 
   @override
   void dispose() {
+    _controller.dispose();
     _finishButtonController.dispose();
     super.dispose();
   }
 
-  bool get isTradePossible => (_water * widget.game.waterPrice).round() + (_food * widget.game.foodPrice).round() <= widget.game.money;
-  void _onWaterChanged(int value) {
-    _water = value;
-    setState(() => _finishButtonController.update(WidgetState.disabled, !isTradePossible));
-  }
-
-  void _onFoodChanged(int value) {
-    _food = value;
-    setState(() => _finishButtonController.update(WidgetState.disabled, !isTradePossible));
-  }
+  bool get isTradePossible => (_controller.water.value * widget.game.waterPrice).round() + (_controller.food.value * widget.game.foodPrice).round() <= widget.game.money;
 
   void _onFinish() {
-    widget.game.exchangeResources(_water, _food);
-    Navigator.of(context).pop();
+    widget.game.exchangeResources(_controller.water.value, _controller.food.value);
+    _controller.reset();
   }
 
   @override
@@ -70,14 +63,13 @@ class _PopoverState extends State<_Popover> {
       children: [
         const Text('Markt'),
         ResourceSliders(
+          controller: _controller,
           leftText: 'Verkaufen',
           rightText: 'Kaufen',
           waterLeftMax: widget.game.water,
           waterRightMax: (widget.game.money / widget.game.waterPrice).round(),
-          onWaterChanged: _onWaterChanged,
           foodLeftMax: widget.game.food,
           foodRightMax: (widget.game.money / widget.game.foodPrice).round(),
-          onFoodChanged: _onFoodChanged,
         ),
         if (!isTradePossible) const Text('Handel nicht möglich'),
         OutlinedButton(

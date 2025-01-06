@@ -5,54 +5,91 @@ import 'package:geocibus/constants.dart';
 class ResourceSliders extends StatelessWidget {
   const ResourceSliders({
     super.key,
+    required this.controller,
     required this.leftText,
     required this.rightText,
     required this.waterLeftMax,
     required this.waterRightMax,
-    required this.onWaterChanged,
     required this.foodLeftMax,
     required this.foodRightMax,
-    required this.onFoodChanged,
   });
+
+  final ResourceSlidersController controller;
 
   final String leftText;
   final String rightText;
 
   final int waterLeftMax;
   final int waterRightMax;
-  final ValueChanged<int> onWaterChanged;
 
   final int foodLeftMax;
   final int foodRightMax;
-  final ValueChanged<int> onFoodChanged;
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
         Row(children: [Text(leftText), const Spacer(), Text(rightText)]),
-        _LabeledSlider(icon: waterIcon, leftMax: waterLeftMax, rightMax: waterRightMax, onChanged: onWaterChanged),
-        _LabeledSlider(icon: foodIcon, leftMax: foodLeftMax, rightMax: foodRightMax, onChanged: onFoodChanged),
+        _LabeledSlider(valueNotifier: controller.water, resetNotifier: controller._reset, icon: waterIcon, leftMax: waterLeftMax, rightMax: waterRightMax),
+        _LabeledSlider(valueNotifier: controller.food, resetNotifier: controller._reset, icon: foodIcon, leftMax: foodLeftMax, rightMax: foodRightMax),
       ],
     );
   }
 }
 
+class ResourceSlidersController {
+  final water = ValueNotifier(0);
+  final food = ValueNotifier(0);
+
+  final _reset = _ResetNotifier();
+  void reset() {
+    water.value = 0;
+    food.value = 0;
+    _reset.reset();
+  }
+
+  void dispose() {
+    water.dispose();
+    food.dispose();
+    _reset.dispose();
+  }
+}
+
+class _ResetNotifier extends ChangeNotifier {
+  void reset() => notifyListeners();
+}
+
 class _LabeledSlider extends StatefulWidget {
-  const _LabeledSlider({required this.icon, required this.leftMax, required this.rightMax, required this.onChanged});
+  const _LabeledSlider({required this.valueNotifier, required this.resetNotifier, required this.icon, required this.leftMax, required this.rightMax});
+
+  final ValueNotifier<int> valueNotifier;
+  final _ResetNotifier resetNotifier;
 
   final IconData icon;
 
   final int leftMax;
   final int rightMax;
-  final ValueChanged<int> onChanged;
 
   @override
   State<_LabeledSlider> createState() => _LabeledSliderState();
 }
 
 class _LabeledSliderState extends State<_LabeledSlider> {
+  late final VoidCallback _resetNotifierListener;
   var _value = 0.0;
+
+  @override
+  void initState() {
+    super.initState();
+    _resetNotifierListener = () => setState(() => _value = 0);
+    widget.resetNotifier.addListener(_resetNotifierListener);
+  }
+
+  @override
+  void dispose() {
+    widget.resetNotifier.removeListener(_resetNotifierListener);
+    super.dispose();
+  }
 
   int _convertValue() => switch (_value) {
         < 0 => (_value * widget.leftMax).round(),
@@ -81,7 +118,7 @@ class _LabeledSliderState extends State<_LabeledSlider> {
               //valueIndicatorStrokeColor: ,
               // TODO Choose appropriate colors, maybe draw value inside thumb? Should there be an input field for precise values?
               trackShape: _TrackShape(
-                leftTrackColor: colorScheme.surfaceContainerHighest,
+                leftTrackColor: colorScheme.primaryContainer,
                 leftActiveTrackColor: colorScheme.onPrimaryContainer,
                 rightTrackColor: colorScheme.secondaryContainer,
                 rightActiveTrackColor: colorScheme.onSecondaryContainer,
@@ -91,7 +128,7 @@ class _LabeledSliderState extends State<_LabeledSlider> {
             child: Slider(
               value: _value,
               onChanged: (value) => setState(() => _value = value),
-              onChangeEnd: (value) => widget.onChanged(_convertValue()),
+              onChangeEnd: (value) => widget.valueNotifier.value = _convertValue(),
               min: -1,
               label: _convertValue().abs().toString(),
             ),
