@@ -35,7 +35,7 @@ class _MainMapState extends State<MainMap> {
 
   (Offset, Direction) _getPopupData(Size size, Offset position) {
     final region = _map.getRegionAt(size, position);
-    return (_map.getRegionCenter(size, region), region.runtimeType == Australia ? Direction.up : Direction.down);
+    return (_map.getRegionCenter(size, region), region.runtimeType == Australia || region.runtimeType == SouthAmerica ? Direction.up : Direction.down);
   }
 
   Color _computeRegionColor(Region region) {
