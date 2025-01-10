@@ -11,6 +11,14 @@ import 'package:geocibus/widgets/resource_indicator.dart';
 import 'package:provider/provider.dart';
 import 'package:svg_path_parser/svg_path_parser.dart';
 
+const _elevation = 3.0;
+const _strokeWidth = 2.0;
+const _animationDuration = Duration(milliseconds: 100);
+const _animationCurve = Curves.ease;
+const _hoverAnimationPercentage = 1 / 3;
+const _inactiveDim = 0.2;
+const _tapScale = 1.03;
+
 class MainMap extends StatefulWidget {
   const MainMap({super.key});
 
@@ -20,28 +28,27 @@ class MainMap extends StatefulWidget {
 
 class _MainMapState extends State<MainMap> {
   late final _Map _map;
+  late final PopupController _popupController;
   var _finishedInitializing = false;
 
   @override
   void initState() {
     super.initState();
+
     _Map.load(context.read<Game>()).then(
       (value) => setState(() {
         _map = value;
         _finishedInitializing = true;
       }),
     );
+
+    _popupController = PopupController();
   }
 
-  (Offset, Direction) _getPopupData(Size size, Offset position) {
-    final region = _map.getRegionAt(size, position);
-    return (_map.getRegionCenter(size, region), region.runtimeType == Australia || region.runtimeType == SouthAmerica ? Direction.up : Direction.down);
-  }
-
-  Color _computeRegionColor(Region region) {
-    if (region.population == 0) return Colors.black;
-    final missingResourcesPercentage = min(min(region.food / region.maximumFood, region.water / region.maximumWater), 1.0);
-    return Color.lerp(Colors.red, Colors.green, missingResourcesPercentage)!; // TODO Update colors, blue for too much food
+  @override
+  void dispose() {
+    _popupController.dispose();
+    super.dispose();
   }
 
   @override
@@ -56,18 +63,20 @@ class _MainMapState extends State<MainMap> {
         aspectRatio: _map.bounds.width / _map.bounds.height,
         child: LayoutBuilder(
           builder: (context, constraints) => Popup(
-            getPopupData: (position) => _getPopupData(constraints.biggest, position),
-            popupBuilder: (context, position) {
-              final region = _map.getRegionAt(constraints.biggest, position);
+            controller: _popupController,
+            getPopupPosition: (localPosition) => _map.getRegionCenter(constraints.biggest, _map.getRegionAt(constraints.biggest, localPosition)),
+            getPopupDirection: (localPopupPosition) => _map.getRegionAt(constraints.biggest, localPopupPosition).drawPopupUpwards ? Direction.up : Direction.down,
+            popupBuilder: (context, localPosition) {
+              final region = _map.getRegionAt(constraints.biggest, localPosition);
 
               return Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(region.name, style: theme.textTheme.headlineSmall),
                   Text('${region.population} Mio. Einwohner'),
-                  const Gap(8),
+                  const Gap(16),
                   ResourceIndicator(region),
-                  const Gap(24),
+                  const Gap(32),
                   OutlinedButton(
                     onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (context) => InteractPage(game: game, region: region))),
                     child: const Text('Kontaktieren'),
@@ -75,18 +84,7 @@ class _MainMapState extends State<MainMap> {
                 ],
               );
             },
-            child: CustomPaint(
-              painter: _MapPainter(
-                size: constraints.biggest,
-                map: _map,
-                colors: _map.regions.map((key, value) => MapEntry(key, _computeRegionColor(key))),
-                outlineColor: theme.colorScheme.onSurface,
-                textStyle: theme.textTheme.titleMedium!.copyWith(
-                  fontSize: MediaQuery.textScalerOf(context).scale(theme.textTheme.titleMedium!.fontSize!),
-                  fontWeight: MediaQuery.boldTextOf(context) ? FontWeight.bold : null,
-                ),
-              ),
-            ),
+            child: _AnimatedMap(map: _map, size: constraints.biggest, popupController: _popupController),
           ),
         ),
       ),
@@ -94,11 +92,187 @@ class _MainMapState extends State<MainMap> {
   }
 }
 
+class _AnimatedMap extends StatefulWidget {
+  const _AnimatedMap({required this.map, required this.size, required this.popupController});
+
+  final _Map map;
+  final Size size;
+  final PopupController popupController;
+
+  @override
+  State<_AnimatedMap> createState() => _AnimatedMapState();
+}
+
+class _AnimatedMapState extends State<_AnimatedMap> with TickerProviderStateMixin {
+  late final Map<Region, AnimationController> _controllers;
+
+  @override
+  void initState() {
+    super.initState();
+    _controllers = widget.map.regions.map((key, value) => MapEntry(key, AnimationController(duration: _animationDuration, vsync: this)..addListener(() => setState(() {}))));
+    widget.popupController.addListener(_handlePopupControllerChanged);
+  }
+
+  @override
+  void dispose() {
+    for (final controller in _controllers.values) {
+      controller.dispose();
+    }
+    widget.popupController.removeListener(_handlePopupControllerChanged);
+    super.dispose();
+  }
+
+  Region? _previousHoveredRegion;
+  Region? _previousTappedRegion;
+  void _handlePopupControllerChanged() {
+    final hoveredRegion = widget.popupController.hoverPopupPosition == null ? null : widget.map.getRegionAt(widget.size, widget.popupController.hoverPopupPosition!);
+    final tappedRegion = widget.popupController.tapPopupPosition == null ? null : widget.map.getRegionAt(widget.size, widget.popupController.tapPopupPosition!);
+
+    if (hoveredRegion != _previousHoveredRegion) {
+      if (hoveredRegion != null && hoveredRegion != tappedRegion) _controllers[hoveredRegion]!.animateTo(_hoverAnimationPercentage, curve: _animationCurve);
+      if (_previousHoveredRegion != null && _previousHoveredRegion != tappedRegion) _controllers[_previousHoveredRegion]!.animateTo(0, curve: _animationCurve);
+    }
+    if (tappedRegion != _previousTappedRegion) {
+      if (tappedRegion != null) _controllers[tappedRegion]!.animateTo(1, curve: _animationCurve);
+      if (_previousTappedRegion != null) _controllers[_previousTappedRegion]!.animateTo(_previousTappedRegion == hoveredRegion ? _hoverAnimationPercentage : 0, curve: _animationCurve);
+    }
+
+    _previousHoveredRegion = hoveredRegion;
+    _previousTappedRegion = tappedRegion;
+  }
+
+  Region? get tappedRegion => widget.popupController.tapPopupPosition == null ? null : widget.map.getRegionAt(widget.size, widget.popupController.tapPopupPosition!);
+
+  Color _getRegionColor(Region region) {
+    final surface = Theme.of(context).colorScheme.surface;
+    if (region.population == 0) return surface;
+    final missingResourcesPercentage = min(min(region.food / region.maximumFood, region.water / region.maximumWater), 1.0);
+    final color = Color.lerp(Colors.red, Colors.green, missingResourcesPercentage)!;
+    return Color.lerp(color, surface, _inactiveDim * (1 - _controllers[region]!.value))!;
+  }
+
+  double _getRegionScale(Region region) => 1 + _controllers[region]!.value * (_tapScale - 1);
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return CustomPaint(
+      painter: _MapPainter(
+        size: widget.size,
+        map: widget.map,
+        scales: widget.map.regions.map((key, value) => MapEntry(key, _getRegionScale(key))),
+        colors: widget.map.regions.map((key, value) => MapEntry(key, _getRegionColor(key))),
+        outlineColor: theme.colorScheme.onSurface,
+        textStyle: theme.textTheme.titleLarge!.copyWith(
+          fontSize: MediaQuery.textScalerOf(context).scale(theme.textTheme.titleLarge!.fontSize!),
+          fontWeight: MediaQuery.boldTextOf(context) ? FontWeight.bold : null,
+        ),
+      ),
+    );
+  }
+}
+
+class _MapPainter extends CustomPainter {
+  _MapPainter({
+    required this.size,
+    required this.map,
+    required this.scales,
+    required this.colors,
+    required this.outlineColor,
+    required this.textStyle,
+  });
+
+  final Size size;
+  final _Map map;
+  final Map<Region, double> scales;
+  final Map<Region, Color> colors;
+  final Color outlineColor;
+  final TextStyle textStyle;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    map.transformCanvas(size, canvas);
+
+    final inactiveRegions = map.regions.keys.where((e) => scales[e] == 1).toList();
+    final activeRegions = map.regions.keys.where((e) => scales[e] != 1).toList()..sort((a, b) => scales[a]!.compareTo(scales[b]!));
+
+    // TODO Benchmark the performance of shadows
+    for (final region in inactiveRegions) {
+      _paintShadow(canvas, region);
+    }
+    for (final region in activeRegions) {
+      _withScale(canvas, region, () => _paintShadow(canvas, region));
+    }
+
+    for (final region in inactiveRegions) {
+      _paintRegion(canvas, region);
+    }
+    for (final region in activeRegions) {
+      _withScale(canvas, region, () => _paintRegion(canvas, region));
+    }
+
+    final textPainter = TextPainter(textDirection: TextDirection.ltr);
+    for (final region in inactiveRegions) {
+      _layoutText(textPainter, region);
+      _paintText(canvas, textPainter, region);
+    }
+    for (final region in activeRegions) {
+      _layoutText(textPainter, region);
+      _withScale(canvas, region, () => _paintText(canvas, textPainter, region), scaleCenter: map.getRegionPathTextCenter(region, textPainter.height));
+    }
+    textPainter.dispose();
+  }
+
+  void _withScale(Canvas canvas, Region region, VoidCallback callback, {Offset? scaleCenter}) {
+    final scale = scales[region]!;
+    final center = scaleCenter ?? map.regions[region]!.bounds.center;
+    canvas.save();
+    canvas.scale(scale);
+    canvas.translate(center.dx / scale - center.dx, center.dy / scale - center.dy);
+    callback();
+    canvas.restore();
+  }
+
+  void _paintShadow(Canvas canvas, Region region) {
+    for (final path in map.regions[region]!.paths) {
+      canvas.drawShadow(path, outlineColor, _elevation, false);
+    }
+  }
+
+  late final strokePaint = Paint()
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = _strokeWidth
+    ..color = outlineColor;
+  void _paintRegion(Canvas canvas, Region region) {
+    final fillPaint = Paint()..color = colors[region]!;
+    for (final path in map.regions[region]!.paths) {
+      canvas.drawPath(path, fillPaint);
+      canvas.drawPath(path, strokePaint);
+    }
+  }
+
+  void _layoutText(TextPainter textPainter, Region region) {
+    textPainter.text = TextSpan(text: region.name, style: textStyle);
+    textPainter.layout();
+  }
+
+  void _paintText(Canvas canvas, TextPainter textPainter, Region region) =>
+      textPainter.paint(canvas, map.getRegionPathTextCenter(region, textPainter.height).translate(-textPainter.width / 2, -textPainter.height / 2));
+
+  @override
+  bool shouldRepaint(_MapPainter oldDelegate) =>
+      map != oldDelegate.map || scales != oldDelegate.scales || colors != oldDelegate.colors || outlineColor != oldDelegate.outlineColor || textStyle != oldDelegate.textStyle;
+
+  @override
+  bool? hitTest(Offset position) => map.hitTest(size, position);
+}
+
 class _Map {
   const _Map({required this.bounds, required this.regions});
 
   final Rect bounds;
-  final Map<Region, List<Path>> regions;
+  final Map<Region, ({Rect bounds, List<Path> paths})> regions;
 
   static const _regionsToPaths = {
     Europe: [5, 6, 7, 8, 9, 10, 12],
@@ -112,10 +286,14 @@ class _Map {
     final pathsFile = await rootBundle.loadString('assets/map.paths');
     final paths = pathsFile.split('\n').map((e) => parseSvgPath(e)).toList();
 
-    final bounds = paths.map((e) => e.getBounds()).reduce((rect, e) => rect.expandToInclude(e));
-    final regions = {
-      for (final region in game.regions) region: [for (final i in _regionsToPaths[region.runtimeType]!) paths[i]],
-    };
+    final regions = <Region, ({Rect bounds, List<Path> paths})>{};
+    for (final region in game.regions) {
+      final regionPaths = _regionsToPaths[region.runtimeType]!.map((e) => paths[e]).toList();
+      final regionBounds = regionPaths.map((e) => e.getBounds()).reduce((rect, e) => rect.expandToInclude(e));
+      regions[region] = (bounds: regionBounds, paths: regionPaths);
+    }
+
+    final bounds = regions.values.map((e) => e.bounds).reduce((rect, e) => rect.expandToInclude(e));
 
     return _Map(bounds: bounds, regions: regions);
   }
@@ -128,75 +306,23 @@ class _Map {
 
   bool hitTest(Size size, Offset offset) {
     final pathPosition = localToPath(size, offset);
-    final regionEntries = regions.entries.where((entry) => entry.value.any((e) => e.contains(pathPosition)));
+    final regionEntries = regions.entries.where((entry) => entry.value.paths.any((e) => e.contains(pathPosition)));
     return regionEntries.isNotEmpty && regionEntries.first.key.population > 0;
   }
 
   Region getRegionAt(Size size, Offset position) {
     final pathPosition = localToPath(size, position);
-    return regions.entries.firstWhere((entry) => entry.value.any((e) => e.contains(pathPosition))).key;
+    return regions.entries.firstWhere((entry) => entry.value.paths.any((e) => e.contains(pathPosition))).key;
   }
 
   static const _regionCenters = {
     Europe: Offset(1000, 580),
     Asia: Offset(1400, 600),
     NorthAmerica: Offset(300, 620),
-    SouthAmerica: Offset(520, 1020),
+    SouthAmerica: Offset(530, 1000),
     Africa: Offset(1020, 850),
-    Australia: Offset(1750, 1110),
+    Australia: Offset(1760, 1080),
   };
   Offset getRegionCenter(Size size, Region region) => pathToLocal(size, _regionCenters[region.runtimeType]!);
-}
-
-class _MapPainter extends CustomPainter {
-  _MapPainter({
-    required this.size,
-    required this.map,
-    required this.colors,
-    required this.outlineColor,
-    required this.textStyle,
-  });
-
-  final Size size;
-  final _Map map;
-  final Map<Region, Color> colors;
-  final Color outlineColor;
-  final TextStyle textStyle;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    canvas.save();
-    map.transformCanvas(size, canvas);
-
-    for (final MapEntry(key: region, value: paths) in map.regions.entries) {
-      final fillPaint = Paint()..color = colors[region]!;
-      final strokePaint = Paint()
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 2
-        ..color = outlineColor;
-
-      for (final path in paths) {
-        canvas.drawPath(path, fillPaint);
-        canvas.drawPath(path, strokePaint);
-      }
-    }
-
-    canvas.restore();
-
-    final textPainter = TextPainter(textDirection: TextDirection.ltr);
-    for (final MapEntry(key: region, value: _) in map.regions.entries) {
-      textPainter.text = TextSpan(text: region.name, style: textStyle);
-      textPainter.layout();
-      final position = map.getRegionCenter(size, region).translate(-textPainter.width / 2, -textPainter.height);
-      textPainter.paint(canvas, position);
-    }
-    textPainter.dispose();
-  }
-
-  @override
-  bool shouldRepaint(_MapPainter oldDelegate) =>
-      size != oldDelegate.size || map != oldDelegate.map || colors != oldDelegate.colors || outlineColor != oldDelegate.outlineColor || textStyle != oldDelegate.textStyle;
-
-  @override
-  bool? hitTest(Offset position) => map.hitTest(size, position);
+  Offset getRegionPathTextCenter(Region region, double textHeight) => _regionCenters[region.runtimeType]!.translate(0, region.drawPopupUpwards ? textHeight / 2 : -textHeight / 2);
 }

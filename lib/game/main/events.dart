@@ -25,10 +25,10 @@ class _MainEventsState extends State<MainEvents> {
     return renderFlex.getChildrenAsList().indexed.firstWhere((e) => e.$2.hitTest(BoxHitTestResult(), position: e.$2.globalToLocal(globalPosition)));
   }
 
-  (Offset, Direction) _getPopupData(Offset position) {
-    final (_, eventRenderBox) = _getRenderBoxAt(position);
+  Offset _getPopupPosition(Offset localPosition) {
+    final (_, eventRenderBox) = _getRenderBoxAt(localPosition);
     final globalOffset = eventRenderBox.localToGlobal(Offset.zero).translate(eventRenderBox.size.width, eventRenderBox.size.height / 2);
-    return (_getColumnRenderFlex().globalToLocal(globalOffset), Direction.right);
+    return _getColumnRenderFlex().globalToLocal(globalOffset);
   }
 
   @override
@@ -38,7 +38,8 @@ class _MainEventsState extends State<MainEvents> {
 
     return Popup(
       fixOnTap: false,
-      getPopupData: _getPopupData,
+      getPopupPosition: _getPopupPosition,
+      direction: Direction.right,
       popupBuilder: (context, position) {
         final event = game.activeEvents[_getRenderBoxAt(position).$1 ~/ 2];
 

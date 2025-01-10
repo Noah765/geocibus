@@ -9,17 +9,21 @@ const _popupPadding = 8;
 class Popup extends StatefulWidget {
   const Popup({
     super.key,
+    this.controller,
     this.fixOnTap = true,
+    this.getPopupPosition,
+    this.getPopupDirection,
     this.direction,
-    this.getPopupData,
     required this.popupBuilder,
     required this.child,
-  }) : assert(direction != null || getPopupData != null);
+  }) : assert(direction != null || getPopupDirection != null);
 
+  final PopupController? controller;
   final bool fixOnTap;
+  final Offset Function(Offset localPosition)? getPopupPosition;
+  final Direction Function(Offset localPopupPosition)? getPopupDirection;
   final Direction? direction;
-  final (Offset, Direction) Function(Offset position)? getPopupData;
-  final Widget Function(BuildContext context, Offset position) popupBuilder;
+  final Widget Function(BuildContext context, Offset localPosition) popupBuilder;
   final Widget child;
 
   @override
@@ -30,21 +34,31 @@ enum Direction { up, right, down, left }
 
 class _PopupState extends State<Popup> {
   final _overlayController = OverlayPortalController();
+  late final PopupController _controller;
   var _hoveringOverOverlay = false;
   var _tappedOverlay = false;
-  Offset? _hoverPosition;
-  Offset? _tapPosition;
 
-  (Offset, Direction) _getPopupData(Offset position) {
-    if (widget.getPopupData != null) return widget.getPopupData!(position);
+  @override
+  void initState() {
+    super.initState();
+    _controller = widget.controller ?? PopupController();
+  }
+
+  @override
+  void dispose() {
+    if (widget.controller == null) _controller.dispose();
+    super.dispose();
+  }
+
+  Offset _getPopupPosition(Offset localPosition) {
+    if (widget.getPopupPosition != null) return widget.getPopupPosition!(localPosition);
     final bounds = Offset.zero & (context.findRenderObject()! as RenderBox).size;
-    final offset = switch (widget.direction!) {
+    return switch (widget.direction!) {
       Direction.up => bounds.topCenter,
       Direction.right => bounds.centerRight,
       Direction.down => bounds.bottomCenter,
       Direction.left => bounds.centerLeft,
     };
-    return (offset, widget.direction!);
   }
 
   void _onTapOverlay(PointerDownEvent event) => _tappedOverlay = true;
@@ -53,7 +67,9 @@ class _PopupState extends State<Popup> {
 
   void _onPointerExitOverlay(PointerExitEvent event) {
     _hoveringOverOverlay = false;
-    if (_tapPosition == null) _overlayController.hide();
+    if (_controller.tapPopupPosition != null) return;
+    _controller.hoverPopupPosition = null;
+    _overlayController.hide();
   }
 
   void _onTapOutside(PointerDownEvent event) {
@@ -61,36 +77,37 @@ class _PopupState extends State<Popup> {
       _tappedOverlay = false;
       return;
     }
-    _tapPosition = null;
+    _controller.tapPopupPosition = null;
     _overlayController.hide();
   }
 
   void _onTapChild(PointerDownEvent event) {
-    final position = (context.findRenderObject()! as RenderBox).globalToLocal(event.position);
-    final tappedSameRegion = _tapPosition != null && _getPopupData(_tapPosition!).$1 == _getPopupData(position).$1;
-    if (tappedSameRegion) {
-      _tapPosition = null;
+    final tapPosition = (context.findRenderObject()! as RenderBox).globalToLocal(event.position);
+    final popupPosition = _getPopupPosition(tapPosition);
+    if (popupPosition == _controller.tapPopupPosition) {
+      _controller.tapPopupPosition = null;
       return;
     }
-    _tapPosition = position;
+    _controller.tapPopupPosition = popupPosition;
     _overlayController.show();
   }
 
   void _onPointerEnterChild(PointerEnterEvent event) {
-    _hoverPosition = event.localPosition;
+    _controller.hoverPopupPosition = _getPopupPosition(event.localPosition);
     _overlayController.show();
   }
 
   void _onPointerExitChild() {
     if (_hoveringOverOverlay) return;
-    _hoverPosition = null;
-    if (_tapPosition == null) _overlayController.hide();
+    _controller.hoverPopupPosition = null;
+    if (_controller.tapPopupPosition == null) _overlayController.hide();
   }
 
   void _onChildHover(PointerHoverEvent event) {
-    if (_tapPosition != null) return;
-    if (_getPopupData(_hoverPosition!).$1 != _getPopupData(event.localPosition).$1) _overlayController.show();
-    _hoverPosition = event.localPosition;
+    final popupPosition = _getPopupPosition(event.localPosition);
+    if (popupPosition == _controller.hoverPopupPosition) return;
+    _overlayController.show();
+    _controller.hoverPopupPosition = popupPosition;
   }
 
   @override
@@ -98,8 +115,9 @@ class _PopupState extends State<Popup> {
     return OverlayPortal(
       controller: _overlayController,
       overlayChildBuilder: (overlayContext) {
-        final (localOffset, direction) = _getPopupData(_tapPosition ?? _hoverPosition!);
-        final offset = (context.findRenderObject()! as RenderBox).localToGlobal(localOffset);
+        final localPosition = _controller.tapPopupPosition ?? _controller.hoverPopupPosition!;
+        final direction = widget.getPopupDirection != null ? widget.getPopupDirection!(localPosition) : widget.direction!;
+        final globalPosition = (context.findRenderObject()! as RenderBox).localToGlobal(localPosition);
 
         // TODO Hairline width between arrow and card
 
@@ -111,13 +129,13 @@ class _PopupState extends State<Popup> {
             hitTestBehavior: HitTestBehavior.deferToChild,
             child: _Overlay(
               direction: direction,
-              offset: offset,
+              position: globalPosition,
               arrowColor: Theme.of(overlayContext).colorScheme.surfaceContainerHighest,
               child: Card.filled(
                 margin: EdgeInsets.zero,
                 child: Padding(
                   padding: const EdgeInsets.all(16),
-                  child: widget.popupBuilder(overlayContext, _tapPosition ?? _hoverPosition!),
+                  child: widget.popupBuilder(overlayContext, localPosition),
                 ),
               ),
             ),
@@ -139,27 +157,45 @@ class _PopupState extends State<Popup> {
   }
 }
 
+class PopupController extends ChangeNotifier {
+  Offset? _hoverPopupPosition;
+  Offset? get hoverPopupPosition => _hoverPopupPosition;
+  set hoverPopupPosition(Offset? value) {
+    if (value == _hoverPopupPosition) return;
+    _hoverPopupPosition = value;
+    notifyListeners();
+  }
+
+  Offset? _tapPopupPosition;
+  Offset? get tapPopupPosition => _tapPopupPosition;
+  set tapPopupPosition(Offset? value) {
+    if (value == _tapPopupPosition) return;
+    _tapPopupPosition = value;
+    notifyListeners();
+  }
+}
+
 class _Overlay extends SingleChildRenderObjectWidget {
-  const _Overlay({required this.direction, required this.offset, required this.arrowColor, required super.child});
+  const _Overlay({required this.direction, required this.position, required this.arrowColor, required super.child});
 
   final Direction direction;
-  final Offset offset;
+  final Offset position;
   final Color arrowColor;
 
   @override
-  RenderObject createRenderObject(BuildContext context) => _RenderOverlay(direction: direction, offset: offset, arrowColor: arrowColor);
+  RenderObject createRenderObject(BuildContext context) => _RenderOverlay(direction: direction, position: position, arrowColor: arrowColor);
 
   @override
   void updateRenderObject(BuildContext context, _RenderOverlay renderObject) => renderObject
     ..direction = direction
-    ..offset = offset
+    ..position = position
     ..arrowColor = arrowColor;
 }
 
 class _RenderOverlay extends RenderBox with RenderObjectWithChildMixin<RenderBox> {
-  _RenderOverlay({required Direction direction, required Offset offset, required Color arrowColor})
+  _RenderOverlay({required Direction direction, required Offset position, required Color arrowColor})
       : _direction = direction,
-        _offset = offset,
+        _position = position,
         _arrowColor = arrowColor;
 
   Direction _direction;
@@ -170,11 +206,11 @@ class _RenderOverlay extends RenderBox with RenderObjectWithChildMixin<RenderBox
     markNeedsLayout();
   }
 
-  Offset _offset;
-  Offset get offset => _offset;
-  set offset(Offset value) {
-    if (value == _offset) return;
-    _offset = value;
+  Offset _position;
+  Offset get position => _position;
+  set position(Offset value) {
+    if (value == _position) return;
+    _position = value;
     markNeedsLayout();
   }
 
@@ -194,10 +230,10 @@ class _RenderOverlay extends RenderBox with RenderObjectWithChildMixin<RenderBox
     final childOffset = (child!.parentData! as BoxParentData).offset;
     final childSize = child!.size;
     final rect = switch (_direction) {
-      Direction.up => Rect.fromLTWH(childOffset.dx, _offset.dy - _arrowHeight, childSize.width, _arrowHeight),
-      Direction.right => Rect.fromLTWH(_offset.dx, childOffset.dy, _arrowWidth, childSize.height),
-      Direction.down => Rect.fromLTWH(childOffset.dx, _offset.dy, childSize.width, _arrowHeight),
-      Direction.left => Rect.fromLTWH(_offset.dx - _arrowWidth, childOffset.dy, _arrowWidth, childSize.height),
+      Direction.up => Rect.fromLTWH(childOffset.dx, _position.dy - _arrowHeight, childSize.width, _arrowHeight),
+      Direction.right => Rect.fromLTWH(_position.dx, childOffset.dy, _arrowWidth, childSize.height),
+      Direction.down => Rect.fromLTWH(childOffset.dx, _position.dy, childSize.width, _arrowHeight),
+      Direction.left => Rect.fromLTWH(_position.dx - _arrowWidth, childOffset.dy, _arrowWidth, childSize.height),
     };
     return rect.contains(position);
   }
@@ -214,10 +250,10 @@ class _RenderOverlay extends RenderBox with RenderObjectWithChildMixin<RenderBox
   @override
   void performLayout() {
     final childConstraints = switch (_direction) {
-      Direction.up => BoxConstraints(maxWidth: size.width - 2 * _popupPadding, maxHeight: _offset.dy - _arrowHeight - _popupPadding),
-      Direction.right => BoxConstraints(maxWidth: size.width - _offset.dx - _arrowWidth - _popupPadding, maxHeight: size.height - 2 * _popupPadding),
-      Direction.down => BoxConstraints(maxWidth: size.width - 2 * _popupPadding, maxHeight: size.height - _offset.dy - _arrowHeight - _popupPadding),
-      Direction.left => BoxConstraints(maxWidth: _offset.dx - _arrowWidth - _popupPadding, maxHeight: size.height - 2 * _popupPadding),
+      Direction.up => BoxConstraints(maxWidth: size.width - 2 * _popupPadding, maxHeight: _position.dy - _arrowHeight - _popupPadding),
+      Direction.right => BoxConstraints(maxWidth: size.width - _position.dx - _arrowWidth - _popupPadding, maxHeight: size.height - 2 * _popupPadding),
+      Direction.down => BoxConstraints(maxWidth: size.width - 2 * _popupPadding, maxHeight: size.height - _position.dy - _arrowHeight - _popupPadding),
+      Direction.left => BoxConstraints(maxWidth: _position.dx - _arrowWidth - _popupPadding, maxHeight: size.height - 2 * _popupPadding),
     };
     child!.layout(childConstraints, parentUsesSize: true);
 
@@ -225,12 +261,12 @@ class _RenderOverlay extends RenderBox with RenderObjectWithChildMixin<RenderBox
     final childHeight = child!.size.height;
     final childOffset = switch (_direction) {
       Direction.left || Direction.right => Offset(
-          _direction == Direction.left ? _offset.dx - _arrowWidth - childWidth : _offset.dx + _arrowWidth,
-          _offset.dy - childHeight / 2 + max(0, childHeight / 2 - _offset.dy + _popupPadding) - max(0, _offset.dy + childHeight / 2 - size.height + _popupPadding),
+          _direction == Direction.left ? _position.dx - _arrowWidth - childWidth : _position.dx + _arrowWidth,
+          _position.dy - childHeight / 2 + max(0, childHeight / 2 - _position.dy + _popupPadding) - max(0, _position.dy + childHeight / 2 - size.height + _popupPadding),
         ),
       Direction.up || Direction.down => Offset(
-          _offset.dx - childWidth / 2 + max(0, childWidth / 2 - _offset.dx + _popupPadding) - max(0, _offset.dx + childWidth / 2 - size.width + _popupPadding),
-          _direction == Direction.up ? _offset.dy - _arrowHeight - childHeight : _offset.dy + _arrowHeight,
+          _position.dx - childWidth / 2 + max(0, childWidth / 2 - _position.dx + _popupPadding) - max(0, _position.dx + childWidth / 2 - size.width + _popupPadding),
+          _direction == Direction.up ? _position.dy - _arrowHeight - childHeight : _position.dy + _arrowHeight,
         ),
     };
     child!.parentData = BoxParentData()..offset = childOffset;
@@ -261,10 +297,10 @@ class _RenderOverlay extends RenderBox with RenderObjectWithChildMixin<RenderBox
         ..lineTo(0, 0),
     };
     final arrowPosition = switch (_direction) {
-      Direction.up => _offset.translate(-_arrowWidth / 2, -_arrowHeight),
-      Direction.right => _offset.translate(0, -_arrowHeight / 2),
-      Direction.down => _offset.translate(-_arrowWidth / 2, 0),
-      Direction.left => _offset.translate(-_arrowWidth, -_arrowHeight / 2),
+      Direction.up => _position.translate(-_arrowWidth / 2, -_arrowHeight),
+      Direction.right => _position.translate(0, -_arrowHeight / 2),
+      Direction.down => _position.translate(-_arrowWidth / 2, 0),
+      Direction.left => _position.translate(-_arrowWidth, -_arrowHeight / 2),
     };
     final arrowPaint = Paint()..color = _arrowColor;
     context.canvas.drawPath(arrowPath.shift(offset + arrowPosition), arrowPaint);

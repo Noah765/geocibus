@@ -6,6 +6,7 @@ import 'package:geocibus/models/event.dart';
 sealed class Region {
   Region({
     required this.name,
+    this.drawPopupUpwards = false,
     required this.character,
     required this.startPopulation,
     required this.defaultPopulationGrowthRate,
@@ -15,6 +16,7 @@ sealed class Region {
   });
 
   final String name;
+  final bool drawPopupUpwards;
   final String character;
 
   final int startPopulation;
@@ -123,6 +125,7 @@ class SouthAmerica extends Region {
   SouthAmerica()
       : super(
           name: 'Südamerika',
+          drawPopupUpwards: true,
           character: 'south-america.png',
           startPopulation: 659,
           defaultPopulationGrowthRate: 0.0065,
@@ -149,6 +152,7 @@ class Australia extends Region {
   Australia()
       : super(
           name: 'Australien',
+          drawPopupUpwards: true,
           character: 'australia.png',
           startPopulation: 46,
           defaultPopulationGrowthRate: 0.0111,
