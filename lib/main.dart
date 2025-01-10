@@ -18,7 +18,7 @@ class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = ColorScheme.fromSeed(
-      seedColor: Colors.green,
+      seedColor: Colors.blue,
       brightness: Brightness.dark,
       dynamicSchemeVariant: DynamicSchemeVariant.vibrant, // TODO: Test out all of these options
     );
