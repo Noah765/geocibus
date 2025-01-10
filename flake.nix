@@ -7,7 +7,7 @@
     in
       pkgs.mkShell {
         buildInputs = with pkgs; [pkg-config gtk3];
-        shellHook = "flutter clean; flutter run";
+        shellHook = "nu";
       };
   };
 }
