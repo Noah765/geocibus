@@ -118,7 +118,7 @@ class NorthAmerica extends Region {
           startPopulation: 383,
           defaultPopulationGrowthRate: 0.0056,
           waterPerPerson: 10,
-          waterGenerationRate: 15, //78,
+          waterGenerationRate: 15,
           foodGenerationRate: 3.881,
         );
 }
@@ -145,7 +145,7 @@ class Africa extends Region {
           startPopulation: 1481,
           defaultPopulationGrowthRate: 0.0226,
           waterPerPerson: 10,
-          waterGenerationRate: 6, //1,
+          waterGenerationRate: 6,
           foodGenerationRate: 2.567,
         );
 }
@@ -159,7 +159,7 @@ class Australia extends Region {
           startPopulation: 46,
           defaultPopulationGrowthRate: 0.0111,
           waterPerPerson: 9,
-          waterGenerationRate: 5, //2,
+          waterGenerationRate: 5,
           foodGenerationRate: 3.6,
         );
 }
