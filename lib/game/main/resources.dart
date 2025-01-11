@@ -16,13 +16,12 @@ class MainResources extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
         child: Text.rich(
           // TODO Tooltips on hover resources
-          // TODO Dollar icon for money
           // TODO Bigger bottom
           TextSpan(
             children: [
               TextSpan(text: game.money.toString(), style: textStyle.copyWith(color: Colors.red)),
               WidgetSpan(
-                child: FaIcon(FontAwesomeIcons.moneyBills, size: textStyle.fontSize, color: Colors.red),
+                child: FaIcon(FontAwesomeIcons.dollarSign, size: textStyle.fontSize, color: Colors.red),
                 alignment: PlaceholderAlignment.baseline,
                 baseline: TextBaseline.alphabetic,
               ),
