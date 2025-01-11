@@ -27,6 +27,7 @@ class App extends StatelessWidget {
       title: 'Geocibus',
       theme: ThemeData(
         colorScheme: colorScheme,
+        fontFamily: 'Roboto',
         iconTheme: IconThemeData(color: colorScheme.onSurface, applyTextScaling: true),
       ),
       debugShowCheckedModeBanner: false,

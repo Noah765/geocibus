@@ -20,3 +20,9 @@ flutter:
   assets:
     - assets/
     - assets/characters/
+  fonts:
+    - family: Roboto
+      fonts:
+        - asset: assets/fonts/roboto.ttf
+        - asset: assets/fonts/roboto-italic.ttf
+          style: italic
