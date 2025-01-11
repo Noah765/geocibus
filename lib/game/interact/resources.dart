@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gap/gap.dart';
-import 'package:geocibus/constants.dart';
 import 'package:geocibus/models/game.dart';
 import 'package:geocibus/models/region.dart';
 import 'package:geocibus/widgets/resource_indicator.dart';
@@ -33,12 +32,12 @@ class InteractResources extends StatelessWidget {
               children: [
                 Text('Du', style: textTheme.headlineSmall),
                 Text.rich(
-                  style: textTheme.titleLarge!.copyWith(color: waterColor),
+                  style: textTheme.titleLarge!.copyWith(color: Colors.blue),
                   TextSpan(
                     children: [
                       TextSpan(text: game.water.toString()),
                       WidgetSpan(
-                        child: FaIcon(waterIcon, size: textTheme.titleLarge!.fontSize, color: waterColor),
+                        child: FaIcon(FontAwesomeIcons.glassWater, size: textTheme.titleLarge!.fontSize, color: Colors.blue),
                         alignment: PlaceholderAlignment.baseline,
                         baseline: TextBaseline.alphabetic,
                       ),
@@ -47,11 +46,11 @@ class InteractResources extends StatelessWidget {
                 ),
                 Text.rich(
                   TextSpan(
-                    style: textTheme.titleLarge!.copyWith(color: foodColor),
+                    style: textTheme.titleLarge!.copyWith(color: Colors.green),
                     children: [
                       TextSpan(text: game.food.toString()),
                       WidgetSpan(
-                        child: FaIcon(foodIcon, size: textTheme.titleLarge!.fontSize, color: foodColor),
+                        child: FaIcon(FontAwesomeIcons.bowlFood, size: textTheme.titleLarge!.fontSize, color: Colors.green),
                         alignment: PlaceholderAlignment.baseline,
                         baseline: TextBaseline.alphabetic,
                       ),

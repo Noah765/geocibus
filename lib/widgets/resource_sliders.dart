@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:geocibus/constants.dart';
 
 class ResourceSliders extends StatelessWidget {
   const ResourceSliders({
@@ -30,8 +29,8 @@ class ResourceSliders extends StatelessWidget {
     return Column(
       children: [
         Row(children: [Text(leftText), const Spacer(), Text(rightText)]),
-        _LabeledSlider(valueNotifier: controller.water, resetNotifier: controller._reset, icon: waterIcon, leftMax: waterLeftMax, rightMax: waterRightMax),
-        _LabeledSlider(valueNotifier: controller.food, resetNotifier: controller._reset, icon: foodIcon, leftMax: foodLeftMax, rightMax: foodRightMax),
+        _LabeledSlider(valueNotifier: controller.water, resetNotifier: controller._reset, icon: FontAwesomeIcons.glassWater, leftMax: waterLeftMax, rightMax: waterRightMax),
+        _LabeledSlider(valueNotifier: controller.food, resetNotifier: controller._reset, icon: FontAwesomeIcons.bowlFood, leftMax: foodLeftMax, rightMax: foodRightMax),
       ],
     );
   }

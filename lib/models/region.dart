@@ -1,7 +1,9 @@
 import 'dart:math';
 
-import 'package:geocibus/constants.dart';
 import 'package:geocibus/models/event.dart';
+
+const _maximumPopulationGrowthRate = 0.1;
+const _foodPerPerson = 2.0;
 
 sealed class Region {
   Region({
@@ -33,9 +35,9 @@ sealed class Region {
   bool get isExportBlocked => exportBlockingEvents.isNotEmpty;
 
   int get requiredWater => (population * waterPerPerson).round();
-  int get requiredFood => (population * foodPerPerson).round();
-  int get maximumWater => (population * (1 + maximumPopulationGrowthRate) * waterPerPerson).round();
-  int get maximumFood => (population * (1 + maximumPopulationGrowthRate) * foodPerPerson).round();
+  int get requiredFood => (population * _foodPerPerson).round();
+  int get maximumWater => (population * (1 + _maximumPopulationGrowthRate) * waterPerPerson).round();
+  int get maximumFood => (population * (1 + _maximumPopulationGrowthRate) * _foodPerPerson).round();
 
   int get generatedWater => (waterGenerationRate * population).round();
   int get generatedFood => (log(population / startPopulation + 1) * startPopulation * foodGenerationRate).round();
@@ -57,7 +59,7 @@ sealed class Region {
   ResourceTrend foodTrend = ResourceTrend.stable;
 
   void finishRound() {
-    population = (min(population * (1 + maximumPopulationGrowthRate), min(food / foodPerPerson, water / waterPerPerson)) * (1 + defaultPopulationGrowthRate)).round();
+    population = (min(population * (1 + _maximumPopulationGrowthRate), min(food / _foodPerPerson, water / waterPerPerson)) * (1 + defaultPopulationGrowthRate)).round();
 
     final newWater = water - requiredWater + generatedWater;
     final newFood = food - requiredFood + generatedFood;
