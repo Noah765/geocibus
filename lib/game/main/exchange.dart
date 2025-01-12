@@ -15,7 +15,7 @@ class MainExchange extends StatelessWidget {
     return Popup(
       direction: Direction.up,
       builder: (context, data) => _Popup(game),
-      child: const FaIcon(FontAwesomeIcons.arrowRightArrowLeft),
+      child: IconButton(onPressed: () {}, icon: const FaIcon(FontAwesomeIcons.arrowRightArrowLeft)),
     );
   }
 }
@@ -72,7 +72,7 @@ class _PopupState extends State<_Popup> {
           foodRightMax: (widget.game.money / widget.game.foodPrice).round(),
         ),
         if (!isTradePossible) const Text('Handel nicht möglich'),
-        OutlinedButton(
+        ElevatedButton(
           onPressed: _onFinish,
           statesController: _finishButtonController,
           child: const Text('Fertig'),

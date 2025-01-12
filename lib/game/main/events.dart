@@ -62,7 +62,7 @@ class _Event extends StatelessWidget {
           Text(event.description, textAlign: TextAlign.center),
         ],
       ),
-      child: Card.filled(
+      child: Card(
         child: Padding(
           padding: const EdgeInsets.all(8),
           child: FaIcon(event.icon),

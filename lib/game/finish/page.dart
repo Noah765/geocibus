@@ -34,7 +34,7 @@ class _FinishPageState extends State<FinishPage> {
         children: [
           Text('Score: ${widget.game.score}', style: textTheme.displayLarge),
           Text('High Score: ${_highScore ?? 'Laden...'}'),
-          OutlinedButton(onPressed: () => Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => const MainMenu())), child: const Text('Zurück zum Hauptmenü')),
+          ElevatedButton(onPressed: () => Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => const MainMenu())), child: const Text('Zurück zum Hauptmenü')),
         ],
       ),
     );

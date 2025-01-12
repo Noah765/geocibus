@@ -158,7 +158,7 @@ class _AnimatedMapState extends State<_AnimatedMap> with TickerProviderStateMixi
         map: widget.map,
         scales: widget.map.regions.map((key, value) => MapEntry(key, _getRegionScale(key))),
         colors: widget.map.regions.map((key, value) => MapEntry(key, _getRegionColor(key))),
-        outlineColor: theme.colorScheme.onSurface,
+        outlineColor: theme.colorScheme.outline,
         textStyle: theme.textTheme.titleLarge!.copyWith(
           fontSize: MediaQuery.textScalerOf(context).scale(theme.textTheme.titleLarge!.fontSize!),
           fontWeight: MediaQuery.boldTextOf(context) ? FontWeight.bold : null,

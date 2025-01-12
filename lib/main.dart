@@ -1,6 +1,7 @@
 import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:flutter/material.dart';
 import 'package:geocibus/menus/main.dart';
+import 'package:geocibus/theme.dart';
 import 'package:window_manager/window_manager.dart';
 
 void main() {
@@ -17,19 +18,9 @@ class App extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = ColorScheme.fromSeed(
-      seedColor: Colors.blue,
-      brightness: Brightness.dark,
-      dynamicSchemeVariant: DynamicSchemeVariant.vibrant, // TODO: Test out all of these options
-    );
-
     return MaterialApp(
       title: 'Geocibus',
-      theme: ThemeData(
-        colorScheme: colorScheme,
-        fontFamily: 'Roboto',
-        iconTheme: IconThemeData(color: colorScheme.onSurface, applyTextScaling: true),
-      ),
+      theme: getTheme(),
       debugShowCheckedModeBanner: false,
       home: const MainMenu(),
     );

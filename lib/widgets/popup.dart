@@ -130,8 +130,8 @@ class _PopupState<T extends Object> extends State<Popup<T>> {
             child: _Overlay(
               direction: direction,
               position: globalPosition,
-              arrowColor: Theme.of(overlayContext).colorScheme.surfaceContainerHighest,
-              child: Card.filled(
+              arrowColor: Theme.of(overlayContext).colorScheme.outline,
+              child: Card(
                 child: Padding(
                   padding: const EdgeInsets.all(16),
                   child: widget.builder(overlayContext, data),

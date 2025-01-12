@@ -64,7 +64,7 @@ class _MainPageState extends State<MainPage> {
                       const Gap(8),
                       const MainExchange(),
                       const Gap(8),
-                      OutlinedButton(
+                      ElevatedButton(
                         onPressed: game.finishRound,
                         child: const Text('Jahr beenden'),
                       ),

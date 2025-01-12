@@ -15,7 +15,7 @@ class InteractResources extends StatelessWidget {
     final region = context.read<Region>();
     final textTheme = Theme.of(context).textTheme;
 
-    return Card.filled(
+    return Card(
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
         child: Row(

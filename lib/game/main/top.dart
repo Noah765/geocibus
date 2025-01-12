@@ -24,9 +24,9 @@ class MainTop extends StatelessWidget {
                 tooltip: 'Zurück zum Hauptmenü',
               ),
               const Gap(8),
-              Card.filled(
+              Card(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                  padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
                   child: Text('${game.month} des Jahres ${game.round}/10'),
                 ),
               ),
@@ -37,9 +37,9 @@ class MainTop extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              Card.filled(
+              Card(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                  padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
                   child: Text('Score: ${game.score}'),
                 ),
               ),

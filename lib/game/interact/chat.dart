@@ -94,7 +94,7 @@ class _ChatState extends State<Chat> {
             ],
           )
         else if (lastInteraction.isRequestSuccessful == false)
-          OutlinedButton(onPressed: () => _resetInteraction(game, region), child: const Text('Zurück'))
+          ElevatedButton(onPressed: () => _resetInteraction(game, region), child: const Text('Zurück'))
         else if (lastInteraction.isRequestSuccessful == true)
           Row(
             children: [
@@ -112,10 +112,10 @@ class _ChatState extends State<Chat> {
               ),
               Text('(${lastInteraction.requestValue})'),
               const Gap(8),
-              OutlinedButton(onPressed: () => _distribute(game, region, lastInteraction), child: const Text('Senden')),
+              ElevatedButton(onPressed: () => _distribute(game, region, lastInteraction), child: const Text('Senden')),
               const Gap(8),
               // TODO Restart chat instead of exiting (restart instead of exiting when finishing?, only when resourcestate changes?)
-              OutlinedButton(onPressed: () => _resetInteraction(game, region), child: const Text('Zurück')),
+              ElevatedButton(onPressed: () => _resetInteraction(game, region), child: const Text('Zurück')),
             ],
           ),
       ],
@@ -279,7 +279,7 @@ class _RegionMessage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Align(
       alignment: Alignment.centerLeft,
-      child: Card.filled(
+      child: Card(
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
           child: Text(text),
@@ -298,7 +298,7 @@ class _YourMessage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Align(
       alignment: Alignment.centerRight,
-      child: Card.filled(
+      child: Card(
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
           child: Text(text),

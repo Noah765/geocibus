@@ -21,7 +21,7 @@ class RoundBeginningOverlay extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Card.filled(
+            Card(
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
                 child: Text('Jahr ${game.round + 1}', style: textTheme.displaySmall!.copyWith()),
@@ -30,7 +30,7 @@ class RoundBeginningOverlay extends StatelessWidget {
             const Gap(16),
             if (game.newEvents.isNotEmpty || game.finishedEvents.isNotEmpty) ...[
               Expanded(
-                child: Card.filled(
+                child: Card(
                   child: Padding(
                     padding: const EdgeInsets.all(16),
                     child: Row(
@@ -45,7 +45,7 @@ class RoundBeginningOverlay extends StatelessWidget {
               ),
               const Gap(16),
             ],
-            OutlinedButton(
+            ElevatedButton(
               onPressed: () {
                 game.startRound();
                 Navigator.of(context).pop();
@@ -74,7 +74,7 @@ class _EventColumn extends StatelessWidget {
         Text(text, style: textTheme.titleMedium),
         const Gap(8),
         Expanded(
-          child: Card.filled(
+          child: Card(
             child: Column(
               children: [
                 for (final event in events) ...[
@@ -98,7 +98,7 @@ class _EventCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card.filled(
+    return Card(
       child: Row(
         children: [
           FaIcon(event.icon),

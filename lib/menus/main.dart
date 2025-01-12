@@ -39,15 +39,15 @@ class MainMenu extends StatelessWidget {
               alignment: Alignment.centerLeft,
               child: Column(
                 children: [
-                  FilledButton(
+                  ElevatedButton(
                     onPressed: () => _start(context),
                     child: const Text('START'),
                   ),
-                  OutlinedButton(
+                  ElevatedButton(
                     onPressed: _options,
                     child: const Text('OPTIONEN'),
                   ),
-                  OutlinedButton(
+                  ElevatedButton(
                     onPressed: _leave,
                     child: const Text('SPIEL VERLASSEN'),
                   ),

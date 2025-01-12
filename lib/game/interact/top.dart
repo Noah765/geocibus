@@ -18,7 +18,7 @@ class InteractTop extends StatelessWidget {
           onPressed: Navigator.of(context).pop,
           tooltip: 'Zurück zur Karte',
         ),
-        Card.filled(
+        Card(
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
             child: Text('${game.month} des Jahres ${game.round}/10'),
