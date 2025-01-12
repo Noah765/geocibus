@@ -6,37 +6,40 @@ import 'package:flutter/rendering.dart';
 
 const _popupPadding = 8;
 
-class Popup extends StatefulWidget {
+enum Direction { up, right, down, left }
+
+class Popup<T extends Object> extends StatefulWidget {
   const Popup({
     super.key,
     this.controller,
-    this.fixOnTap = true,
-    this.getPopupPosition,
-    this.getPopupDirection,
+    this.getDataAt,
+    this.getPosition,
+    this.getDirection,
     this.direction,
-    required this.popupBuilder,
+    this.fixOnPressed = true,
+    required this.builder,
     required this.child,
-  }) : assert(direction != null || getPopupDirection != null);
+  })  : assert(getDirection != null || direction != null),
+        assert(getDataAt != null || T == Object);
 
-  final PopupController? controller;
-  final bool fixOnTap;
-  final Offset Function(Offset localPosition)? getPopupPosition;
-  final Direction Function(Offset localPopupPosition)? getPopupDirection;
+  final PopupController<T>? controller;
+  final T Function(Offset localPosition)? getDataAt;
+  final Offset Function(T data)? getPosition;
+  final Direction Function(T data)? getDirection;
   final Direction? direction;
-  final Widget Function(BuildContext context, Offset localPosition) popupBuilder;
+  final bool fixOnPressed;
+  final Widget Function(BuildContext context, T data) builder;
   final Widget child;
 
   @override
-  State<Popup> createState() => _PopupState();
+  State<Popup> createState() => _PopupState<T>();
 }
 
-enum Direction { up, right, down, left }
-
-class _PopupState extends State<Popup> {
+class _PopupState<T extends Object> extends State<Popup<T>> {
   final _overlayController = OverlayPortalController();
-  late final PopupController _controller;
-  var _hoveringOverOverlay = false;
-  var _tappedOverlay = false;
+  late final PopupController<T> _controller;
+  var _overlayHovered = false;
+  var _overlayPressed = false;
 
   @override
   void initState() {
@@ -50,8 +53,54 @@ class _PopupState extends State<Popup> {
     super.dispose();
   }
 
-  Offset _getPopupPosition(Offset localPosition) {
-    if (widget.getPopupPosition != null) return widget.getPopupPosition!(localPosition);
+  T _getDataAt(Offset localPosition) => widget.getDataAt == null ? true as T : widget.getDataAt!(localPosition);
+
+  void _onTapOverlay(PointerDownEvent event) => _overlayPressed = true;
+
+  void _onPointerEnterOverlay(PointerEnterEvent event) => _overlayHovered = true;
+
+  void _onPointerExitOverlay(PointerExitEvent event) {
+    _overlayHovered = false;
+    if (_controller.pressed != null) return;
+    _controller.hovered = null;
+    _overlayController.hide();
+  }
+
+  void _onTapOutside(PointerDownEvent event) {
+    if (_overlayPressed) {
+      _overlayPressed = false;
+      return;
+    }
+    _controller.pressed = null;
+    _overlayController.hide();
+  }
+
+  void _onTapChild(PointerDownEvent event) {
+    final position = (context.findRenderObject()! as RenderBox).globalToLocal(event.position);
+    final data = _getDataAt(position);
+    _controller.pressed = data == _controller.pressed ? null : data;
+    _overlayController.show();
+  }
+
+  void _onPointerEnterChild(PointerEnterEvent event) {
+    _controller.hovered = _getDataAt(event.localPosition);
+    _overlayController.show();
+  }
+
+  void _onPointerExitChild() {
+    if (_overlayHovered) return;
+    _controller.hovered = null;
+    if (_controller.pressed == null) _overlayController.hide();
+  }
+
+  void _onChildHover(PointerHoverEvent event) {
+    final data = _getDataAt(event.localPosition);
+    if (data == _controller.hovered) return;
+    _controller.hovered = data;
+    _overlayController.show();
+  }
+
+  Offset _getFallbackPosition() {
     final bounds = Offset.zero & (context.findRenderObject()! as RenderBox).size;
     return switch (widget.direction!) {
       Direction.up => bounds.topCenter,
@@ -61,63 +110,14 @@ class _PopupState extends State<Popup> {
     };
   }
 
-  void _onTapOverlay(PointerDownEvent event) => _tappedOverlay = true;
-
-  void _onPointerEnterOverlay(PointerEnterEvent event) => _hoveringOverOverlay = true;
-
-  void _onPointerExitOverlay(PointerExitEvent event) {
-    _hoveringOverOverlay = false;
-    if (_controller.tapPopupPosition != null) return;
-    _controller.hoverPopupPosition = null;
-    _overlayController.hide();
-  }
-
-  void _onTapOutside(PointerDownEvent event) {
-    if (_tappedOverlay) {
-      _tappedOverlay = false;
-      return;
-    }
-    _controller.tapPopupPosition = null;
-    _overlayController.hide();
-  }
-
-  void _onTapChild(PointerDownEvent event) {
-    final tapPosition = (context.findRenderObject()! as RenderBox).globalToLocal(event.position);
-    final popupPosition = _getPopupPosition(tapPosition);
-    if (popupPosition == _controller.tapPopupPosition) {
-      _controller.tapPopupPosition = null;
-      return;
-    }
-    _controller.tapPopupPosition = popupPosition;
-    _overlayController.show();
-  }
-
-  void _onPointerEnterChild(PointerEnterEvent event) {
-    _controller.hoverPopupPosition = _getPopupPosition(event.localPosition);
-    _overlayController.show();
-  }
-
-  void _onPointerExitChild() {
-    if (_hoveringOverOverlay) return;
-    _controller.hoverPopupPosition = null;
-    if (_controller.tapPopupPosition == null) _overlayController.hide();
-  }
-
-  void _onChildHover(PointerHoverEvent event) {
-    final popupPosition = _getPopupPosition(event.localPosition);
-    if (popupPosition == _controller.hoverPopupPosition) return;
-    _overlayController.show();
-    _controller.hoverPopupPosition = popupPosition;
-  }
-
   @override
   Widget build(BuildContext context) {
     return OverlayPortal(
       controller: _overlayController,
       overlayChildBuilder: (overlayContext) {
-        final localPosition = _controller.tapPopupPosition ?? _controller.hoverPopupPosition!;
-        final direction = widget.getPopupDirection != null ? widget.getPopupDirection!(localPosition) : widget.direction!;
-        final globalPosition = (context.findRenderObject()! as RenderBox).localToGlobal(localPosition);
+        final data = _controller.pressed ?? _controller.hovered!;
+        final globalPosition = (context.findRenderObject()! as RenderBox).localToGlobal(widget.getPosition == null ? _getFallbackPosition() : widget.getPosition!(data));
+        final direction = widget.getDirection == null ? widget.direction! : widget.getDirection!(data);
 
         // TODO Hairline width between arrow and card
 
@@ -132,10 +132,9 @@ class _PopupState extends State<Popup> {
               position: globalPosition,
               arrowColor: Theme.of(overlayContext).colorScheme.surfaceContainerHighest,
               child: Card.filled(
-                margin: EdgeInsets.zero,
                 child: Padding(
                   padding: const EdgeInsets.all(16),
-                  child: widget.popupBuilder(overlayContext, localPosition),
+                  child: widget.builder(overlayContext, data),
                 ),
               ),
             ),
@@ -143,11 +142,11 @@ class _PopupState extends State<Popup> {
         );
       },
       child: TapRegion(
-        onTapOutside: widget.fixOnTap ? _onTapOutside : null,
-        onTapInside: widget.fixOnTap ? _onTapChild : null,
+        onTapOutside: widget.fixOnPressed ? _onTapOutside : null,
+        onTapInside: widget.fixOnPressed ? _onTapChild : null,
         child: MouseRegion(
           onEnter: _onPointerEnterChild,
-          onExit: (event) => Future.microtask(_onPointerExitChild), // TODO Debug resize errors
+          onExit: (event) => Future.microtask(_onPointerExitChild),
           onHover: _onChildHover,
           hitTestBehavior: HitTestBehavior.deferToChild,
           child: widget.child,
@@ -157,20 +156,20 @@ class _PopupState extends State<Popup> {
   }
 }
 
-class PopupController extends ChangeNotifier {
-  Offset? _hoverPopupPosition;
-  Offset? get hoverPopupPosition => _hoverPopupPosition;
-  set hoverPopupPosition(Offset? value) {
-    if (value == _hoverPopupPosition) return;
-    _hoverPopupPosition = value;
+class PopupController<T extends Object> extends ChangeNotifier {
+  T? _hovered;
+  T? get hovered => _hovered;
+  set hovered(T? value) {
+    if (value == _hovered) return;
+    _hovered = value;
     notifyListeners();
   }
 
-  Offset? _tapPopupPosition;
-  Offset? get tapPopupPosition => _tapPopupPosition;
-  set tapPopupPosition(Offset? value) {
-    if (value == _tapPopupPosition) return;
-    _tapPopupPosition = value;
+  T? _pressed;
+  T? get pressed => _pressed;
+  set pressed(T? value) {
+    if (value == _pressed) return;
+    _pressed = value;
     notifyListeners();
   }
 }

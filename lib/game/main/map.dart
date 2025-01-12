@@ -17,7 +17,7 @@ const _animationDuration = Duration(milliseconds: 100);
 const _animationCurve = Curves.ease;
 const _hoverAnimationPercentage = 1 / 3;
 const _inactiveDim = 0.2;
-const _tapScale = 1.03;
+const _pressedScale = 1.03;
 
 class MainMap extends StatefulWidget {
   const MainMap({super.key});
@@ -28,7 +28,7 @@ class MainMap extends StatefulWidget {
 
 class _MainMapState extends State<MainMap> {
   late final _Map _map;
-  late final PopupController _popupController;
+  late final PopupController<Region> _popupController;
   var _finishedInitializing = false;
 
   @override
@@ -64,26 +64,23 @@ class _MainMapState extends State<MainMap> {
         child: LayoutBuilder(
           builder: (context, constraints) => Popup(
             controller: _popupController,
-            getPopupPosition: (localPosition) => _map.getRegionCenter(constraints.biggest, _map.getRegionAt(constraints.biggest, localPosition)),
-            getPopupDirection: (localPopupPosition) => _map.getRegionAt(constraints.biggest, localPopupPosition).drawPopupUpwards ? Direction.up : Direction.down,
-            popupBuilder: (context, localPosition) {
-              final region = _map.getRegionAt(constraints.biggest, localPosition);
-
-              return Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(region.name, style: theme.textTheme.headlineSmall),
-                  Text('${region.population} Mio. Einwohner'),
-                  const Gap(16),
-                  ResourceIndicator(region),
-                  const Gap(32),
-                  OutlinedButton(
-                    onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (context) => InteractPage(game: game, region: region))),
-                    child: const Text('Kontaktieren'),
-                  ),
-                ],
-              );
-            },
+            getDataAt: (localPosition) => _map.getRegionAt(constraints.biggest, localPosition),
+            getPosition: (region) => _map.getRegionCenter(constraints.biggest, region),
+            getDirection: (region) => region.drawPopupUpwards ? Direction.up : Direction.down,
+            builder: (context, region) => Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(region.name, style: theme.textTheme.headlineSmall),
+                Text('${region.population} Mio. Einwohner'),
+                const Gap(16),
+                ResourceIndicator(region),
+                const Gap(32),
+                ElevatedButton(
+                  onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (context) => InteractPage(game: game, region: region))),
+                  child: const Text('Kontaktieren'),
+                ),
+              ],
+            ),
             child: _AnimatedMap(map: _map, size: constraints.biggest, popupController: _popupController),
           ),
         ),
@@ -97,7 +94,7 @@ class _AnimatedMap extends StatefulWidget {
 
   final _Map map;
   final Size size;
-  final PopupController popupController;
+  final PopupController<Region> popupController;
 
   @override
   State<_AnimatedMap> createState() => _AnimatedMapState();
@@ -123,25 +120,23 @@ class _AnimatedMapState extends State<_AnimatedMap> with TickerProviderStateMixi
   }
 
   Region? _previousHoveredRegion;
-  Region? _previousTappedRegion;
+  Region? _previousPressedRegion;
   void _handlePopupControllerChanged() {
-    final hoveredRegion = widget.popupController.hoverPopupPosition == null ? null : widget.map.getRegionAt(widget.size, widget.popupController.hoverPopupPosition!);
-    final tappedRegion = widget.popupController.tapPopupPosition == null ? null : widget.map.getRegionAt(widget.size, widget.popupController.tapPopupPosition!);
+    final hovered = widget.popupController.hovered;
+    final pressed = widget.popupController.pressed;
 
-    if (hoveredRegion != _previousHoveredRegion) {
-      if (hoveredRegion != null && hoveredRegion != tappedRegion) _controllers[hoveredRegion]!.animateTo(_hoverAnimationPercentage, curve: _animationCurve);
-      if (_previousHoveredRegion != null && _previousHoveredRegion != tappedRegion) _controllers[_previousHoveredRegion]!.animateTo(0, curve: _animationCurve);
+    if (hovered != _previousHoveredRegion) {
+      if (hovered != null && hovered != pressed) _controllers[hovered]!.animateTo(_hoverAnimationPercentage, curve: _animationCurve);
+      if (_previousHoveredRegion != null && _previousHoveredRegion != pressed) _controllers[_previousHoveredRegion]!.animateTo(0, curve: _animationCurve);
     }
-    if (tappedRegion != _previousTappedRegion) {
-      if (tappedRegion != null) _controllers[tappedRegion]!.animateTo(1, curve: _animationCurve);
-      if (_previousTappedRegion != null) _controllers[_previousTappedRegion]!.animateTo(_previousTappedRegion == hoveredRegion ? _hoverAnimationPercentage : 0, curve: _animationCurve);
+    if (pressed != _previousPressedRegion) {
+      if (pressed != null) _controllers[pressed]!.animateTo(1, curve: _animationCurve);
+      if (_previousPressedRegion != null) _controllers[_previousPressedRegion]!.animateTo(_previousPressedRegion == hovered ? _hoverAnimationPercentage : 0, curve: _animationCurve);
     }
 
-    _previousHoveredRegion = hoveredRegion;
-    _previousTappedRegion = tappedRegion;
+    _previousHoveredRegion = hovered;
+    _previousPressedRegion = pressed;
   }
-
-  Region? get tappedRegion => widget.popupController.tapPopupPosition == null ? null : widget.map.getRegionAt(widget.size, widget.popupController.tapPopupPosition!);
 
   Color _getRegionColor(Region region) {
     final surface = Theme.of(context).colorScheme.surface;
@@ -151,7 +146,7 @@ class _AnimatedMapState extends State<_AnimatedMap> with TickerProviderStateMixi
     return Color.lerp(color, surface, _inactiveDim * (1 - _controllers[region]!.value))!;
   }
 
-  double _getRegionScale(Region region) => 1 + _controllers[region]!.value * (_tapScale - 1);
+  double _getRegionScale(Region region) => 1 + _controllers[region]!.value * (_pressedScale - 1);
 
   @override
   Widget build(BuildContext context) {
@@ -298,20 +293,20 @@ class _Map {
     return _Map(bounds: bounds, regions: regions);
   }
 
-  Offset pathToLocal(Size size, Offset position) => position.translate(-bounds.left, -bounds.top).scale(size.width / bounds.width, size.height / bounds.height);
-  Offset localToPath(Size size, Offset position) => position.scale(bounds.width / size.width, bounds.height / size.height).translate(bounds.left, bounds.top);
+  Offset pathToLocal(Size size, Offset pathPosition) => pathPosition.translate(-bounds.left, -bounds.top).scale(size.width / bounds.width, size.height / bounds.height);
+  Offset localToPath(Size size, Offset localPosition) => localPosition.scale(bounds.width / size.width, bounds.height / size.height).translate(bounds.left, bounds.top);
   void transformCanvas(Size size, Canvas canvas) => canvas
     ..scale(size.width / bounds.width, size.height / bounds.height)
     ..translate(-bounds.left, -bounds.top);
 
-  bool hitTest(Size size, Offset offset) {
-    final pathPosition = localToPath(size, offset);
+  bool hitTest(Size size, Offset localPosition) {
+    final pathPosition = localToPath(size, localPosition);
     final regionEntries = regions.entries.where((entry) => entry.value.paths.any((e) => e.contains(pathPosition)));
     return regionEntries.isNotEmpty && regionEntries.first.key.population > 0;
   }
 
-  Region getRegionAt(Size size, Offset position) {
-    final pathPosition = localToPath(size, position);
+  Region getRegionAt(Size size, Offset localPosition) {
+    final pathPosition = localToPath(size, localPosition);
     return regions.entries.firstWhere((entry) => entry.value.paths.any((e) => e.contains(pathPosition))).key;
   }
 
