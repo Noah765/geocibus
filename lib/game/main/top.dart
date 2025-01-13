@@ -19,7 +19,7 @@ class MainTop extends StatelessWidget {
           child: Row(
             children: [
               IconButton(
-                icon: const FaIcon(FontAwesomeIcons.rightFromBracket),
+                icon: const Icon(FontAwesomeIcons.rightFromBracket, size: 24),
                 onPressed: () => Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => const MainMenu())),
                 tooltip: 'Zurück zum Hauptmenü',
               ),

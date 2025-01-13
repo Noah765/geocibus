@@ -20,7 +20,6 @@ ThemeData getTheme() {
   return ThemeData(
     colorScheme: colors,
     fontFamily: 'Roboto',
-    // TODO Because of https://github.com/fluttercommunity/font_awesome_flutter/issues/270, icons are taller than expected
     iconTheme: IconThemeData(size: 20, color: colors.onSurface, applyTextScaling: true),
     cardTheme: CardTheme(margin: EdgeInsets.zero, shape: getShape(3)),
     elevatedButtonTheme: ElevatedButtonThemeData(

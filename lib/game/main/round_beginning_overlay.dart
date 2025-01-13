@@ -101,7 +101,7 @@ class _EventCard extends StatelessWidget {
     return Card(
       child: Row(
         children: [
-          FaIcon(event.icon),
+          Icon(event.icon),
           const Gap(4),
           Text(event.name),
           const Spacer(),

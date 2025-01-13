@@ -15,7 +15,7 @@ class MainExchange extends StatelessWidget {
     return Popup(
       direction: Direction.up,
       builder: (context, data) => _Popup(game),
-      child: IconButton(onPressed: () {}, icon: const FaIcon(FontAwesomeIcons.arrowRightArrowLeft)),
+      child: IconButton(onPressed: () {}, icon: const Icon(FontAwesomeIcons.arrowRightArrowLeft)),
     );
   }
 }

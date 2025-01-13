@@ -21,19 +21,19 @@ class MainResources extends StatelessWidget {
             children: [
               TextSpan(text: game.money.toString(), style: textStyle.copyWith(color: Colors.red)),
               WidgetSpan(
-                child: FaIcon(FontAwesomeIcons.dollarSign, size: textStyle.fontSize, color: Colors.red),
+                child: Icon(FontAwesomeIcons.dollarSign, size: textStyle.fontSize, color: Colors.red),
                 alignment: PlaceholderAlignment.baseline,
                 baseline: TextBaseline.alphabetic,
               ),
               TextSpan(text: ' ${game.water}', style: textStyle.copyWith(color: Colors.blue)),
               WidgetSpan(
-                child: FaIcon(FontAwesomeIcons.glassWater, size: textStyle.fontSize, color: Colors.blue),
+                child: Icon(FontAwesomeIcons.glassWater, size: textStyle.fontSize, color: Colors.blue),
                 alignment: PlaceholderAlignment.baseline,
                 baseline: TextBaseline.alphabetic,
               ),
               TextSpan(text: ' ${game.food}', style: textStyle.copyWith(color: Colors.green)),
               WidgetSpan(
-                child: FaIcon(FontAwesomeIcons.bowlFood, size: textStyle.fontSize, color: Colors.green),
+                child: Icon(FontAwesomeIcons.bowlFood, size: textStyle.fontSize, color: Colors.green),
                 alignment: PlaceholderAlignment.baseline,
                 baseline: TextBaseline.alphabetic,
               ),

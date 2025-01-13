@@ -14,7 +14,7 @@ class InteractTop extends StatelessWidget {
     return Row(
       children: [
         IconButton(
-          icon: const FaIcon(FontAwesomeIcons.arrowLeft),
+          icon: const Icon(FontAwesomeIcons.arrowLeft),
           onPressed: Navigator.of(context).pop,
           tooltip: 'Zurück zur Karte',
         ),

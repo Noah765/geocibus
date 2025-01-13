@@ -7,7 +7,7 @@ class SettingsButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return IconButton(
-      icon: const FaIcon(FontAwesomeIcons.gear),
+      icon: const Icon(FontAwesomeIcons.gear),
       onPressed: () {},
       tooltip: 'Einstellungen',
     );

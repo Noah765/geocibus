@@ -37,7 +37,7 @@ class InteractResources extends StatelessWidget {
                     children: [
                       TextSpan(text: game.water.toString()),
                       WidgetSpan(
-                        child: FaIcon(FontAwesomeIcons.glassWater, size: textTheme.titleLarge!.fontSize, color: Colors.blue),
+                        child: Icon(FontAwesomeIcons.glassWater, size: textTheme.titleLarge!.fontSize, color: Colors.blue),
                         alignment: PlaceholderAlignment.baseline,
                         baseline: TextBaseline.alphabetic,
                       ),
@@ -50,7 +50,7 @@ class InteractResources extends StatelessWidget {
                     children: [
                       TextSpan(text: game.food.toString()),
                       WidgetSpan(
-                        child: FaIcon(FontAwesomeIcons.bowlFood, size: textTheme.titleLarge!.fontSize, color: Colors.green),
+                        child: Icon(FontAwesomeIcons.bowlFood, size: textTheme.titleLarge!.fontSize, color: Colors.green),
                         alignment: PlaceholderAlignment.baseline,
                         baseline: TextBaseline.alphabetic,
                       ),

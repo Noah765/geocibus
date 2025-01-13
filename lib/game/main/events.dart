@@ -53,7 +53,7 @@ class _Event extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               // TODO Size icon according to upper case letters
-              FaIcon(event.icon, size: textTheme.titleLarge!.fontSize),
+              Icon(event.icon, size: textTheme.titleLarge!.fontSize),
               const Gap(8),
               Text('${event.name} (Lvl. ${event.level})', style: textTheme.titleLarge),
             ],
@@ -65,7 +65,7 @@ class _Event extends StatelessWidget {
       child: Card(
         child: Padding(
           padding: const EdgeInsets.all(8),
-          child: FaIcon(event.icon),
+          child: Icon(event.icon),
         ),
       ),
     );

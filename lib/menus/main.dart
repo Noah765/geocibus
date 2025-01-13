@@ -28,7 +28,7 @@ class MainMenu extends StatelessWidget {
                   WidgetSpan(
                     // TODO Correctly size and align the Icon
                     alignment: PlaceholderAlignment.middle,
-                    child: FaIcon(FontAwesomeIcons.earthEurope, size: theme.textTheme.displayLarge!.fontSize),
+                    child: Icon(FontAwesomeIcons.earthEurope, size: theme.textTheme.displayLarge!.fontSize),
                   ),
                   const TextSpan(text: 'CIBUS'),
                 ],

@@ -103,7 +103,7 @@ class _LabeledSliderState extends State<_LabeledSlider> {
 
     return Row(
       children: [
-        FaIcon(widget.icon),
+        Icon(widget.icon),
         Expanded(
           child: SliderTheme(
             data: SliderThemeData(
