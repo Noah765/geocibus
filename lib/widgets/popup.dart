@@ -71,6 +71,7 @@ class _PopupState<T extends Object> extends State<Popup<T>> {
       _overlayPressed = false;
       return;
     }
+    _controller.hovered = null;
     _controller.pressed = null;
     _overlayController.hide();
   }
@@ -78,6 +79,7 @@ class _PopupState<T extends Object> extends State<Popup<T>> {
   void _onTapChild(PointerDownEvent event) {
     final position = (context.findRenderObject()! as RenderBox).globalToLocal(event.position);
     final data = _getDataAt(position);
+    _controller.hovered = data;
     _controller.pressed = data == _controller.pressed ? null : data;
     _overlayController.show();
   }
