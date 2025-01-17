@@ -44,7 +44,6 @@ class _Event extends StatelessWidget {
 
     return Popup(
       direction: Direction.right,
-      fixOnPressed: false,
       builder: (context, data) => Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -61,12 +60,7 @@ class _Event extends StatelessWidget {
           Text(event.description, textAlign: TextAlign.center),
         ],
       ),
-      child: Card(
-        child: Padding(
-          padding: const EdgeInsets.all(8),
-          child: Icon(event.icon),
-        ),
-      ),
+      child: IconButton(onPressed: () {}, icon: Icon(event.icon)),
     );
   }
 }

@@ -16,7 +16,6 @@ class Popup<T extends Object> extends StatefulWidget {
     this.getPosition,
     this.getDirection,
     this.direction,
-    this.fixOnPressed = true,
     required this.builder,
     required this.child,
   })  : assert(getDirection != null || direction != null),
@@ -27,7 +26,6 @@ class Popup<T extends Object> extends StatefulWidget {
   final Offset Function(T data)? getPosition;
   final Direction Function(T data)? getDirection;
   final Direction? direction;
-  final bool fixOnPressed;
   final Widget Function(BuildContext context, T data) builder;
   final Widget child;
 
@@ -96,6 +94,7 @@ class _PopupState<T extends Object> extends State<Popup<T>> {
   }
 
   void _onChildHover(PointerHoverEvent event) {
+    if (_controller.hovered == null) return;
     final data = _getDataAt(event.localPosition);
     if (data == _controller.hovered) return;
     _controller.hovered = data;
@@ -144,8 +143,8 @@ class _PopupState<T extends Object> extends State<Popup<T>> {
         );
       },
       child: TapRegion(
-        onTapOutside: widget.fixOnPressed ? _onTapOutside : null,
-        onTapInside: widget.fixOnPressed ? _onTapChild : null,
+        onTapOutside: _onTapOutside,
+        onTapInside: _onTapChild,
         child: MouseRegion(
           onEnter: _onPointerEnterChild,
           onExit: (event) => Future.microtask(_onPointerExitChild),
