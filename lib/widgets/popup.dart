@@ -4,8 +4,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
-// TODO Update arrow position on window size change
-
 const _padding = 8;
 
 enum Direction { up, right, down, left }
@@ -36,8 +34,8 @@ class Popup<T extends Object> extends StatefulWidget {
 }
 
 class _PopupState<T extends Object> extends State<Popup<T>> {
-  final _overlayController = OverlayPortalController();
   late final PopupController<T> _controller;
+  final _overlayController = OverlayPortalController();
   var _overlayHovered = false;
   var _overlayPressed = false;
 
@@ -114,36 +112,36 @@ class _PopupState<T extends Object> extends State<Popup<T>> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext buildContext) {
     return OverlayPortal(
       controller: _overlayController,
-      overlayChildBuilder: (overlayContext) {
-        final data = _controller.pressed ?? _controller.hovered!;
-        final globalPosition = (context.findRenderObject()! as RenderBox).localToGlobal(widget.getPosition == null ? _getFallbackPosition() : widget.getPosition!(data));
-        final direction = widget.getDirection == null ? widget.direction! : widget.getDirection!(data);
+      overlayChildBuilder: (context) => LayoutBuilder(
+        builder: (context, constraints) {
+          final data = _controller.pressed ?? _controller.hovered!;
+          final globalPosition = (buildContext.findRenderObject()! as RenderBox).localToGlobal(widget.getPosition == null ? _getFallbackPosition() : widget.getPosition!(data));
+          final direction = widget.getDirection == null ? widget.direction! : widget.getDirection!(data);
 
-        // TODO Hairline width between arrow and card
-
-        return Listener(
-          onPointerDown: _onTapOverlay,
-          child: MouseRegion(
-            onEnter: _onPointerEnterOverlay,
-            onExit: _onPointerExitOverlay,
-            hitTestBehavior: HitTestBehavior.deferToChild,
-            child: _Overlay(
-              direction: direction,
-              position: globalPosition,
-              arrowColor: Theme.of(overlayContext).colorScheme.outline,
-              child: Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: widget.builder(overlayContext, data),
+          return Listener(
+            onPointerDown: _onTapOverlay,
+            child: MouseRegion(
+              onEnter: _onPointerEnterOverlay,
+              onExit: _onPointerExitOverlay,
+              hitTestBehavior: HitTestBehavior.deferToChild,
+              child: _Overlay(
+                direction: direction,
+                position: globalPosition,
+                arrowColor: Theme.of(context).colorScheme.outline,
+                child: Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: widget.builder(context, data),
+                  ),
                 ),
               ),
             ),
-          ),
-        );
-      },
+          );
+        },
+      ),
       child: TapRegion(
         onTapOutside: _onTapOutside,
         onTapInside: _onTapChild,
