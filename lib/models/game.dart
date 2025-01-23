@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:geocibus/models/event.dart';
 import 'package:geocibus/models/region.dart';
@@ -31,13 +32,15 @@ class Game extends ChangeNotifier {
         _ => throw Error(),
       };
 
-  int food = 0;
   int water = 0;
-  int money = 5000;
-
-  double foodPrice = 1;
   double waterPrice = 1;
+  int get additionalWaterMaximum => regions.map((e) => max(0, e.maximumWater - e.water)).sum;
 
+  int food = 0;
+  double foodPrice = 1;
+  int get additionalFoodMaximum => regions.map((e) => max(0, e.maximumFood - e.food)).sum;
+
+  int money = 5000;
   int generatedMoney = 100; // TODO Change based on events
   double moneyMultiplicationRate = 1.1;
 

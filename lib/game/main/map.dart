@@ -11,10 +11,10 @@ import 'package:geocibus/widgets/resource_indicator.dart';
 import 'package:provider/provider.dart';
 import 'package:svg_path_parser/svg_path_parser.dart';
 
-const _elevation = 3.0;
+const _elevation = 3.0; // TODO Increase elevation as part of the animation
 const _strokeWidth = 2.0;
 const _animationDuration = Duration(milliseconds: 100);
-const _animationCurve = Curves.ease;
+const _animationCurve = Curves.fastOutSlowIn;
 const _hoverAnimationPercentage = 1 / 3;
 const _inactiveDim = 0.2;
 const _pressedScale = 1.03;
@@ -153,7 +153,7 @@ class _AnimatedMapState extends State<_AnimatedMap> with TickerProviderStateMixi
     final theme = Theme.of(context);
 
     return CustomPaint(
-      painter: _MapPainter(
+      painter: _Painter(
         size: widget.size,
         map: widget.map,
         scales: widget.map.regions.map((key, value) => MapEntry(key, _getRegionScale(key))),
@@ -168,8 +168,8 @@ class _AnimatedMapState extends State<_AnimatedMap> with TickerProviderStateMixi
   }
 }
 
-class _MapPainter extends CustomPainter {
-  _MapPainter({
+class _Painter extends CustomPainter {
+  _Painter({
     required this.size,
     required this.map,
     required this.scales,
@@ -256,7 +256,7 @@ class _MapPainter extends CustomPainter {
       textPainter.paint(canvas, map.getRegionPathTextCenter(region, textPainter.height).translate(-textPainter.width / 2, -textPainter.height / 2));
 
   @override
-  bool shouldRepaint(_MapPainter oldDelegate) =>
+  bool shouldRepaint(_Painter oldDelegate) =>
       map != oldDelegate.map || scales != oldDelegate.scales || colors != oldDelegate.colors || outlineColor != oldDelegate.outlineColor || textStyle != oldDelegate.textStyle;
 
   @override

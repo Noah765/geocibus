@@ -12,6 +12,7 @@ class MainTop extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final game = context.watch<Game>();
+    final textTheme = Theme.of(context).textTheme;
 
     return Row(
       children: [
@@ -19,7 +20,7 @@ class MainTop extends StatelessWidget {
           child: Row(
             children: [
               IconButton(
-                icon: const Icon(FontAwesomeIcons.rightFromBracket, size: 24),
+                icon: const Icon(FontAwesomeIcons.rightFromBracket),
                 onPressed: () => Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => const MainMenu())),
                 tooltip: 'Zurück zum Hauptmenü',
               ),
@@ -27,7 +28,7 @@ class MainTop extends StatelessWidget {
               Card(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                  child: Text('${game.month} des Jahres ${game.round}/10'),
+                  child: Text('${game.month} des Jahres ${game.round}/10', style: textTheme.titleMedium),
                 ),
               ),
             ],
@@ -40,7 +41,7 @@ class MainTop extends StatelessWidget {
               Card(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                  child: Text('Score: ${game.score}'),
+                  child: Text('Score: ${game.score}', style: textTheme.titleMedium),
                 ),
               ),
               const Gap(8),

@@ -23,15 +23,14 @@ class ResourceIndicator extends StatelessWidget {
     return Column(
       children: [
         Text('Wasser', style: theme.textTheme.titleMedium),
-        // TODO Choose different colors
         CustomPaint(
           painter: _Painter(
             current: region.water,
             required: region.requiredWater,
             maximum: region.maximumWater,
             currentColor: theme.colorScheme.primary,
-            requiredColor: theme.colorScheme.secondaryContainer,
-            maximumColor: theme.colorScheme.surfaceContainer,
+            requiredColor: theme.colorScheme.secondary,
+            maximumColor: theme.colorScheme.tertiary,
             textStyle: resourceLabelTextStyle,
           ),
           size: Size(240, resourceLabelTextHeight * 2 + 12),
@@ -44,8 +43,8 @@ class ResourceIndicator extends StatelessWidget {
             required: region.requiredFood,
             maximum: region.maximumFood,
             currentColor: theme.colorScheme.primary,
-            requiredColor: theme.colorScheme.secondaryContainer,
-            maximumColor: theme.colorScheme.surfaceContainer,
+            requiredColor: theme.colorScheme.secondary,
+            maximumColor: theme.colorScheme.tertiary,
             textStyle: resourceLabelTextStyle,
           ),
           size: Size(240, resourceLabelTextHeight * 2 + 12),

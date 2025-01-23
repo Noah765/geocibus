@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:geocibus/models/event.dart';
 import 'package:geocibus/models/game.dart';
+import 'package:geocibus/widgets/icon_span.dart';
 
 class RoundBeginningOverlay extends StatelessWidget {
   const RoundBeginningOverlay(this.game, {super.key});
@@ -10,7 +11,7 @@ class RoundBeginningOverlay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
+    final theme = Theme.of(context);
 
     return Material(
       color: Colors.transparent,
@@ -22,8 +23,8 @@ class RoundBeginningOverlay extends StatelessWidget {
           children: [
             Card(
               child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                child: Text('Jahr ${game.round + 1}', style: textTheme.displaySmall!.copyWith()),
+                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+                child: Text('Jahr ${game.round + 1}', style: theme.textTheme.displayMedium),
               ),
             ),
             const Gap(16),
@@ -34,9 +35,9 @@ class RoundBeginningOverlay extends StatelessWidget {
                     padding: const EdgeInsets.all(16),
                     child: Row(
                       children: [
-                        Expanded(child: _EventColumn(text: 'Neue Events:', events: game.newEvents)),
+                        Expanded(child: _EventColumn(text: 'Neue Events', events: game.newEvents)),
                         const Gap(16),
-                        Expanded(child: _EventColumn(text: 'Abgelaufene Events:', events: game.finishedEvents)),
+                        Expanded(child: _EventColumn(text: 'Abgelaufene Events', events: game.finishedEvents)),
                       ],
                     ),
                   ),
@@ -49,6 +50,16 @@ class RoundBeginningOverlay extends StatelessWidget {
                 game.startRound();
                 Navigator.of(context).pop();
               },
+              style: ButtonStyle(
+                textStyle: WidgetStatePropertyAll(theme.textTheme.titleLarge),
+                shape: WidgetStatePropertyAll(
+                  RoundedRectangleBorder(
+                    side: BorderSide(color: theme.colorScheme.outline, width: 3),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                visualDensity: const VisualDensity(horizontal: 2, vertical: 2),
+              ),
               child: const Text('Jahr starten'),
             ),
           ],
@@ -70,18 +81,21 @@ class _EventColumn extends StatelessWidget {
 
     return Column(
       children: [
-        Text(text, style: textTheme.titleMedium),
+        Text(text, style: textTheme.titleLarge),
         const Gap(8),
         Expanded(
           child: Card(
-            child: Column(
-              children: [
-                for (final event in events) ...[
-                  _EventCard(event),
-                  if (event != events.last) const Gap(4),
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: ListView(
+                children: [
+                  for (final event in events) ...[
+                    _EventCard(event),
+                    if (event != events.last) const Gap(12 - 3),
+                  ],
+                  if (events.isEmpty) const Expanded(child: Center(child: Text('Leer...'))),
                 ],
-                if (events.isEmpty) const Text('Leer...'),
-              ],
+              ),
             ),
           ),
         ),
@@ -97,15 +111,21 @@ class _EventCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final titleStyle = Theme.of(context).textTheme.titleLarge!;
+
     return Card(
-      child: Row(
-        children: [
-          Icon(event.icon),
-          const Gap(4),
-          Text(event.name),
-          const Spacer(),
-          Text('(Lvl. ${event.level})'),
-        ],
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            Text.rich(
+              TextSpan(children: [IconSpan(icon: event.icon), TextSpan(text: ' ${event.name} (Lvl. ${event.level})')]),
+              style: titleStyle,
+            ),
+            const Gap(4),
+            Text(event.description, textAlign: TextAlign.center),
+          ],
+        ),
       ),
     );
   }

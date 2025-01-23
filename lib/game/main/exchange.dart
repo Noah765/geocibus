@@ -1,8 +1,11 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:gap/gap.dart';
 import 'package:geocibus/models/game.dart';
+import 'package:geocibus/widgets/bidirectional_slider.dart';
 import 'package:geocibus/widgets/popup.dart';
-import 'package:geocibus/widgets/resource_sliders.dart';
 import 'package:provider/provider.dart';
 
 class MainExchange extends StatelessWidget {
@@ -15,7 +18,11 @@ class MainExchange extends StatelessWidget {
     return Popup(
       direction: Direction.up,
       builder: (context, data) => _Popup(game),
-      child: IconButton(onPressed: () {}, icon: const Icon(FontAwesomeIcons.arrowRightArrowLeft)),
+      child: IconButton(
+        onPressed: () {},
+        style: const ButtonStyle(padding: WidgetStatePropertyAll(EdgeInsets.all(14))),
+        icon: const Icon(FontAwesomeIcons.arrowRightArrowLeft, size: 24),
+      ),
     );
   }
 }
@@ -30,52 +37,89 @@ class _Popup extends StatefulWidget {
 }
 
 class _PopupState extends State<_Popup> {
-  late final ResourceSlidersController _controller;
-  late final WidgetStatesController _finishButtonController;
+  var _water = 0.0;
+  var _food = 0.0;
 
-  @override
-  void initState() {
-    super.initState();
-    _controller = ResourceSlidersController();
-    _finishButtonController = WidgetStatesController();
-    _controller.water.addListener(() => _finishButtonController.update(WidgetState.disabled, !isTradePossible));
-    _controller.food.addListener(() => _finishButtonController.update(WidgetState.disabled, !isTradePossible));
-  }
+  int get _waterMax => (widget.game.money - _food.round() * widget.game.foodPrice) ~/ widget.game.waterPrice;
+  int get _foodMax => (widget.game.money - _water.round() * widget.game.waterPrice) ~/ widget.game.foodPrice;
+  int get _waterForFoodMax => (-(widget.game.additionalFoodMaximum * widget.game.foodPrice - widget.game.money) / widget.game.waterPrice).ceil();
+  int get _foodForWaterMax => (-(widget.game.additionalWaterMaximum * widget.game.waterPrice - widget.game.money) / widget.game.foodPrice).ceil();
 
-  @override
-  void dispose() {
-    _controller.dispose();
-    _finishButtonController.dispose();
-    super.dispose();
-  }
+  bool get _isExchangePossible => (_water.round() * widget.game.waterPrice).ceil() + (_food.round() * widget.game.foodPrice).ceil() <= widget.game.money;
 
-  bool get isTradePossible => (_controller.water.value * widget.game.waterPrice).round() + (_controller.food.value * widget.game.foodPrice).round() <= widget.game.money;
-
-  void _onFinish() {
-    widget.game.exchangeResources(_controller.water.value, _controller.food.value);
-    _controller.reset();
+  void _exchange() {
+    widget.game.exchangeResources(_water.round(), _food.round());
+    setState(() {
+      _water = 0;
+      _food = 0;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    final sliderHeight = MediaQuery.textScalerOf(context).scale(24) + 20;
+
+    const resourceDisplay = Column(
+      children: [
+        Card(child: Padding(padding: EdgeInsets.all(10), child: Icon(FontAwesomeIcons.glassWater, size: 24))),
+        Gap(8),
+        Card(child: Padding(padding: EdgeInsets.all(10), child: Icon(FontAwesomeIcons.bowlFood, size: 24))),
+      ],
+    );
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        const Text('Markt'),
-        ResourceSliders(
-          controller: _controller,
-          leftText: 'Verkaufen',
-          rightText: 'Kaufen',
-          waterLeftMax: widget.game.water,
-          waterRightMax: (widget.game.money / widget.game.waterPrice).round(),
-          foodLeftMax: widget.game.food,
-          foodRightMax: (widget.game.money / widget.game.foodPrice).round(),
+        Text('Markt', style: textTheme.headlineMedium),
+        const Gap(8),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            resourceDisplay,
+            const Gap(16),
+            Expanded(
+              child: Column(
+                children: [
+                  const Row(children: [Text('Verkaufen'), Spacer(), Text('Kaufen')]),
+                  SizedBox(
+                    height: sliderHeight,
+                    child: BidirectionalSlider(
+                      value: _water,
+                      secondaryTrackValueRight: _waterMax.toDouble(),
+                      onChanged: (value) => setState(() => _water = value),
+                      snapValues: [-widget.game.water.toDouble(), _waterForFoodMax.toDouble(), 0, _waterMax.toDouble(), widget.game.additionalWaterMaximum.toDouble()],
+                      leftMax: widget.game.water.toDouble(),
+                      rightMax: max(_waterMax.toDouble(), widget.game.additionalWaterMaximum.toDouble()),
+                    ),
+                  ),
+                  const Gap(8),
+                  SizedBox(
+                    height: sliderHeight,
+                    child: BidirectionalSlider(
+                      value: _food,
+                      secondaryTrackValueRight: _foodMax.toDouble(),
+                      onChanged: (value) => setState(() => _food = value),
+                      snapValues: [-widget.game.food.toDouble(), _foodForWaterMax.toDouble(), 0, _foodMax.toDouble(), widget.game.additionalFoodMaximum.toDouble()],
+                      leftMax: widget.game.food.toDouble(),
+                      rightMax: max(_foodMax.toDouble(), widget.game.additionalFoodMaximum.toDouble()),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Gap(16),
+            resourceDisplay,
+          ],
         ),
-        if (!isTradePossible) const Text('Handel nicht möglich'),
+        const Gap(16),
         ElevatedButton(
-          onPressed: _onFinish,
-          statesController: _finishButtonController,
-          child: const Text('Fertig'),
+          onPressed: _isExchangePossible ? _exchange : null,
+          style: ButtonStyle(
+            textStyle: WidgetStatePropertyAll(textTheme.titleMedium),
+            visualDensity: VisualDensity.standard,
+          ),
+          child: const Text('Handeln'),
         ),
       ],
     );
