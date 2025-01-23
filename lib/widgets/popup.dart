@@ -6,7 +6,7 @@ import 'package:flutter/rendering.dart';
 
 // TODO Update arrow position on window size change
 
-const _popupPadding = 8;
+const _padding = 8;
 
 enum Direction { up, right, down, left }
 
@@ -233,10 +233,10 @@ class _RenderOverlay extends RenderBox with RenderObjectWithChildMixin<RenderBox
   bool hitTestSelf(Offset position) {
     final childRect = (child!.parentData! as BoxParentData).offset & child!.size;
     return Rect.fromLTRB(
-      _direction == Direction.right ? _position.dx : (childRect.left == _popupPadding ? 0 : childRect.left),
-      _direction == Direction.down ? _position.dy : (childRect.top == _popupPadding ? 0 : childRect.top),
-      _direction == Direction.left ? _position.dx : (size.width - childRect.right == _popupPadding ? size.width : childRect.right),
-      _direction == Direction.up ? _position.dy : (size.height - childRect.bottom == _popupPadding ? size.height : childRect.bottom),
+      _direction == Direction.right ? _position.dx : (childRect.left == _padding ? 0 : childRect.left),
+      _direction == Direction.down ? _position.dy : (childRect.top == _padding ? 0 : childRect.top),
+      _direction == Direction.left ? _position.dx : (size.width - childRect.right == _padding ? size.width : childRect.right),
+      _direction == Direction.up ? _position.dy : (size.height - childRect.bottom == _padding ? size.height : childRect.bottom),
     ).contains(position);
   }
 
@@ -258,10 +258,10 @@ class _RenderOverlay extends RenderBox with RenderObjectWithChildMixin<RenderBox
   @override
   void performLayout() {
     final childConstraints = switch (_direction) {
-      Direction.up => BoxConstraints(maxWidth: size.width - 2 * _popupPadding, maxHeight: _position.dy - _arrowHeight - _popupPadding),
-      Direction.right => BoxConstraints(maxWidth: size.width - _position.dx - _arrowWidth - _popupPadding, maxHeight: size.height - 2 * _popupPadding),
-      Direction.down => BoxConstraints(maxWidth: size.width - 2 * _popupPadding, maxHeight: size.height - _position.dy - _arrowHeight - _popupPadding),
-      Direction.left => BoxConstraints(maxWidth: _position.dx - _arrowWidth - _popupPadding, maxHeight: size.height - 2 * _popupPadding),
+      Direction.up => BoxConstraints(maxWidth: size.width - 2 * _padding, maxHeight: _position.dy - _arrowHeight - _padding),
+      Direction.right => BoxConstraints(maxWidth: size.width - _position.dx - _arrowWidth - _padding, maxHeight: size.height - 2 * _padding),
+      Direction.down => BoxConstraints(maxWidth: size.width - 2 * _padding, maxHeight: size.height - _position.dy - _arrowHeight - _padding),
+      Direction.left => BoxConstraints(maxWidth: _position.dx - _arrowWidth - _padding, maxHeight: size.height - 2 * _padding),
     };
     child!.layout(childConstraints, parentUsesSize: true);
 
@@ -270,10 +270,10 @@ class _RenderOverlay extends RenderBox with RenderObjectWithChildMixin<RenderBox
     final childOffset = switch (_direction) {
       Direction.left || Direction.right => Offset(
           _direction == Direction.left ? _position.dx - _arrowWidth - childWidth : _position.dx + _arrowWidth,
-          _position.dy - childHeight / 2 + max(0, childHeight / 2 - _position.dy + _popupPadding) - max(0, _position.dy + childHeight / 2 - size.height + _popupPadding),
+          _position.dy - childHeight / 2 + max(0, childHeight / 2 - _position.dy + _padding) - max(0, _position.dy + childHeight / 2 - size.height + _padding),
         ),
       Direction.up || Direction.down => Offset(
-          _position.dx - childWidth / 2 + max(0, childWidth / 2 - _position.dx + _popupPadding) - max(0, _position.dx + childWidth / 2 - size.width + _popupPadding),
+          _position.dx - childWidth / 2 + max(0, childWidth / 2 - _position.dx + _padding) - max(0, _position.dx + childWidth / 2 - size.width + _padding),
           _direction == Direction.up ? _position.dy - _arrowHeight - childHeight : _position.dy + _arrowHeight,
         ),
     };
