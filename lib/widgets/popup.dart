@@ -4,6 +4,8 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
+// TODO Update arrow position on window size change
+
 const _popupPadding = 8;
 
 enum Direction { up, right, down, left }
@@ -186,10 +188,12 @@ class _Overlay extends SingleChildRenderObjectWidget {
   RenderObject createRenderObject(BuildContext context) => _RenderOverlay(direction: direction, position: position, arrowColor: arrowColor);
 
   @override
-  void updateRenderObject(BuildContext context, _RenderOverlay renderObject) => renderObject
-    ..direction = direction
-    ..position = position
-    ..arrowColor = arrowColor;
+  void updateRenderObject(BuildContext context, _RenderOverlay renderObject) {
+    renderObject
+      ..direction = direction
+      ..position = position
+      ..arrowColor = arrowColor;
+  }
 }
 
 class _RenderOverlay extends RenderBox with RenderObjectWithChildMixin<RenderBox> {
@@ -227,19 +231,23 @@ class _RenderOverlay extends RenderBox with RenderObjectWithChildMixin<RenderBox
 
   @override
   bool hitTestSelf(Offset position) {
-    final childOffset = (child!.parentData! as BoxParentData).offset;
-    final childSize = child!.size;
-    final rect = switch (_direction) {
-      Direction.up => Rect.fromLTWH(childOffset.dx, _position.dy - _arrowHeight, childSize.width, _arrowHeight),
-      Direction.right => Rect.fromLTWH(_position.dx, childOffset.dy, _arrowWidth, childSize.height),
-      Direction.down => Rect.fromLTWH(childOffset.dx, _position.dy, childSize.width, _arrowHeight),
-      Direction.left => Rect.fromLTWH(_position.dx - _arrowWidth, childOffset.dy, _arrowWidth, childSize.height),
-    };
-    return rect.contains(position);
+    final childRect = (child!.parentData! as BoxParentData).offset & child!.size;
+    return Rect.fromLTRB(
+      _direction == Direction.right ? _position.dx : (childRect.left == _popupPadding ? 0 : childRect.left),
+      _direction == Direction.down ? _position.dy : (childRect.top == _popupPadding ? 0 : childRect.top),
+      _direction == Direction.left ? _position.dx : (size.width - childRect.right == _popupPadding ? size.width : childRect.right),
+      _direction == Direction.up ? _position.dy : (size.height - childRect.bottom == _popupPadding ? size.height : childRect.bottom),
+    ).contains(position);
   }
 
   @override
-  bool hitTestChildren(BoxHitTestResult result, {required Offset position}) => child!.hitTest(result, position: position - (child!.parentData! as BoxParentData).offset);
+  bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
+    return result.addWithPaintOffset(
+      offset: (child!.parentData! as BoxParentData).offset,
+      position: position,
+      hitTest: (result, position) => child!.hitTest(result, position: position),
+    );
+  }
 
   @override
   bool get sizedByParent => true;
