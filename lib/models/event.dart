@@ -29,8 +29,12 @@ sealed class Event {
   void onFinished(Game game) {}
 }
 
-// TODO Define appropriate names and icons for every event
-// level
+extension on List<Region> {
+  String displayNames() {
+    if (length == 1) return first.name;
+    return '${take(length - 1).map((e) => e.name).join(', ')} und ${last.name}';
+  }
+}
 
 class PandemicEvent extends Event {
   PandemicEvent({required super.game, required super.level}) {
@@ -45,14 +49,8 @@ class PandemicEvent extends Event {
   @override
   IconData get icon => FontAwesomeIcons.virus;
   @override
-  String get description => '''
-Eine Krankheit verbreitet sich ${level == 1 ? 'in ${regions[0].name}.' : 'auf der Welt.\n${regions.length == 1 ? '${regions[0].name} ist' : '${regions.take(regions.length - 1).map((e) => e.name).join(', ')} und ${regions.last.name} sind'} bereits betroffen.'}
-Viele Grenzen machen dicht, weswegen der Handel ins Stocken
-gerät. Dazu kommt noch eine hohe Inflationsrate, die
-vielen Menschen durch hohe Lebensmittelpreise das Leben
-erschwert. Und das Schlimmste von allen ist: Es gibt
-kein Toilettenpapier mehr!''';
-
+  String get description =>
+      'Eine Krankheit verbreitet sich ${level == 1 ? 'in ${regions[0].name}.' : 'auf der Welt.\n${regions.length == 1 ? '${regions[0].name} ist' : '${regions.displayNames()} sind'} bereits betroffen.'} Viele Grenzen machen dicht, weswegen der Handel ins Stocken gerät. Dazu kommt noch eine hohe Inflationsrate, die vielen Menschen durch hohe Lebensmittelpreise das Leben erschwert. Und das Schlimmste von allen ist: Es gibt kein Toilettenpapier mehr!';
   final regions = <Region>[];
 
   @override
@@ -99,11 +97,8 @@ class InflationEvent extends Event {
   @override
   IconData get icon => FontAwesomeIcons.moneyBillTrendUp;
   @override
-  String get description => '''
-Aufgrund einer instabilen Wirtschaft steigt die
-Inflationsrate und damit auch die Lebensmittelpreise.
-Viele Teile der Bevölkerung muss darum bangen, ob sie
-noch genügend Nahrung auf ihren Teller bekommen.''';
+  String get description =>
+      'Aufgrund einer instabilen Wirtschaft steigt die Inflationsrate und damit auch die Lebensmittelpreise. Viele Teile der Bevölkerung muss darum bangen, ob sie noch genügend Nahrung auf ihren Teller bekommen.';
 
   @override
   void onInitialize(Game game) {
@@ -144,13 +139,8 @@ class WarEvent extends Event {
   @override
   IconData get icon => FontAwesomeIcons.personMilitaryRifle;
   @override
-  String get description => '''
-Ein Krieg wird zwischen ${regions.take(regions.length - 1).map((e) => e.name).join(', ')} und ${regions.last.name} ausgefochten. Doch
-das betrifft nicht nur die Kriegsparteien, dessen
-Populationen unter Nahrungs- und Wasserknappheit leiden.
-Die Inflation steigt. Und Handelembargos verhindern den
-reibungslosen Austausch von Gütern.''';
-
+  String get description =>
+      'Ein Krieg wird zwischen ${regions.displayNames()} ausgefochten. Doch das betrifft nicht nur die Kriegsparteien, dessen Populationen unter Nahrungs- und Wasserknappheit leiden. Die Inflation steigt. Und Handelembargos verhindern den reibungslosen Austausch von Gütern.';
   final regions = <Region>[];
 
   @override
@@ -186,14 +176,8 @@ class NatureEvent extends Event {
         _ => FontAwesomeIcons.sunPlantWilt,
       };
   @override
-  String get description => '''
-Naturkatastrophen sind zwar natürlich, aber durch den
-Klimawandel werden sie immer stärker und kommen viel
-häufiger vor. Mangelnde Hygiene, die durch zerstörte
-Infrastruktur hervorgerufen wird, steuern zur
-Verbreitung von Krankheiten bei und die Nahrungs- und
-Wasserversorung leidet. Der Wiederaufbau dieser
-Infrastruktur kostet viel Geld.''';
+  String get description =>
+      'Naturkatastrophen sind zwar natürlich, aber durch den Klimawandel werden sie immer stärker und kommen viel häufiger vor. Mangelnde Hygiene, die durch zerstörte Infrastruktur hervorgerufen wird, steuern zur Verbreitung von Krankheiten bei und die Nahrungs- und Wasserversorung leidet. Der Wiederaufbau dieser Infrastruktur kostet viel Geld.';
 
   @override
   void onInitialize(Game game) {
@@ -234,17 +218,9 @@ class PlantDiseaseEvent extends Event {
   IconData get icon => FontAwesomeIcons.plantWilt;
   @override
   String get description => switch (level) {
-        1 => '''
-Eine Pflanzenkrankheit geht herum. Es kommt zu
-Ernteausfällen, sodass bei vielen sowohl Essens- als
-auch Lebensgrundlage verloren geht. Durch das mangelnde
-Angebot aber hohe Nachfrage steigen die
-Lebensmittelpreise.''',
-        _ => '''
-Eine Viehkrankheit geht in Teilen der Welt herum.
-Reihenweise Tiere sterben. Man hat nicht mehr genug
-proteinreiche Nahrung, weswegen die Preise
-ansteigen.''',
+        1 =>
+          'Eine Pflanzenkrankheit geht herum. Es kommt zu Ernteausfällen, sodass bei vielen sowohl Essens- als auch Lebensgrundlage verloren geht. Durch das mangelnde Angebot aber hohe Nachfrage steigen die Lebensmittelpreise.',
+        _ => 'Eine Viehkrankheit geht in Teilen der Welt herum. Reihenweise Tiere sterben. Man hat nicht mehr genug proteinreiche Nahrung, weswegen die Preise ansteigen.',
       };
 
   @override
@@ -276,12 +252,8 @@ class WaterPollutionEvent extends Event {
   @override
   IconData get icon => FontAwesomeIcons.handHoldingDroplet;
   @override
-  String get description => '''
-Wasserverschmutzung hat viele Ursachen. Zerstörte
-Infrastruktur durch Krieg oder Naturkatastrophen oder
-auch ein Unfall, welcher dazu führt, dass Chemikalien in
-die Wasserversorgung gelangen. So wird das Wasser immer
-knapper.''';
+  String get description =>
+      'Wasserverschmutzung hat viele Ursachen. Zerstörte Infrastruktur durch Krieg oder Naturkatastrophen oder auch ein Unfall, welcher dazu führt, dass Chemikalien in die Wasserversorgung gelangen. So wird das Wasser immer knapper.';
 
   @override
   void onInitialize(Game game) {
