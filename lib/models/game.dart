@@ -110,9 +110,10 @@ class Game extends ChangeNotifier {
   }
 
   void exchangeResources(int water, int food) {
+    if (water == 0 && food == 0) return;
     this.water += water;
     this.food += food;
-    money -= (water * waterPrice).round() + (food * foodPrice).round();
+    money -= (water * waterPrice).ceil() + (food * foodPrice).ceil();
     notifyListeners();
   }
 
@@ -136,7 +137,7 @@ class Game extends ChangeNotifier {
     movesLeft = 6;
 
     money += generatedMoney;
-    money = (money * moneyMultiplicationRate).round();
+    money = (money * moneyMultiplicationRate).floor();
 
     final removedEvents = <Event>[];
     for (final event in activeEvents) {

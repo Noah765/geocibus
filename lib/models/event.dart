@@ -182,7 +182,7 @@ class NatureEvent extends Event {
   @override
   void onInitialize(Game game) {
     if (level > 1 && Random().nextBool()) game.scheduleEvent(PandemicEvent(game: game, level: level - 1));
-    game.money -= game.money * (0.1 * level).round();
+    game.money -= (game.money * 0.1 * level).ceil();
 
     if (level == 1) {
       for (final region in game.regions) {
@@ -232,7 +232,7 @@ class PlantDiseaseEvent extends Event {
 
   @override
   void apply(Game game) {
-    game.food -= game.food * (0.1 * level).round();
+    game.food -= (game.food * 0.1 * level).ceil();
     game.foodPrice *= 1.1 * level;
   }
 
@@ -264,7 +264,7 @@ class WaterPollutionEvent extends Event {
 
   @override
   void apply(Game game) {
-    game.water -= game.water * (0.1 * level).round();
+    game.water -= (game.water * 0.1 * level).ceil();
     game.waterPrice *= 1.1 * level;
   }
 

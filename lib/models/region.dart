@@ -34,13 +34,13 @@ sealed class Region {
   Set<Event> exportBlockingEvents = {};
   bool get isExportBlocked => exportBlockingEvents.isNotEmpty;
 
-  int get requiredWater => (population * waterPerPerson).round();
-  int get requiredFood => (population * _foodPerPerson).round();
-  int get maximumWater => (population * (1 + _maximumPopulationGrowthRate) * waterPerPerson).round();
-  int get maximumFood => (population * (1 + _maximumPopulationGrowthRate) * _foodPerPerson).round();
+  int get requiredWater => (population * waterPerPerson).ceil();
+  int get requiredFood => (population * _foodPerPerson).ceil();
+  int get maximumWater => (population * (1 + _maximumPopulationGrowthRate) * waterPerPerson).ceil();
+  int get maximumFood => (population * (1 + _maximumPopulationGrowthRate) * _foodPerPerson).ceil();
 
-  int get generatedWater => (waterGenerationRate * population).round();
-  int get generatedFood => (log(population / startPopulation + 1) * startPopulation * foodGenerationRate).round();
+  int get generatedWater => (waterGenerationRate * population).floor();
+  int get generatedFood => (log(population / startPopulation + 1) * startPopulation * foodGenerationRate).floor();
 
   ResourceState get waterState => switch (water / requiredWater) {
         >= 1.1 => ResourceState.good,
@@ -59,7 +59,7 @@ sealed class Region {
   ResourceTrend foodTrend = ResourceTrend.stable;
 
   void finishRound() {
-    population = (min(population * (1 + _maximumPopulationGrowthRate), min(food / _foodPerPerson, water / waterPerPerson)) * (1 + defaultPopulationGrowthRate)).round();
+    population = (min(population * (1 + _maximumPopulationGrowthRate), min(food / _foodPerPerson, water / waterPerPerson)) * (1 + defaultPopulationGrowthRate)).floor();
 
     final newWater = water - requiredWater + generatedWater;
     final newFood = food - requiredFood + generatedFood;
