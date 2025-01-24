@@ -11,14 +11,6 @@ import 'package:geocibus/widgets/resource_indicator.dart';
 import 'package:provider/provider.dart';
 import 'package:svg_path_parser/svg_path_parser.dart';
 
-const _elevation = 3.0; // TODO Increase elevation as part of the animation
-const _strokeWidth = 2.0;
-const _animationDuration = Duration(milliseconds: 100);
-const _animationCurve = Curves.fastOutSlowIn;
-const _hoverAnimationPercentage = 1 / 3;
-const _inactiveDim = 0.2;
-const _pressedScale = 1.03;
-
 class MainMap extends StatefulWidget {
   const MainMap({super.key});
 
@@ -53,7 +45,7 @@ class _MainMapState extends State<MainMap> {
 
   @override
   Widget build(BuildContext context) {
-    if (!_finishedInitializing) return const SizedBox(); // TODO Maybe show loading indicator? Should be almost instant though
+    if (!_finishedInitializing) return const SizedBox();
 
     final game = context.watch<Game>();
     final theme = Theme.of(context);
@@ -106,7 +98,7 @@ class _AnimatedMapState extends State<_AnimatedMap> with TickerProviderStateMixi
   @override
   void initState() {
     super.initState();
-    _controllers = widget.map.regions.map((key, value) => MapEntry(key, AnimationController(duration: _animationDuration, vsync: this)..addListener(() => setState(() {}))));
+    _controllers = widget.map.regions.map((key, value) => MapEntry(key, AnimationController(duration: const Duration(milliseconds: 100), vsync: this)..addListener(() => setState(() {}))));
     widget.popupController.addListener(_handlePopupControllerChanged);
   }
 
@@ -126,27 +118,29 @@ class _AnimatedMapState extends State<_AnimatedMap> with TickerProviderStateMixi
     final pressed = widget.popupController.pressed;
 
     if (hovered != _previousHoveredRegion) {
-      if (hovered != null && hovered != pressed) _controllers[hovered]!.animateTo(_hoverAnimationPercentage, curve: _animationCurve);
-      if (_previousHoveredRegion != null && _previousHoveredRegion != pressed) _controllers[_previousHoveredRegion]!.animateTo(0, curve: _animationCurve);
+      if (hovered != null && hovered != pressed) _controllers[hovered]!.animateTo(1 / 3, curve: Curves.fastOutSlowIn);
+      if (_previousHoveredRegion != null && _previousHoveredRegion != pressed) _controllers[_previousHoveredRegion]!.animateTo(0, curve: Curves.fastOutSlowIn);
     }
     if (pressed != _previousPressedRegion) {
-      if (pressed != null) _controllers[pressed]!.animateTo(1, curve: _animationCurve);
-      if (_previousPressedRegion != null) _controllers[_previousPressedRegion]!.animateTo(_previousPressedRegion == hovered ? _hoverAnimationPercentage : 0, curve: _animationCurve);
+      if (pressed != null) _controllers[pressed]!.animateTo(1, curve: Curves.fastOutSlowIn);
+      if (_previousPressedRegion != null) _controllers[_previousPressedRegion]!.animateTo(_previousPressedRegion == hovered ? 1 / 3 : 0, curve: Curves.fastOutSlowIn);
     }
 
     _previousHoveredRegion = hovered;
     _previousPressedRegion = pressed;
   }
 
+  double _getRegionScale(Region region) => 1 + _controllers[region]!.value * 0.03;
+
+  double _getRegionElevation(Region region) => region.population == 0 ? 0 : 3 + _controllers[region]!.value * 3;
+
   Color _getRegionColor(Region region) {
     final surface = Theme.of(context).colorScheme.surface;
     if (region.population == 0) return surface;
     final missingResourcesPercentage = min(min(region.food / region.maximumFood, region.water / region.maximumWater), 1.0);
     final color = Color.lerp(Colors.red, Colors.green, missingResourcesPercentage)!;
-    return Color.lerp(color, surface, _inactiveDim * (1 - _controllers[region]!.value))!;
+    return Color.lerp(color, surface, 0.2 * (1 - _controllers[region]!.value))!;
   }
-
-  double _getRegionScale(Region region) => 1 + _controllers[region]!.value * (_pressedScale - 1);
 
   @override
   Widget build(BuildContext context) {
@@ -157,8 +151,10 @@ class _AnimatedMapState extends State<_AnimatedMap> with TickerProviderStateMixi
         size: widget.size,
         map: widget.map,
         scales: widget.map.regions.map((key, value) => MapEntry(key, _getRegionScale(key))),
+        elevations: widget.map.regions.map((key, value) => MapEntry(key, _getRegionElevation(key))),
         colors: widget.map.regions.map((key, value) => MapEntry(key, _getRegionColor(key))),
         outlineColor: theme.colorScheme.outline,
+        shadowColor: theme.colorScheme.shadow,
         textStyle: theme.textTheme.titleLarge!.copyWith(
           fontSize: MediaQuery.textScalerOf(context).scale(theme.textTheme.titleLarge!.fontSize!),
           fontWeight: MediaQuery.boldTextOf(context) ? FontWeight.bold : null,
@@ -173,16 +169,20 @@ class _Painter extends CustomPainter {
     required this.size,
     required this.map,
     required this.scales,
+    required this.elevations,
     required this.colors,
     required this.outlineColor,
+    required this.shadowColor,
     required this.textStyle,
   });
 
   final Size size;
   final _Map map;
   final Map<Region, double> scales;
+  final Map<Region, double> elevations;
   final Map<Region, Color> colors;
   final Color outlineColor;
+  final Color shadowColor;
   final TextStyle textStyle;
 
   @override
@@ -192,7 +192,6 @@ class _Painter extends CustomPainter {
     final inactiveRegions = map.regions.keys.where((e) => scales[e] == 1).toList();
     final activeRegions = map.regions.keys.where((e) => scales[e] != 1).toList()..sort((a, b) => scales[a]!.compareTo(scales[b]!));
 
-    // TODO Benchmark the performance of shadows
     for (final region in inactiveRegions) {
       _paintShadow(canvas, region);
     }
@@ -231,13 +230,13 @@ class _Painter extends CustomPainter {
 
   void _paintShadow(Canvas canvas, Region region) {
     for (final path in map.regions[region]!.paths) {
-      canvas.drawShadow(path, outlineColor, _elevation, false);
+      canvas.drawShadow(path, shadowColor, elevations[region]!, false);
     }
   }
 
   late final strokePaint = Paint()
     ..style = PaintingStyle.stroke
-    ..strokeWidth = _strokeWidth
+    ..strokeWidth = 2
     ..color = outlineColor;
   void _paintRegion(Canvas canvas, Region region) {
     final fillPaint = Paint()..color = colors[region]!;
