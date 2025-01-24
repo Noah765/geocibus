@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
-const _textFontSizeToIconFontSize = 0.682;
-const _removedToPixels = 0.0201;
-const _removedBottomPixels = 0.0223;
+const _textFontSizeToIconFontSize = 0.701;
+const _textFontSizeToBaseline = 0.721;
+const _removedTopPixels = 0.021;
+const _removedBottomPixels = 0.023;
 const _debugDrawHelperLines = false;
 
 class IconSpan extends WidgetSpan {
   IconSpan({required IconData icon, int removedTop = 1, int removedBottom = 1})
       : super(
-          child: _Icon(icon: icon, removedTop: removedTop * _removedToPixels, removedBottom: removedBottom * _removedBottomPixels),
-          alignment: PlaceholderAlignment.aboveBaseline,
+          child: _Icon(icon: icon, removedTop: removedTop * _removedTopPixels, removedBottom: removedBottom * _removedBottomPixels),
+          alignment: PlaceholderAlignment.baseline,
           baseline: TextBaseline.alphabetic,
         );
 }
@@ -65,14 +66,6 @@ class _RenderIcon extends RenderBox {
     markNeedsLayout();
   }
 
-  final TextPainter _painter;
-
-  @override
-  void dispose() {
-    _painter.dispose();
-    super.dispose();
-  }
-
   RenderObject _visitParents(RenderObject parent, bool Function(RenderObject parent) visitor) {
     if (visitor(parent)) return parent;
     return _visitParents(parent.parent!, visitor);
@@ -90,12 +83,26 @@ class _RenderIcon extends RenderBox {
     return null;
   }
 
-  @override
-  void performLayout() {
+  TextStyle _getTextStyle() {
     final span = (_visitParents(this, (parent) => parent.parentData is TextParentData).parentData! as TextParentData).span! as IconSpan;
     final renderParagraph = _visitParents(parent!, (parent) => parent is RenderParagraph) as RenderParagraph;
-    final style = _getTextStyles(renderParagraph.text, span)!.reversed.reduce((value, e) => value.merge(e));
+    return _getTextStyles(renderParagraph.text, span)!.reversed.reduce((value, e) => value.merge(e));
+  }
 
+  final TextPainter _painter;
+
+  @override
+  void dispose() {
+    _painter.dispose();
+    super.dispose();
+  }
+
+  @override
+  double? computeDistanceToActualBaseline(TextBaseline baseline) => _getTextStyle().fontSize! * _textFontSizeToBaseline;
+
+  @override
+  void performLayout() {
+    final style = _getTextStyle();
     _painter.text = TextSpan(
       text: String.fromCharCode(_icon.codePoint),
       style: TextStyle(
