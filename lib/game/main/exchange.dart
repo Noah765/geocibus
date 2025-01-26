@@ -4,7 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gap/gap.dart';
 import 'package:geocibus/models/game.dart';
+import 'package:geocibus/theme.dart';
 import 'package:geocibus/widgets/bidirectional_slider.dart';
+import 'package:geocibus/widgets/button.dart';
+import 'package:geocibus/widgets/card.dart';
 import 'package:geocibus/widgets/popup.dart';
 import 'package:provider/provider.dart';
 
@@ -15,13 +18,16 @@ class MainExchange extends StatelessWidget {
   Widget build(BuildContext context) {
     final game = context.read<Game>();
 
+    final resourcesStyle = Theme.of(context).textTheme.headlineMedium!;
+    final height = (MediaQuery.textScalerOf(context).scale(resourcesStyle.fontSize!) * resourcesStyle.height!).roundToDouble() + getTextPadding(context, resourcesStyle, 3).vertical;
+
     return Popup(
       direction: Direction.up,
       builder: (context, data) => _Popup(game),
-      child: IconButton(
+      child: Button.icon(
+        icon: FontAwesomeIcons.arrowRightArrowLeft,
+        size: (height + 14) / 3,
         onPressed: () {},
-        style: const ButtonStyle(padding: WidgetStatePropertyAll(EdgeInsets.all(14))),
-        icon: const Icon(FontAwesomeIcons.arrowRightArrowLeft, size: 24),
       ),
     );
   }
@@ -66,13 +72,14 @@ class _PopupState extends State<_Popup> {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
-    final sliderHeight = MediaQuery.textScalerOf(context).scale(24) + 20;
+    final iconSize = MediaQuery.textScalerOf(context).scale(20);
+    final sliderHeight = iconSize + getIconPadding(context, iconSize, 3).vertical;
 
     const resourceDisplay = Column(
       children: [
-        Card(child: Padding(padding: EdgeInsets.all(10), child: Icon(FontAwesomeIcons.glassWater, size: 24))),
+        IconCard(icon: FontAwesomeIcons.glassWater, size: 20),
         Gap(8),
-        Card(child: Padding(padding: EdgeInsets.all(10), child: Icon(FontAwesomeIcons.bowlFood, size: 24))),
+        IconCard(icon: FontAwesomeIcons.bowlFood, size: 20),
       ],
     );
 
@@ -121,13 +128,10 @@ class _PopupState extends State<_Popup> {
           ],
         ),
         const Gap(16),
-        ElevatedButton(
+        Button(
+          text: 'Handeln',
+          style: textTheme.titleMedium,
           onPressed: _isExchangePossible ? _exchange : null,
-          style: ButtonStyle(
-            textStyle: WidgetStatePropertyAll(textTheme.titleMedium),
-            visualDensity: VisualDensity.standard,
-          ),
-          child: const Text('Handeln'),
         ),
       ],
     );

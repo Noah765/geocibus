@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gap/gap.dart';
 import 'package:geocibus/game/finish/page.dart';
+import 'package:geocibus/game/main/end_year.dart';
 import 'package:geocibus/game/main/events.dart';
 import 'package:geocibus/game/main/exchange.dart';
 import 'package:geocibus/game/main/map.dart';
@@ -54,13 +54,9 @@ class _MainPageState extends State<MainPage> {
   Widget build(BuildContext context) {
     return ChangeNotifierProvider.value(
       value: _game,
-      child: Scaffold(
-        floatingActionButton: FloatingActionButton(
-          tooltip: 'Jahr beenden',
-          onPressed: _game.finishRound,
-          child: const Icon(FontAwesomeIcons.forward),
-        ),
-        body: const Padding(
+      child: const Scaffold(
+        floatingActionButton: MainEndYear(),
+        body: Padding(
           padding: EdgeInsets.all(8),
           child: Column(
             children: [

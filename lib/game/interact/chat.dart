@@ -5,6 +5,8 @@ import 'package:gap/gap.dart';
 import 'package:geocibus/models/event.dart';
 import 'package:geocibus/models/game.dart';
 import 'package:geocibus/models/region.dart';
+import 'package:geocibus/widgets/button.dart';
+import 'package:geocibus/widgets/card.dart';
 import 'package:provider/provider.dart';
 
 // TODO Other message for starting a new interaction
@@ -94,7 +96,7 @@ class _ChatState extends State<Chat> {
             ],
           )
         else if (lastInteraction.isRequestSuccessful == false)
-          ElevatedButton(onPressed: () => _resetInteraction(game, region), child: const Text('Zurück'))
+          Button(text: 'Zurück', onPressed: () => _resetInteraction(game, region))
         else if (lastInteraction.isRequestSuccessful == true)
           Row(
             children: [
@@ -112,10 +114,10 @@ class _ChatState extends State<Chat> {
               ),
               Text('(${lastInteraction.requestValue})'),
               const Gap(8),
-              ElevatedButton(onPressed: () => _distribute(game, region, lastInteraction), child: const Text('Senden')),
+              Button(text: 'Senden', onPressed: () => _distribute(game, region, lastInteraction)),
               const Gap(8),
               // TODO Restart chat instead of exiting (restart instead of exiting when finishing?, only when resourcestate changes?)
-              ElevatedButton(onPressed: () => _resetInteraction(game, region), child: const Text('Zurück')),
+              Button(text: 'Zurück', onPressed: () => _resetInteraction(game, region)),
             ],
           ),
       ],
@@ -276,17 +278,7 @@ class _RegionMessage extends StatelessWidget {
   final String text;
 
   @override
-  Widget build(BuildContext context) {
-    return Align(
-      alignment: Alignment.centerLeft,
-      child: Card(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-          child: Text(text),
-        ),
-      ),
-    );
-  }
+  Widget build(BuildContext context) => Align(alignment: Alignment.centerLeft, child: TextCard(text: text));
 }
 
 class _YourMessage extends StatelessWidget {
@@ -295,15 +287,5 @@ class _YourMessage extends StatelessWidget {
   final String text;
 
   @override
-  Widget build(BuildContext context) {
-    return Align(
-      alignment: Alignment.centerRight,
-      child: Card(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-          child: Text(text),
-        ),
-      ),
-    );
-  }
+  Widget build(BuildContext context) => Align(alignment: Alignment.centerRight, child: TextCard(text: text));
 }

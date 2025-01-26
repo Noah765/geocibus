@@ -18,7 +18,7 @@ class ResourceIndicator extends StatelessWidget {
       fontSize: MediaQuery.textScalerOf(context).scale(theme.textTheme.labelMedium!.fontSize!),
       fontWeight: MediaQuery.boldTextOf(context) ? FontWeight.bold : null,
     );
-    final resourceLabelTextHeight = resourceLabelTextStyle.fontSize! * resourceLabelTextStyle.height!;
+    final resourceLabelTextHeight = (resourceLabelTextStyle.fontSize! * resourceLabelTextStyle.height!).roundToDouble();
 
     return Column(
       children: [

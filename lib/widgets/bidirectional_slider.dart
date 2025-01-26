@@ -83,11 +83,11 @@ class _BidirectionalSliderState extends State<BidirectionalSlider> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final activeColor = widget.value <= 0 ? colorScheme.onPrimary : colorScheme.onSecondary;
+    final colors = Theme.of(context).colorScheme;
+    final activeColor = widget.value <= 0 ? colors.onPrimary : colors.onSecondary;
     final thumbColor = switch ((_active, _thumbHover)) {
-      (true, _) => Color.alphaBlend(colorScheme.onSurface.withOpacity(0.1), activeColor),
-      (false, true) => Color.alphaBlend(colorScheme.onSurface.withOpacity(0.08), activeColor),
+      (true, _) => Color.alphaBlend(colors.onSurface.withOpacity(0.1), activeColor),
+      (false, true) => Color.alphaBlend(colors.onSurface.withOpacity(0.08), activeColor),
       (false, false) => activeColor,
     };
 
@@ -114,7 +114,7 @@ class _BidirectionalSliderState extends State<BidirectionalSlider> {
                       height: _trackHeight,
                       child: DecoratedBox(
                         decoration: BoxDecoration(
-                          color: widget.leftMax == 0 ? colorScheme.onSurface.withOpacity(0.12) : colorScheme.primary,
+                          color: widget.leftMax == 0 ? colors.onSurface.withOpacity(0.12) : colors.primary,
                           borderRadius: const BorderRadius.horizontal(left: Radius.circular(_trackHeight / 2)),
                         ),
                       ),
@@ -127,7 +127,7 @@ class _BidirectionalSliderState extends State<BidirectionalSlider> {
                         height: _trackHeight,
                         child: DecoratedBox(
                           decoration: BoxDecoration(
-                            color: colorScheme.onPrimary.withOpacity(0.1),
+                            color: colors.onPrimary.withOpacity(0.1),
                             borderRadius: const BorderRadius.horizontal(left: Radius.circular(_trackHeight / 2)),
                           ),
                         ),
@@ -139,7 +139,7 @@ class _BidirectionalSliderState extends State<BidirectionalSlider> {
                       height: _trackHeight,
                       child: DecoratedBox(
                         decoration: BoxDecoration(
-                          color: widget.rightMax == 0 ? colorScheme.onSurface.withOpacity(0.12) : colorScheme.secondary,
+                          color: widget.rightMax == 0 ? colors.onSurface.withOpacity(0.12) : colors.secondary,
                           borderRadius: const BorderRadius.horizontal(right: Radius.circular(_trackHeight / 2)),
                         ),
                       ),
@@ -152,7 +152,7 @@ class _BidirectionalSliderState extends State<BidirectionalSlider> {
                         height: _trackHeight,
                         child: DecoratedBox(
                           decoration: BoxDecoration(
-                            color: colorScheme.onSurface.withOpacity(0.1),
+                            color: colors.onSurface.withOpacity(0.1),
                             borderRadius: const BorderRadius.horizontal(right: Radius.circular(_trackHeight / 2)),
                           ),
                         ),

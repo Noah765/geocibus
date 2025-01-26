@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:gap/gap.dart';
 import 'package:geocibus/models/game.dart';
-import 'package:geocibus/widgets/settings_button.dart';
+import 'package:geocibus/widgets/button.dart';
+import 'package:geocibus/widgets/card.dart';
 import 'package:provider/provider.dart';
 
 class InteractTop extends StatelessWidget {
@@ -13,19 +15,15 @@ class InteractTop extends StatelessWidget {
 
     return Row(
       children: [
-        IconButton(
-          icon: const Icon(FontAwesomeIcons.arrowLeft),
-          onPressed: Navigator.of(context).pop,
+        Button.icon(
+          icon: FontAwesomeIcons.arrowLeft,
           tooltip: 'Zurück zur Karte',
+          onPressed: Navigator.of(context).pop,
         ),
-        Card(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-            child: Text('${game.month} des Jahres ${game.round}/10'),
-          ),
-        ),
+        const Gap(8),
+        TextCard(text: '${game.month} des Jahres ${game.round}/10', style: Theme.of(context).textTheme.titleMedium),
         const Spacer(),
-        const SettingsButton(),
+        Button.icon(icon: FontAwesomeIcons.gear, tooltip: 'Einstellungen', onPressed: () {}),
       ],
     );
   }

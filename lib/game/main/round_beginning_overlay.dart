@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:geocibus/models/event.dart';
 import 'package:geocibus/models/game.dart';
+import 'package:geocibus/widgets/button.dart';
+import 'package:geocibus/widgets/card.dart';
 import 'package:geocibus/widgets/icon_span.dart';
 
 class RoundBeginningOverlay extends StatelessWidget {
@@ -21,46 +23,29 @@ class RoundBeginningOverlay extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
-                child: Text('Jahr ${game.round + 1}', style: theme.textTheme.displayMedium),
-              ),
-            ),
+            TextCard(text: 'Jahr ${game.round + 1}', style: theme.textTheme.displayMedium),
             const Gap(16),
             if (game.newEvents.isNotEmpty || game.finishedEvents.isNotEmpty) ...[
               Expanded(
-                child: Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Row(
-                      children: [
-                        Expanded(child: _EventColumn(text: 'Neue Events', events: game.newEvents)),
-                        const Gap(16),
-                        Expanded(child: _EventColumn(text: 'Abgelaufene Events', events: game.finishedEvents)),
-                      ],
-                    ),
+                child: ContainerCard(
+                  child: Row(
+                    children: [
+                      Expanded(child: _EventColumn(text: 'Neue Events', emptyText: 'Es sind keine neuen Events dazugekommen', events: game.newEvents)),
+                      const Gap(24),
+                      Expanded(child: _EventColumn(text: 'Abgelaufene Events', emptyText: 'Es sind keine Events abgelaufen', events: game.finishedEvents)),
+                    ],
                   ),
                 ),
               ),
               const Gap(16),
             ],
-            ElevatedButton(
+            Button(
+              text: 'Jahr starten',
+              style: theme.textTheme.headlineMedium,
               onPressed: () {
                 game.startRound();
                 Navigator.of(context).pop();
               },
-              style: ButtonStyle(
-                textStyle: WidgetStatePropertyAll(theme.textTheme.titleLarge),
-                shape: WidgetStatePropertyAll(
-                  RoundedRectangleBorder(
-                    side: BorderSide(color: theme.colorScheme.outline, width: 3),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                visualDensity: const VisualDensity(horizontal: 2, vertical: 2),
-              ),
-              child: const Text('Jahr starten'),
             ),
           ],
         ),
@@ -70,9 +55,10 @@ class RoundBeginningOverlay extends StatelessWidget {
 }
 
 class _EventColumn extends StatelessWidget {
-  const _EventColumn({required this.text, required this.events});
+  const _EventColumn({required this.text, required this.emptyText, required this.events});
 
   final String text;
+  final String emptyText;
   final List<Event> events;
 
   @override
@@ -82,21 +68,19 @@ class _EventColumn extends StatelessWidget {
     return Column(
       children: [
         Text(text, style: textTheme.titleLarge),
-        const Gap(8),
+        const Gap(12),
         Expanded(
-          child: Card(
-            child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: ListView(
-                children: [
-                  for (final event in events) ...[
-                    _EventCard(event),
-                    if (event != events.last) const Gap(12 - 3),
-                  ],
-                  if (events.isEmpty) const Expanded(child: Center(child: Text('Leer...'))),
-                ],
-              ),
-            ),
+          child: ContainerCard(
+            child: events.isEmpty
+                ? Center(child: Text(emptyText))
+                : ListView(
+                    children: [
+                      for (final event in events) ...[
+                        _EventCard(event),
+                        if (event != events.last) const Gap(12 - 3),
+                      ],
+                    ],
+                  ),
           ),
         ),
       ],
@@ -113,19 +97,16 @@ class _EventCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final titleStyle = Theme.of(context).textTheme.titleLarge!;
 
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            Text.rich(
-              TextSpan(children: [IconSpan(icon: event.icon), TextSpan(text: ' ${event.name} (Lvl. ${event.level})')]),
-              style: titleStyle,
-            ),
-            const Gap(4),
-            Text(event.description, textAlign: TextAlign.center),
-          ],
-        ),
+    return ContainerCard(
+      child: Column(
+        children: [
+          Text.rich(
+            TextSpan(children: [IconSpan(icon: event.icon), TextSpan(text: ' ${event.name} (Lvl. ${event.level})')]),
+            style: titleStyle,
+          ),
+          const Gap(4),
+          Text(event.description, textAlign: TextAlign.center),
+        ],
       ),
     );
   }

@@ -6,6 +6,7 @@ import 'package:gap/gap.dart';
 import 'package:geocibus/game/interact/page.dart';
 import 'package:geocibus/models/game.dart';
 import 'package:geocibus/models/region.dart';
+import 'package:geocibus/widgets/button.dart';
 import 'package:geocibus/widgets/popup.dart';
 import 'package:geocibus/widgets/resource_indicator.dart';
 import 'package:provider/provider.dart';
@@ -67,9 +68,9 @@ class _MainMapState extends State<MainMap> {
                 const Gap(16),
                 ResourceIndicator(region),
                 const Gap(32),
-                ElevatedButton(
+                Button(
+                  text: 'Kontaktieren',
                   onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (context) => InteractPage(game: game, region: region))),
-                  child: const Text('Kontaktieren'),
                 ),
               ],
             ),

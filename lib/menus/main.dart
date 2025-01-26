@@ -2,6 +2,8 @@ import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:geocibus/game/main/page.dart';
+import 'package:geocibus/widgets/button.dart';
+import 'package:geocibus/widgets/icon_span.dart';
 
 class MainMenu extends StatelessWidget {
   const MainMenu({super.key});
@@ -25,11 +27,7 @@ class MainMenu extends StatelessWidget {
                 style: theme.textTheme.displayLarge,
                 children: [
                   const TextSpan(text: 'GE'),
-                  WidgetSpan(
-                    // TODO Correctly size and align the Icon
-                    alignment: PlaceholderAlignment.middle,
-                    child: Icon(FontAwesomeIcons.earthEurope, size: theme.textTheme.displayLarge!.fontSize),
-                  ),
+                  IconSpan(icon: FontAwesomeIcons.earthEurope),
                   const TextSpan(text: 'CIBUS'),
                 ],
               ),
@@ -39,18 +37,9 @@ class MainMenu extends StatelessWidget {
               alignment: Alignment.centerLeft,
               child: Column(
                 children: [
-                  ElevatedButton(
-                    onPressed: () => _start(context),
-                    child: const Text('START'),
-                  ),
-                  ElevatedButton(
-                    onPressed: _options,
-                    child: const Text('OPTIONEN'),
-                  ),
-                  ElevatedButton(
-                    onPressed: _leave,
-                    child: const Text('SPIEL VERLASSEN'),
-                  ),
+                  Button(text: 'Start', onPressed: () => _start(context)),
+                  Button(text: 'Optionen', onPressed: _options),
+                  Button(text: 'Spiel verlassen', onPressed: _leave),
                 ],
               ),
             ),

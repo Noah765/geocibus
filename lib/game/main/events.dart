@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:geocibus/models/event.dart';
 import 'package:geocibus/models/game.dart';
+import 'package:geocibus/widgets/button.dart';
 import 'package:geocibus/widgets/icon_span.dart';
 import 'package:geocibus/widgets/popup.dart';
 import 'package:provider/provider.dart';
@@ -14,7 +15,7 @@ class MainEvents extends StatelessWidget {
     final events = context.watch<Game>().activeEvents;
 
     return SizedBox(
-      width: IconButtonTheme.of(context).style!.padding!.resolve({})!.horizontal + MediaQuery.textScalerOf(context).scale(IconTheme.of(context).size!),
+      width: Button.getDefaultIconButtonWidth(context),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -53,7 +54,7 @@ class _Event extends StatelessWidget {
           ],
         ),
       ),
-      child: IconButton(onPressed: () {}, icon: Icon(event.icon)),
+      child: Button.icon(icon: event.icon, onPressed: () {}),
     );
   }
 }

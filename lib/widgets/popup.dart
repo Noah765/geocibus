@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:geocibus/widgets/card.dart';
 
 const _padding = 8;
 
@@ -117,6 +118,8 @@ class _PopupState<T extends Object> extends State<Popup<T>> {
       controller: _overlayController,
       overlayChildBuilder: (context) => LayoutBuilder(
         builder: (context, constraints) {
+          final colors = Theme.of(context).colorScheme;
+
           final data = _controller.pressed ?? _controller.hovered!;
           final globalPosition = (buildContext.findRenderObject()! as RenderBox).localToGlobal(widget.getPosition == null ? _getFallbackPosition() : widget.getPosition!(data));
           final direction = widget.getDirection == null ? widget.direction! : widget.getDirection!(data);
@@ -130,13 +133,8 @@ class _PopupState<T extends Object> extends State<Popup<T>> {
               child: _Overlay(
                 direction: direction,
                 position: globalPosition,
-                arrowColor: Theme.of(context).colorScheme.outline,
-                child: Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: widget.builder(context, data),
-                  ),
-                ),
+                arrowColor: colors.outline,
+                child: ContainerCard(child: widget.builder(context, data)),
               ),
             ),
           );

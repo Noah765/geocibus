@@ -3,7 +3,8 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gap/gap.dart';
 import 'package:geocibus/menus/main.dart';
 import 'package:geocibus/models/game.dart';
-import 'package:geocibus/widgets/settings_button.dart';
+import 'package:geocibus/widgets/button.dart';
+import 'package:geocibus/widgets/card.dart';
 import 'package:provider/provider.dart';
 
 class MainTop extends StatelessWidget {
@@ -12,25 +13,20 @@ class MainTop extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final game = context.watch<Game>();
-    final textTheme = Theme.of(context).textTheme;
+    final textStyle = Theme.of(context).textTheme.titleMedium!;
 
     return Row(
       children: [
         Expanded(
           child: Row(
             children: [
-              IconButton(
-                icon: const Icon(FontAwesomeIcons.rightFromBracket),
-                onPressed: () => Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => const MainMenu())),
+              Button.icon(
+                icon: FontAwesomeIcons.rightFromBracket,
                 tooltip: 'Zurück zum Hauptmenü',
+                onPressed: () => Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => const MainMenu())),
               ),
               const Gap(8),
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                  child: Text('${game.month} des Jahres ${game.round}/10', style: textTheme.titleMedium),
-                ),
-              ),
+              TextCard(text: '${game.month} des Jahres ${game.round}/10', style: textStyle),
             ],
           ),
         ),
@@ -38,14 +34,9 @@ class MainTop extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                  child: Text('Score: ${game.score}', style: textTheme.titleMedium),
-                ),
-              ),
+              TextCard(text: 'Score: ${game.score}', style: textStyle),
               const Gap(8),
-              const SettingsButton(),
+              Button.icon(icon: FontAwesomeIcons.gear, tooltip: 'Einstellungen', onPressed: () {}),
             ],
           ),
         ),
