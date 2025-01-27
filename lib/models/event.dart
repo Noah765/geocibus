@@ -167,12 +167,14 @@ class NatureEvent extends Event {
   String get name => switch (level) {
         1 => 'Überflutung',
         2 => 'Tsunami',
+        3 => 'Erdbeben',
         _ => 'Dürre',
       };
   @override
   IconData get icon => switch (level) {
         1 => FontAwesomeIcons.houseFloodWater,
         2 => FontAwesomeIcons.houseTsunami,
+        3 => FontAwesomeIcons.houseCrack,
         _ => FontAwesomeIcons.sunPlantWilt,
       };
   @override
@@ -184,27 +186,17 @@ class NatureEvent extends Event {
     if (level > 1 && Random().nextBool()) game.scheduleEvent(PandemicEvent(game: game, level: level - 1));
     game.money -= (game.money * 0.1 * level).ceil();
 
-    if (level == 1) {
-      for (final region in game.regions) {
-        region.waterGenerationRate *= 0.8;
-      }
-    } else if (level != 2) {
-      for (final region in game.regions) {
-        region.foodGenerationRate *= 0.8;
-      }
+    for (final region in game.regions) {
+      region.foodGenerationRate *= min(0.5, 1 - level * 0.1);
+      region.waterGenerationRate *= min(0.5, 1 - level * 0.1);
     }
   }
 
   @override
   void onFinished(Game game) {
-    if (level == 1) {
-      for (final region in game.regions) {
-        region.waterGenerationRate /= 0.8;
-      }
-    } else if (level != 2) {
-      for (final region in game.regions) {
-        region.foodGenerationRate /= 0.8;
-      }
+    for (final region in game.regions) {
+      region.foodGenerationRate /= min(0.5, 1 - level * 0.1);
+      region.waterGenerationRate /= min(0.5, 1 - level * 0.1);
     }
   }
 }
@@ -218,7 +210,7 @@ class PlantDiseaseEvent extends Event {
   IconData get icon => FontAwesomeIcons.plantWilt;
   @override
   String get description => switch (level) {
-        1 =>
+        <= 3 =>
           'Eine Pflanzenkrankheit geht herum. Es kommt zu Ernteausfällen, sodass bei vielen sowohl Essens- als auch Lebensgrundlage verloren geht. Durch das mangelnde Angebot aber hohe Nachfrage steigen die Lebensmittelpreise.',
         _ => 'Eine Viehkrankheit geht in Teilen der Welt herum. Reihenweise Tiere sterben. Man hat nicht mehr genug proteinreiche Nahrung, weswegen die Preise ansteigen.',
       };
