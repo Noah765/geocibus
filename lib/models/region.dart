@@ -3,7 +3,7 @@ import 'dart:math';
 import 'package:geocibus/models/event.dart';
 
 const _maximumPopulationGrowthRate = 0.1;
-const _foodPerPerson = 2.0;
+const _foodPerPerson = 2.2;
 
 sealed class Region {
   Region({
