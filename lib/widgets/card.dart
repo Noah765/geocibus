@@ -6,7 +6,7 @@ class ContainerCard extends StatelessWidget {
     super.key,
     this.padding = const EdgeInsets.all(16),
     this.borderWidth = 3,
-    this.borderRadius = 20,
+    this.borderRadius = 16,
     required this.child,
   });
 
