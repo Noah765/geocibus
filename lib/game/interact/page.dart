@@ -24,19 +24,15 @@ class InteractPage extends StatelessWidget {
           child: Column(
             children: [
               InteractTop(),
+              Gap(8),
               Expanded(
                 child: Row(
                   children: [
                     InteractCharacter(),
-                    Expanded(
-                      child: Column(
-                        children: [
-                          InteractResources(),
-                          Gap(16),
-                          Expanded(child: Chat()),
-                        ],
-                      ),
-                    ),
+                    Gap(16),
+                    InteractResources(),
+                    Gap(16),
+                    Expanded(child: Chat()),
                   ],
                 ),
               ),

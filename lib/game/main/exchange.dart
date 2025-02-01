@@ -99,7 +99,7 @@ class _PopupState extends State<_Popup> {
                   const Row(children: [Text('Verkaufen'), Spacer(), Text('Kaufen')]),
                   SizedBox(
                     height: sliderHeight,
-                    child: BidirectionalSlider(
+                    child: SnappingSlider.bidirectional(
                       value: _water,
                       secondaryTrackValueRight: _waterMaxPossible.toDouble(),
                       onChanged: (value) => _updateValue(() => _water = value),
@@ -111,7 +111,7 @@ class _PopupState extends State<_Popup> {
                   const Gap(8),
                   SizedBox(
                     height: sliderHeight,
-                    child: BidirectionalSlider(
+                    child: SnappingSlider.bidirectional(
                       value: _food,
                       secondaryTrackValueRight: _foodMaxPossible.toDouble(),
                       onChanged: (value) => _updateValue(() => _food = value),

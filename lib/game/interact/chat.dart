@@ -5,6 +5,8 @@ import 'package:gap/gap.dart';
 import 'package:geocibus/models/event.dart';
 import 'package:geocibus/models/game.dart';
 import 'package:geocibus/models/region.dart';
+import 'package:geocibus/theme.dart';
+import 'package:geocibus/widgets/bidirectional_slider.dart';
 import 'package:geocibus/widgets/button.dart';
 import 'package:geocibus/widgets/card.dart';
 import 'package:provider/provider.dart';
@@ -20,11 +22,16 @@ class _ChatState extends State<Chat> {
   final _interactions = <_Interaction>[];
   late final ScrollController _messagesScrollController;
 
+  var _interactable = false;
+  var _showForeshadowing = false;
+  var _showResponse = false;
+  var _showFinalResponse = false;
+
   @override
   void initState() {
     super.initState();
-    _interactions.add(_Interaction(context.read<Game>(), context.read<Region>()));
     _messagesScrollController = ScrollController();
+    _startInteraction();
   }
 
   @override
@@ -33,30 +40,65 @@ class _ChatState extends State<Chat> {
     super.dispose();
   }
 
-  void _scrollToBottom() => WidgetsBinding.instance.addPostFrameCallback((timeStamp) => _messagesScrollController.jumpTo(_messagesScrollController.position.maxScrollExtent));
-
-  void _distribute(Game game, Region region, _Interaction interaction) {
-    game.distributeResources(
-      region,
-      switch (interaction.request) { _RequestWater() => -interaction.requestValue, _DistributeWater() => interaction.requestValue, _ => 0 },
-      switch (interaction.request) { _RequestFood() => -interaction.requestValue, _DistributeFood() => interaction.requestValue, _ => 0 },
+  void _scrollToBottom() {
+    WidgetsBinding.instance.addPostFrameCallback(
+      (timeStamp) => _messagesScrollController.animateTo(
+        _messagesScrollController.position.maxScrollExtent,
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.fastOutSlowIn,
+      ),
     );
-    _resetInteraction(game, region);
   }
 
-  void _resetInteraction(Game game, Region region) {
-    setState(() => _interactions.add(_Interaction(game, region)));
+  void _showDelayed(Duration duration, VoidCallback callback, {bool allowInteractions = false}) {
+    Future.delayed(duration, () {
+      if (!mounted) return;
+      setState(callback);
+      if (allowInteractions) _interactable = true;
+      _scrollToBottom();
+    });
+  }
+
+  void _startInteraction() {
+    final newInteraction = _Interaction(context.read<Game>(), context.read<Region>());
+    setState(() => _interactions.add(newInteraction));
     _scrollToBottom();
+    _showForeshadowing = false;
+    _showResponse = false;
+    _showFinalResponse = false;
+    if (_interactions.last.foreshadowing == null) {
+      _interactable = true;
+    } else {
+      _showDelayed(const Duration(milliseconds: 500), () => _showForeshadowing = true, allowInteractions: true);
+    }
   }
 
   void _requestResources(_Request request) {
-    setState(() => _interactions.last.requestResources(context.read<Region>(), request));
+    setState(() => _interactable = false);
+    _interactions.last.requestResources(request);
     _scrollToBottom();
+    _showDelayed(const Duration(milliseconds: 200), () => _showResponse = true, allowInteractions: _interactions.last.isRequestSuccessful!);
+    if (!_interactions.last.isRequestSuccessful!) _showDelayed(const Duration(milliseconds: 700), _startInteraction);
   }
 
   void _distributeResources(_Request request) {
-    setState(() => _interactions.last.distributeResources(request));
+    setState(() => _interactable = false);
+    _interactions.last.distributeResources(request);
     _scrollToBottom();
+    _showDelayed(const Duration(milliseconds: 200), () => _showResponse = true, allowInteractions: true);
+  }
+
+  void _submit() {
+    setState(() => _interactable = false);
+    _interactions.last.submit();
+    context.read<Game>().distributeResources(
+          context.read<Region>(),
+          switch (_interactions.last.request) { _RequestWater() => -_interactions.last.value.round(), _DistributeWater() => _interactions.last.value.round(), _ => 0 },
+          switch (_interactions.last.request) { _RequestFood() => -_interactions.last.value.round(), _DistributeFood() => _interactions.last.value.round(), _ => 0 },
+        );
+    _scrollToBottom();
+    _showDelayed(const Duration(milliseconds: 200), () => _showFinalResponse = true);
+    _showDelayed(const Duration(milliseconds: 700), _startInteraction);
   }
 
   @override
@@ -71,51 +113,74 @@ class _ChatState extends State<Chat> {
         Expanded(
           child: ListView(
             controller: _messagesScrollController,
+            cacheExtent: 9999999999999,
             children: [
               for (final interaction in _interactions) ...[
-                _RegionMessage(interaction.state),
-                if (interaction.forshadowing != null) _RegionMessage(interaction.forshadowing!),
-                if (interaction.request != null) _YourMessage(interaction.request!.message),
-                if (interaction.response != null) _RegionMessage(interaction.response!),
+                Text(interaction.month, style: Theme.of(context).textTheme.labelMedium!.copyWith(color: Theme.of(context).colorScheme.surfaceContainerLow.withOpacity(0.75))),
+                _Message(text: interaction.state, alignLeft: true),
+                if (interaction.foreshadowing != null && (interaction != lastInteraction || _showForeshadowing)) ...[const Gap(8), _Message(text: interaction.foreshadowing!, alignLeft: true)],
+                if (interaction.request != null) ...[const Gap(8), _Message(text: interaction.request!.message, alignLeft: false)],
+                if (interaction.response != null && (interaction != lastInteraction || _showResponse)) ...[const Gap(8), _Message(text: interaction.response!, alignLeft: true)],
+                if (interaction.offer != null) ...[const Gap(8), _Message(text: interaction.offer!, alignLeft: false)],
+                if (interaction.finalResponse != null && (interaction != lastInteraction || _showFinalResponse)) ...[const Gap(8), _Message(text: interaction.finalResponse!, alignLeft: true)],
+                if (interaction != _interactions.last) const Gap(32),
               ],
             ],
           ),
         ),
-        if (lastInteraction.request == null)
-          Row(
-            children: [
-              ActionChip(label: const Text('Wasser anfragen'), onPressed: () => _requestResources(_RequestWater())),
-              const Gap(8),
-              ActionChip(label: const Text('Essen anfragen'), onPressed: () => _requestResources(_RequestFood())),
-              const Gap(8),
-              ActionChip(label: const Text('Wasser abgeben'), onPressed: game.water == 0 ? null : () => _distributeResources(_DistributeWater())),
-              const Gap(8),
-              ActionChip(label: const Text('Essen abgeben'), onPressed: game.food == 0 ? null : () => _distributeResources(_DistributeFood())),
-            ],
+        const Gap(16),
+        if (!_interactable)
+          SizedBox(height: 32 + getTextPadding(context, Theme.of(context).textTheme.labelLarge!, 2).vertical)
+        else if (lastInteraction.request == null)
+          ContainerCard(
+            child: Row(
+              children: [
+                Expanded(child: Button(text: 'Wasser anfragen', onPressed: () => _requestResources(_RequestWater()))),
+                const Gap(8),
+                Expanded(child: Button(text: 'Essen anfragen', onPressed: () => _requestResources(_RequestFood()))),
+                const Gap(8),
+                Expanded(child: Button(text: 'Wasser abgeben', onPressed: game.water == 0 ? null : () => _distributeResources(_DistributeWater()))),
+                const Gap(8),
+                Expanded(child: Button(text: 'Essen abgeben', onPressed: game.food == 0 ? null : () => _distributeResources(_DistributeFood()))),
+              ],
+            ),
           )
-        else if (lastInteraction.isRequestSuccessful == false)
-          Button(text: 'Zurück', onPressed: () => _resetInteraction(game, region))
-        else if (lastInteraction.isRequestSuccessful == true)
-          Row(
-            children: [
-              // TODO Adjust slider (padding, appearance, snapping to specific values), maybe add an additional input field
-              Slider(
-                value: lastInteraction.requestValue.toDouble(),
-                onChanged: (newValue) => setState(() => lastInteraction.requestValue = newValue.round()),
-                min: 1,
-                max: switch (lastInteraction.request!) {
-                  _RequestWater() => region.water.toDouble(),
-                  _RequestFood() => region.food.toDouble(),
-                  _DistributeWater() => game.water.toDouble(),
-                  _DistributeFood() => game.food.toDouble(),
-                },
-              ),
-              Text('(${lastInteraction.requestValue})'),
-              const Gap(8),
-              Button(text: 'Senden', onPressed: () => _distribute(game, region, lastInteraction)),
-              const Gap(8),
-              Button(text: 'Zurück', onPressed: () => _resetInteraction(game, region)),
-            ],
+        else
+          ContainerCard(
+            child: Row(
+              children: [
+                Expanded(
+                  child: SnappingSlider(
+                    value: lastInteraction.value,
+                    secondaryTrackValue: switch (lastInteraction.request!) {
+                      _RequestWater() => region.water - region.maximumWater,
+                      _RequestFood() => region.food - region.maximumFood,
+                      _DistributeWater() => region.maximumWater - region.water,
+                      _DistributeFood() => region.maximumFood - region.food,
+                    }
+                        .toDouble(),
+                    onChanged: (value) => setState(() => lastInteraction.value = value),
+                    snapValues: switch (lastInteraction.request!) {
+                      _RequestWater() => [(region.water - region.maximumWater).toDouble(), (region.water - region.requiredWater).toDouble()],
+                      _RequestFood() => [(region.food - region.maximumFood).toDouble(), (region.food - region.requiredFood).toDouble()],
+                      _DistributeWater() => [(region.requiredWater - region.water).toDouble(), (region.maximumWater - region.water).toDouble()],
+                      _DistributeFood() => [(region.requiredFood - region.food).toDouble(), (region.maximumFood - region.food).toDouble()],
+                    },
+                    max: switch (lastInteraction.request!) {
+                      _RequestWater() => region.water,
+                      _RequestFood() => region.food,
+                      _DistributeWater() => game.water,
+                      _DistributeFood() => game.food,
+                    }
+                        .toDouble(),
+                  ),
+                ),
+                const Gap(16),
+                Button(text: 'Senden', onPressed: lastInteraction.value.round() == 0 ? null : () => _submit()),
+                const Gap(16),
+                Button(text: 'Abbrechen', onPressed: () => _startInteraction()),
+              ],
+            ),
           ),
       ],
     );
@@ -123,19 +188,26 @@ class _ChatState extends State<Chat> {
 }
 
 class _Interaction {
-  _Interaction(Game game, Region region) {
+  _Interaction(this.game, this.region) : month = game.month {
     event = _chooseEventBasedOnLevel(region.exportBlockingEvents.isEmpty ? game.activeEvents : region.exportBlockingEvents);
-    state = _generateStateMessage(region);
-    forshadowing = _generateForshadowingMessage(game, region);
+    state = _generateStateMessage();
+    foreshadowing = _generateForeshadowingMessage();
   }
+
+  final Game game;
+  final Region region;
+
+  final String month;
 
   late final Event? event;
   late final String state;
-  late final String? forshadowing;
+  late final String? foreshadowing;
   _Request? request;
   String? response;
   bool? isRequestSuccessful;
-  int requestValue = 1;
+  double value = 0;
+  String? offer;
+  String? finalResponse;
 
   Event? _chooseEventBasedOnLevel(Iterable<Event> events) {
     // TODO Improve algorithm (non-linear distribution)
@@ -151,7 +223,7 @@ class _Interaction {
     throw Error();
   }
 
-  String _generateStateMessage(Region region) {
+  String _generateStateMessage() {
     if (region.waterState == ResourceState.panic || region.foodState == ResourceState.panic) {
       if (Random().nextBool()) {
         return switch ((region.waterState == ResourceState.panic, region.foodState == ResourceState.panic)) {
@@ -254,7 +326,7 @@ class _Interaction {
     };
   }
 
-  String? _generateForshadowingMessage(Game game, Region region) {
+  String? _generateForeshadowingMessage() {
     if (game.round == 10 || game.events[game.round].isEmpty) return null;
 
     return switch (_chooseEventBasedOnLevel(game.events[game.round])!) {
@@ -285,14 +357,13 @@ class _Interaction {
     };
   }
 
-  void requestResources(Region region, _Request type) {
+  void requestResources(_Request type) {
+    request = type;
     isRequestSuccessful = !region.isExportBlocked &&
         region.waterState != ResourceState.bad &&
         region.waterState != ResourceState.panic &&
         region.foodState != ResourceState.bad &&
         region.foodState != ResourceState.panic;
-
-    request = type;
 
     if (isRequestSuccessful! && (event == null || Random().nextDouble() < 0.3)) {
       response = [
@@ -374,20 +445,64 @@ class _Interaction {
     };
   }
 
+  static const List<String> _thankingMessages = [
+    'Dankeschön!',
+    'Dankschön, wir schätzen es sehr.',
+    'Unsere Bevölkerung dankt.',
+    'Ihretwegen wird es vielen Menschen besser gehen.',
+    'Danke, wir schätzen Ihre Hilfe sehr.',
+    'Die Ressourcen nehmen wir gerne an.',
+    'Unsere Population wird Ihnen sehr dankbar sein.',
+    'Jegliche Unterstützung ist gerne gesehen. Wir bedanken uns bei Ihnen.',
+  ];
+
   void distributeResources(_Request type) {
     request = type;
     isRequestSuccessful = true;
     response = [
+      ..._thankingMessages,
       'Danke für die Unterstützung! Wie viel ${type is _RequestWater ? 'Wasser' : 'Essen'} möchten Sie uns geben?',
-      'Dankeschön!',
-      'Ihretwegen wird es vielen Menschen besser gehen.',
-      'Danke, wir schätzen Ihre Hilfe sehr.',
-      'Die Ressourcen nehmen wir gerne an.',
-      'Unsere Population wird Ihnen sehr dankbar sein.',
-      'Jegliche Unterstützung ist gerne gesehen. Wir bedanken uns bei Ihnen.',
-      '${type is _RequestWater ? 'Wasser' : 'Essen'} ist bei unserer Lage gerne gesehen.',
+      '${type is _RequestWater ? 'Wasser' : 'Essen'} ist bei unserer Lage gerne gesehen. Danke.',
       'Das ist wirklich super! Wie viel können Sie entbehren?',
-    ][Random().nextInt(9)];
+    ][Random().nextInt(11)];
+  }
+
+  void submit() {
+    final value = this.value.round();
+    final resource = request is _RequestWater || request is _DistributeWater ? 'Wasser' : 'Essen';
+
+    offer = switch (request!) {
+      _RequestWater() || _RequestFood() => [
+          'Ich würde gerne $value $resource nehmen.',
+          'Ich nehme $value $resource.',
+          'Ich brauche $value $resource.',
+          'Um den Bedürftigen zu helfen, brauche ich $value $resource.',
+        ][Random().nextInt(4)],
+      _DistributeWater() when value <= (region.requiredWater - region.water) / 2 => 'Ich kann Ihnen leider nur $value Wasser geben.',
+      _DistributeFood() when value <= (region.requiredFood - region.food) / 2 => 'Ich kann Ihnen leider nur $value Essen geben.',
+      _DistributeWater() || _DistributeFood() => [
+          'Ich kann Ihnen $value $resource anbieten.',
+          'Ich kann Ihnen $value $resource geben.',
+          'Ich gebe Ihnen $value $resource.',
+        ][Random().nextInt(3)],
+    };
+
+    finalResponse = switch (request!) {
+      _RequestWater() when (region.water - value) / region.requiredWater < 0.5 => 'Jetzt haben wir viel zu wenig Wasser! Wir können unsere Bevölkerung nicht mehr ausreichend versorgen!',
+      _RequestFood() when (region.food - value) / region.requiredFood < 0.5 => 'Jetzt haben wir viel zu wenig Essen! Wir können unsere Bevölkerung nicht mehr ausreichend versorgen!',
+      _RequestWater() when (region.water - value) / region.requiredWater < 0.9 => 'Es ist zwar schön, dass wir helfen konnten, aber jetzt haben wir selber zu wenig Wasser!',
+      _RequestFood() when (region.food - value) / region.requiredFood < 0.9 => 'Es ist zwar schön, dass wir helfen konnten, aber jetzt haben wir selber zu wenig Essen!',
+      _RequestWater() || _RequestFood() => ['Ok', 'Das stellen wir gerne bereit.', 'Gut, dass wir helfen konnten!'][Random().nextInt(3)],
+      _DistributeWater() when value < (region.requiredWater - region.water) / 4 => 'Danke für Nichts.',
+      _DistributeFood() when value < (region.requiredFood - region.food) / 4 => 'Danke für Nichts.',
+      _DistributeWater() when value < (region.requiredWater - region.water) / 3 => 'Sie sind ja ganz schön sparsam.',
+      _DistributeFood() when value < (region.requiredFood - region.food) / 3 => 'Sie sind ja ganz schön sparsam.',
+      _DistributeWater() when (region.water + value) / region.requiredWater < 0.75 => 'So wenig? Na ja, immerhin etwas.',
+      _DistributeFood() when (region.food + value) / region.requiredFood < 0.75 => 'So wenig? Na ja, immerhin etwas.',
+      _DistributeWater() when (region.water + value) / region.maximumWater > 1 => 'Mit so viel haben wir wirklich nicht gerechnet. Danke!',
+      _DistributeFood() when (region.food + value) / region.maximumFood > 1 => 'Mit so viel haben wir wirklich nicht gerechnet. Danke!',
+      _DistributeWater() || _DistributeFood() => _thankingMessages[Random().nextInt(8)],
+    };
   }
 }
 
@@ -445,20 +560,32 @@ class _DistributeFood extends _Request {
         );
 }
 
-class _RegionMessage extends StatelessWidget {
-  const _RegionMessage(this.text);
+class _Message extends StatelessWidget {
+  const _Message({required this.text, required this.alignLeft});
 
   final String text;
+  final bool alignLeft;
 
   @override
-  Widget build(BuildContext context) => Align(alignment: Alignment.centerLeft, child: TextCard(text: text));
-}
-
-class _YourMessage extends StatelessWidget {
-  const _YourMessage(this.text);
-
-  final String text;
-
-  @override
-  Widget build(BuildContext context) => Align(alignment: Alignment.centerRight, child: TextCard(text: text));
+  Widget build(BuildContext context) {
+    return FractionallySizedBox(
+      alignment: alignLeft ? Alignment.centerLeft : Alignment.centerRight,
+      widthFactor: 0.7,
+      child: Align(
+        alignment: alignLeft ? Alignment.centerLeft : Alignment.centerRight,
+        child: TweenAnimationBuilder(
+          tween: Tween(begin: 0.0, end: 1.0),
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.fastOutSlowIn,
+          builder: (context, value, child) => Transform.scale(
+            scale: value,
+            child: Opacity(
+              opacity: value,
+              child: TextCard(text: text),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }

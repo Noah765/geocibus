@@ -18,12 +18,13 @@ class InteractResources extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
 
     return ContainerCard(
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Column(
         children: [
           Column(
             children: [
               Text(region.name, style: textTheme.headlineSmall),
+              Text('${region.population} Mio. Einwohner'),
+              const Gap(16),
               ResourceIndicator(region),
             ],
           ),
@@ -31,6 +32,7 @@ class InteractResources extends StatelessWidget {
           Column(
             children: [
               Text('Du', style: textTheme.headlineSmall),
+              const Gap(8),
               Text.rich(
                 style: textTheme.titleLarge!.copyWith(color: Colors.blue),
                 TextSpan(
