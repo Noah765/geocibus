@@ -128,6 +128,7 @@ class _AnimatedMapState extends State<_AnimatedMap> with TickerProviderStateMixi
   double _getRegionElevation(Type region) => 3 + _controllers[region]!.value * 3;
   Color _getRegionColor(Type type) {
     final region = context.read<Game>().regions.firstWhere((e) => e.runtimeType == type);
+    if (region.population == 0) return Colors.transparent;
     final missingResourcesPercentage = min(min(region.food / region.maximumFood, region.water / region.maximumWater), 1.0);
     final color = Color.lerp(Colors.red, Colors.green, missingResourcesPercentage)!;
     return Color.lerp(color, Theme.of(context).colorScheme.surface, 0.2 * (1 - _controllers[type]!.value))!;

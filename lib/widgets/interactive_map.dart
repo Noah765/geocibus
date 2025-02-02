@@ -126,7 +126,7 @@ class _Painter extends CustomPainter {
   void _paintRegion(Canvas canvas, Type region) {
     final fillPaint = Paint()..color = colors[region]!;
     for (final path in data.regions[region]!.paths) {
-      canvas.drawPath(path, fillPaint);
+      if (!deads.contains(region)) canvas.drawPath(path, fillPaint);
       canvas.drawPath(path, strokePaint);
     }
   }
