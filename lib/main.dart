@@ -1,6 +1,6 @@
 import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:flutter/material.dart';
-import 'package:geocibus/menus/main.dart';
+import 'package:geocibus/pages/start.dart';
 import 'package:geocibus/theme.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -22,7 +22,7 @@ class App extends StatelessWidget {
       title: 'Geocibus',
       theme: getTheme(),
       debugShowCheckedModeBanner: false,
-      home: const MainMenu(),
+      home: const StartPage(),
     );
   }
 }

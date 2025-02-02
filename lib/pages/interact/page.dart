@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:geocibus/game/interact/character.dart';
-import 'package:geocibus/game/interact/chat.dart';
-import 'package:geocibus/game/interact/resources.dart';
-import 'package:geocibus/game/interact/top.dart';
 import 'package:geocibus/models/game.dart';
 import 'package:geocibus/models/region.dart';
+import 'package:geocibus/pages/interact/character.dart';
+import 'package:geocibus/pages/interact/chat.dart';
+import 'package:geocibus/pages/interact/resources.dart';
+import 'package:geocibus/pages/interact/top.dart';
 import 'package:provider/provider.dart';
 
 class InteractPage extends StatelessWidget {

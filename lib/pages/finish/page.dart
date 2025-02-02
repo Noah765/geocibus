@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:geocibus/menus/main.dart';
 import 'package:geocibus/models/game.dart';
+import 'package:geocibus/pages/start.dart';
 import 'package:geocibus/widgets/button.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -35,7 +35,7 @@ class _FinishPageState extends State<FinishPage> {
         children: [
           Text('Score: ${widget.game.score}', style: textTheme.displayLarge),
           Text('High Score: ${_highScore ?? 'Laden...'}'),
-          Button(text: 'Zurück zum Hauptmenü', onPressed: () => Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => const MainMenu()))),
+          Button(text: 'Zurück zum Hauptmenü', onPressed: () => Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => const StartPage()))),
         ],
       ),
     );

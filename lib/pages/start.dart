@@ -2,20 +2,20 @@ import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gap/gap.dart';
-import 'package:geocibus/game/main/page.dart';
 import 'package:geocibus/models/region.dart';
+import 'package:geocibus/pages/main/page.dart';
 import 'package:geocibus/widgets/button.dart';
 import 'package:geocibus/widgets/icon_span.dart';
 import 'package:geocibus/widgets/interactive_map.dart';
 
-class MainMenu extends StatefulWidget {
-  const MainMenu({super.key});
+class StartPage extends StatefulWidget {
+  const StartPage({super.key});
 
   @override
-  State<MainMenu> createState() => _MainMenuState();
+  State<StartPage> createState() => _StartPageState();
 }
 
-class _MainMenuState extends State<MainMenu> {
+class _StartPageState extends State<StartPage> {
   InteractiveMapData? _mapData;
 
   @override

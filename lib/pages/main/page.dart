@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:geocibus/game/finish/page.dart';
-import 'package:geocibus/game/main/end_year.dart';
-import 'package:geocibus/game/main/events.dart';
-import 'package:geocibus/game/main/exchange.dart';
-import 'package:geocibus/game/main/map.dart';
-import 'package:geocibus/game/main/resources.dart';
-import 'package:geocibus/game/main/round_beginning_overlay.dart';
-import 'package:geocibus/game/main/top.dart';
 import 'package:geocibus/models/game.dart';
+import 'package:geocibus/pages/finish/page.dart';
+import 'package:geocibus/pages/main/end_year.dart';
+import 'package:geocibus/pages/main/events.dart';
+import 'package:geocibus/pages/main/exchange.dart';
+import 'package:geocibus/pages/main/map.dart';
+import 'package:geocibus/pages/main/resources.dart';
+import 'package:geocibus/pages/main/round_beginning_overlay.dart';
+import 'package:geocibus/pages/main/top.dart';
 import 'package:provider/provider.dart';
 
 // TODO Intro story for a tutorial

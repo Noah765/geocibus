@@ -2,8 +2,8 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:geocibus/game/interact/page.dart';
 import 'package:geocibus/models/game.dart';
+import 'package:geocibus/pages/interact/page.dart';
 import 'package:geocibus/widgets/button.dart';
 import 'package:geocibus/widgets/interactive_map.dart';
 import 'package:geocibus/widgets/popup.dart';
