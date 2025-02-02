@@ -12,7 +12,7 @@ class MainEndYear extends StatelessWidget {
     final colors = Theme.of(context).colorScheme;
 
     final resourcesStyle = Theme.of(context).textTheme.headlineMedium!;
-    final resourcesHeight = (MediaQuery.textScalerOf(context).scale(resourcesStyle.fontSize!) * resourcesStyle.height!).roundToDouble() + getTextPadding(context, resourcesStyle, 3).vertical;
+    final resourcesHeight = (MediaQuery.textScalerOf(context).scale(resourcesStyle.fontSize!) * resourcesStyle.height!).roundToDouble() + getTextPadding(context, resourcesStyle, 3, 2).vertical;
     final iconSize = resourcesHeight / 2 + 14 / 3;
 
     return SizedBox.square(

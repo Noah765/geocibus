@@ -1,12 +1,28 @@
 import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:gap/gap.dart';
 import 'package:geocibus/game/main/page.dart';
+import 'package:geocibus/models/region.dart';
 import 'package:geocibus/widgets/button.dart';
 import 'package:geocibus/widgets/icon_span.dart';
+import 'package:geocibus/widgets/interactive_map.dart';
 
-class MainMenu extends StatelessWidget {
+class MainMenu extends StatefulWidget {
   const MainMenu({super.key});
+
+  @override
+  State<MainMenu> createState() => _MainMenuState();
+}
+
+class _MainMenuState extends State<MainMenu> {
+  InteractiveMapData? _mapData;
+
+  @override
+  void initState() {
+    super.initState();
+    InteractiveMapData.load().then((value) => setState(() => _mapData = value));
+  }
 
   void _start(BuildContext context) => Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => const MainPage()));
 
@@ -17,14 +33,17 @@ class MainMenu extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final buttonStyle = theme.textTheme.displayMedium!;
+    final mapColor = Colors.green.withOpacity(0.75);
 
     return Scaffold(
-      body: SizedBox.expand(
+      body: Padding(
+        padding: const EdgeInsets.all(8),
         child: Column(
           children: [
             Text.rich(
               TextSpan(
-                style: theme.textTheme.displayLarge,
+                style: theme.textTheme.displayLarge!.copyWith(color: theme.colorScheme.surfaceContainerLow, fontSize: theme.textTheme.displayLarge!.fontSize! * 3),
                 children: [
                   const TextSpan(text: 'GE'),
                   IconSpan(icon: FontAwesomeIcons.earthEurope),
@@ -32,14 +51,35 @@ class MainMenu extends StatelessWidget {
                 ],
               ),
             ),
-            FractionallySizedBox(
-              widthFactor: 0.5,
-              alignment: Alignment.centerLeft,
-              child: Column(
+            Expanded(
+              child: Stack(
                 children: [
-                  Button(text: 'Start', onPressed: () => _start(context)),
-                  Button(text: 'Optionen', onPressed: _options),
-                  Button(text: 'Spiel verlassen', onPressed: _leave),
+                  if (_mapData != null)
+                    Center(
+                      child: AspectRatio(
+                        aspectRatio: _mapData!.bounds.width / _mapData!.bounds.height,
+                        child: InteractiveMap(
+                          data: _mapData!,
+                          colors: {Europe: mapColor, Asia: mapColor, NorthAmerica: mapColor, SouthAmerica: mapColor, Africa: mapColor, Australia: mapColor},
+                        ),
+                      ),
+                    ),
+                  Center(
+                    child: FractionallySizedBox(
+                      widthFactor: 1 / 3,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Button(text: 'Start', style: buttonStyle, elevation: 3, borderWidth: 3, onPressed: () => _start(context)),
+                          const Gap(16),
+                          Button(text: 'Optionen', style: buttonStyle, elevation: 3, borderWidth: 3, onPressed: _options),
+                          const Gap(16),
+                          Button(text: 'Spiel verlassen', style: buttonStyle, elevation: 3, borderWidth: 3, onPressed: _leave),
+                        ],
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),

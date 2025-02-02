@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:geocibus/theme.dart';
 
 abstract class Button extends StatelessWidget {
-  const factory Button({Key? key, required String text, TextStyle? style, required VoidCallback? onPressed}) = _TextButton;
+  const factory Button({Key? key, required String text, TextStyle? style, double elevation, double borderWidth, required VoidCallback? onPressed}) = _TextButton;
   const factory Button.icon({Key? key, required IconData icon, double? size, String? tooltip, required VoidCallback? onPressed}) = _IconButton;
 
   const Button._({super.key});
@@ -11,10 +11,12 @@ abstract class Button extends StatelessWidget {
 }
 
 class _TextButton extends Button {
-  const _TextButton({super.key, required this.text, this.style, required this.onPressed}) : super._();
+  const _TextButton({super.key, required this.text, this.style, this.elevation = 1, this.borderWidth = 2, required this.onPressed}) : super._();
 
   final String text;
   final TextStyle? style;
+  final double elevation;
+  final double borderWidth;
   final VoidCallback? onPressed;
 
   @override
@@ -24,12 +26,25 @@ class _TextButton extends Button {
 
     return ElevatedButton(
       onPressed: onPressed,
-      style: ElevatedButton.styleFrom(
-        foregroundColor: colors.onSurface,
-        disabledForegroundColor: colors.onSurface.withOpacity(0.38),
-        padding: getTextPadding(context, style, 2),
-        minimumSize: Size.zero,
-        shape: getTextShape(context, style, colors.outline, 2),
+      style: ButtonStyle(
+        foregroundColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.disabled)) return colors.onSurface.withOpacity(0.38);
+          return colors.onSurface;
+        }),
+        overlayColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.pressed)) return colors.onSurface.withOpacity(0.1);
+          if (states.contains(WidgetState.hovered) || states.contains(WidgetState.focused)) return colors.onSurface.withOpacity(0.08);
+          return null;
+        }),
+        elevation: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.disabled)) return 0;
+          if (states.contains(WidgetState.pressed)) return elevation;
+          if (states.contains(WidgetState.hovered)) return elevation * 3;
+          return elevation;
+        }),
+        padding: WidgetStatePropertyAll(getTextPadding(context, style, borderWidth, 3)),
+        minimumSize: const WidgetStatePropertyAll(Size.zero),
+        shape: WidgetStatePropertyAll(getTextShape(context, style, colors.outline, borderWidth)),
         visualDensity: VisualDensity.standard,
       ),
       child: Text(text, style: style),

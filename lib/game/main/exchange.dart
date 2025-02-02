@@ -19,7 +19,7 @@ class MainExchange extends StatelessWidget {
     final game = context.read<Game>();
 
     final resourcesStyle = Theme.of(context).textTheme.headlineMedium!;
-    final height = (MediaQuery.textScalerOf(context).scale(resourcesStyle.fontSize!) * resourcesStyle.height!).roundToDouble() + getTextPadding(context, resourcesStyle, 3).vertical;
+    final height = (MediaQuery.textScalerOf(context).scale(resourcesStyle.fontSize!) * resourcesStyle.height!).roundToDouble() + getTextPadding(context, resourcesStyle, 3, 2).vertical;
 
     return Popup(
       direction: Direction.up,

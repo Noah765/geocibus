@@ -108,6 +108,9 @@ class _ChatState extends State<Chat> {
 
     final lastInteraction = _interactions.last;
 
+    final buttonTextStyle = Theme.of(context).textTheme.labelLarge!;
+    final buttonHeight = (MediaQuery.textScalerOf(context).scale(buttonTextStyle.fontSize!) * buttonTextStyle.height!).roundToDouble() + getTextPadding(context, buttonTextStyle, 2, 2).vertical;
+
     return Column(
       children: [
         Expanded(
@@ -130,9 +133,10 @@ class _ChatState extends State<Chat> {
         ),
         const Gap(16),
         if (!_interactable)
-          SizedBox(height: 32 + getTextPadding(context, Theme.of(context).textTheme.labelLarge!, 2).vertical)
+          SizedBox(height: buttonHeight + 2 * ContainerCardSize.medium.size)
         else if (lastInteraction.request == null)
           ContainerCard(
+            size: ContainerCardSize.medium,
             child: Row(
               children: [
                 Expanded(child: Button(text: 'Wasser anfragen', onPressed: () => _requestResources(_RequestWater()))),
@@ -147,6 +151,7 @@ class _ChatState extends State<Chat> {
           )
         else
           ContainerCard(
+            size: ContainerCardSize.medium,
             child: Row(
               children: [
                 Expanded(

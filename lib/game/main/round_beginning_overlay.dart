@@ -28,6 +28,7 @@ class RoundBeginningOverlay extends StatelessWidget {
             if (game.newEvents.isNotEmpty || game.finishedEvents.isNotEmpty) ...[
               Expanded(
                 child: ContainerCard(
+                  size: ContainerCardSize.large,
                   child: Row(
                     children: [
                       Expanded(child: _EventColumn(text: 'Neue Events', emptyText: 'Es sind keine neuen Events dazugekommen', events: game.newEvents)),
@@ -71,6 +72,7 @@ class _EventColumn extends StatelessWidget {
         const Gap(12),
         Expanded(
           child: ContainerCard(
+            size: ContainerCardSize.medium,
             child: events.isEmpty
                 ? Center(child: Text(emptyText))
                 : ListView(
@@ -98,6 +100,7 @@ class _EventCard extends StatelessWidget {
     final titleStyle = Theme.of(context).textTheme.titleLarge!;
 
     return ContainerCard(
+      size: ContainerCardSize.small,
       child: Column(
         children: [
           Text.rich(

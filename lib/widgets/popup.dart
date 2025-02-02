@@ -134,7 +134,7 @@ class _PopupState<T extends Object> extends State<Popup<T>> {
                 direction: direction,
                 position: globalPosition,
                 arrowColor: colors.outline,
-                child: ContainerCard(child: widget.builder(context, data)),
+                child: ContainerCard(size: ContainerCardSize.medium, child: widget.builder(context, data)),
               ),
             ),
           );

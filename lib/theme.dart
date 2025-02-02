@@ -30,13 +30,15 @@ ThemeData getTheme() {
   );
 }
 
-EdgeInsets getTextPadding(BuildContext context, TextStyle textStyle, double borderWidth) {
-  final height = (MediaQuery.textScalerOf(context).scale(textStyle.fontSize!) * textStyle.height!).roundToDouble();
-  return EdgeInsets.symmetric(vertical: height / 8 + 2 + borderWidth, horizontal: height * 0.375 + 6 + borderWidth);
+EdgeInsets getTextPadding(BuildContext context, TextStyle textStyle, double borderWidth, double horizontalPadding) {
+  final fontSize = MediaQuery.textScalerOf(context).scale(textStyle.fontSize!);
+  final height = (fontSize * textStyle.height!).roundToDouble();
+  final padding = (fontSize + 11) / 3;
+  return EdgeInsets.symmetric(vertical: padding + fontSize / 2 - height / 2 + borderWidth, horizontal: horizontalPadding * padding + borderWidth);
 }
 
 RoundedRectangleBorder getTextShape(BuildContext context, TextStyle textStyle, Color borderColor, double borderWidth) {
-  final height = (MediaQuery.textScalerOf(context).scale(textStyle.fontSize!) * textStyle.height!).roundToDouble() * 1.25 + 4 + 2 * borderWidth;
+  final height = 5 / 3 * textStyle.fontSize! + 22 / 3 + 2 * borderWidth;
   return RoundedRectangleBorder(side: BorderSide(color: borderColor, width: borderWidth), borderRadius: BorderRadius.circular(height * 0.3));
 }
 

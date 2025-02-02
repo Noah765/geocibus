@@ -1,18 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:geocibus/theme.dart';
 
+enum ContainerCardSize {
+  large(24),
+  medium(20),
+  small(16);
+
+  const ContainerCardSize(this.size);
+
+  final double size;
+}
+
 class ContainerCard extends StatelessWidget {
   const ContainerCard({
     super.key,
-    this.padding = const EdgeInsets.all(16),
-    this.borderWidth = 3,
-    this.borderRadius = 16,
+    required this.size,
     required this.child,
   });
 
-  final EdgeInsets padding;
-  final double borderWidth;
-  final double borderRadius;
+  final ContainerCardSize size;
   final Widget child;
 
   @override
@@ -22,8 +28,8 @@ class ContainerCard extends StatelessWidget {
     return Material(
       elevation: 1,
       color: colors.surfaceContainerLow,
-      shape: RoundedRectangleBorder(side: BorderSide(color: colors.outline, width: borderWidth), borderRadius: BorderRadius.circular(borderRadius)),
-      child: Padding(padding: padding, child: child),
+      shape: RoundedRectangleBorder(side: BorderSide(color: colors.outline, width: 3), borderRadius: BorderRadius.circular(size.size)),
+      child: Padding(padding: EdgeInsets.all(size.size), child: child),
     );
   }
 }
@@ -45,7 +51,7 @@ class TextCard extends StatelessWidget {
       color: colors.surfaceContainerLow,
       shape: getTextShape(context, style, colors.outline, 3),
       child: Padding(
-        padding: getTextPadding(context, style, 3),
+        padding: getTextPadding(context, style, 3, 2),
         child: text == null ? DefaultTextStyle(style: style, child: child!) : Text(text!, style: style),
       ),
     );

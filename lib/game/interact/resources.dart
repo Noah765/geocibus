@@ -18,6 +18,7 @@ class InteractResources extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
 
     return ContainerCard(
+      size: ContainerCardSize.large,
       child: Column(
         children: [
           Column(
