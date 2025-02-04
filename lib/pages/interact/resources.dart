@@ -20,39 +20,31 @@ class InteractResources extends StatelessWidget {
     return ContainerCard(
       size: ContainerCardSize.large,
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Column(
-            children: [
-              Text(region.name, style: textTheme.headlineSmall),
-              Text('${region.population} Mio. Einwohner'),
-              const Gap(16),
-              ResourceIndicator(region),
-            ],
-          ),
+          Text(region.name, style: textTheme.headlineSmall),
+          Text('${region.population} Mio. Einwohner'),
+          const Gap(8),
+          ResourceIndicator(region),
           const Gap(32),
-          Column(
-            children: [
-              Text('Du', style: textTheme.headlineSmall),
-              const Gap(8),
-              Text.rich(
-                style: textTheme.titleLarge!.copyWith(color: Colors.blue),
-                TextSpan(
-                  children: [
-                    TextSpan(text: game.water.toString()),
-                    IconSpan(icon: FontAwesomeIcons.glassWater),
-                  ],
-                ),
-              ),
-              Text.rich(
-                TextSpan(
-                  style: textTheme.titleLarge!.copyWith(color: Colors.green),
-                  children: [
-                    TextSpan(text: game.food.toString()),
-                    IconSpan(icon: FontAwesomeIcons.bowlFood, removedTop: 4, removedBottom: 5),
-                  ],
-                ),
-              ),
-            ],
+          Text('Du', style: textTheme.headlineSmall),
+          Text.rich(
+            style: textTheme.titleLarge!.copyWith(color: Colors.blue),
+            TextSpan(
+              children: [
+                TextSpan(text: game.water.toString()),
+                IconSpan(icon: FontAwesomeIcons.glassWater),
+              ],
+            ),
+          ),
+          Text.rich(
+            TextSpan(
+              style: textTheme.titleLarge!.copyWith(color: Colors.green),
+              children: [
+                TextSpan(text: game.food.toString()),
+                IconSpan(icon: FontAwesomeIcons.bowlFood, removedTop: 4, removedBottom: 5),
+              ],
+            ),
           ),
         ],
       ),

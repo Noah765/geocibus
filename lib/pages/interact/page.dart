@@ -27,6 +27,7 @@ class InteractPage extends StatelessWidget {
               Gap(8),
               Expanded(
                 child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     InteractCharacter(),
                     Gap(16),
