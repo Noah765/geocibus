@@ -24,19 +24,22 @@ class InteractiveMap extends StatelessWidget {
     final theme = Theme.of(context);
     final defaultColor = theme.colorScheme.surfaceContainerLow;
 
-    return CustomPaint(
-      painter: _Painter(
-        data: data,
-        deads: deads,
-        scales: scales,
-        elevations: elevations,
-        colors: colors ?? {Asia: defaultColor, Africa: defaultColor, Europe: defaultColor, SouthAmerica: defaultColor, NorthAmerica: defaultColor, Australia: defaultColor},
-        deadColor: theme.colorScheme.surface,
-        outlineColor: theme.colorScheme.outline,
-        shadowColor: theme.colorScheme.shadow,
-        textStyle: theme.textTheme.titleLarge!.copyWith(
-          fontSize: MediaQuery.textScalerOf(context).scale(theme.textTheme.titleLarge!.fontSize!),
-          fontWeight: MediaQuery.boldTextOf(context) ? FontWeight.bold : null,
+    return LayoutBuilder(
+      builder: (context, constraints) => CustomPaint(
+        painter: _Painter(
+          size: constraints.biggest,
+          data: data,
+          deads: deads,
+          scales: scales,
+          elevations: elevations,
+          colors: colors ?? {Asia: defaultColor, Africa: defaultColor, Europe: defaultColor, SouthAmerica: defaultColor, NorthAmerica: defaultColor, Australia: defaultColor},
+          deadColor: theme.colorScheme.surface,
+          outlineColor: theme.colorScheme.outline,
+          shadowColor: theme.colorScheme.shadow,
+          textStyle: theme.textTheme.titleLarge!.copyWith(
+            fontSize: MediaQuery.textScalerOf(context).scale(theme.textTheme.titleLarge!.fontSize!),
+            fontWeight: MediaQuery.boldTextOf(context) ? FontWeight.bold : null,
+          ),
         ),
       ),
     );
@@ -45,6 +48,7 @@ class InteractiveMap extends StatelessWidget {
 
 class _Painter extends CustomPainter {
   _Painter({
+    required this.size,
     required this.data,
     required this.deads,
     required this.scales,
@@ -56,6 +60,7 @@ class _Painter extends CustomPainter {
     required this.textStyle,
   });
 
+  final Size size;
   final InteractiveMapData data;
   final Set<Type> deads;
   final Map<Type, double> scales;
@@ -66,11 +71,8 @@ class _Painter extends CustomPainter {
   final Color shadowColor;
   final TextStyle textStyle;
 
-  late Size _size;
-
   @override
   void paint(Canvas canvas, Size size) {
-    _size = size;
     data.transformCanvas(size, canvas);
 
     final inactiveRegions = data.regions.keys.where((e) => scales[e] == 1).toList();
@@ -152,7 +154,7 @@ class _Painter extends CustomPainter {
       textStyle != oldDelegate.textStyle;
 
   @override
-  bool? hitTest(Offset position) => data.hitTest(_size, position, deads);
+  bool? hitTest(Offset position) => data.hitTest(size, position, deads);
 }
 
 class InteractiveMapData {
