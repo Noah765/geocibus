@@ -8,8 +8,8 @@ class InteractiveMap extends StatelessWidget {
     super.key,
     required this.data,
     this.deads = const {},
-    this.scales = const {Europe: 1, Asia: 1, NorthAmerica: 1, SouthAmerica: 1, Africa: 1, Australia: 1},
-    this.elevations = const {Europe: 3, Asia: 3, NorthAmerica: 3, SouthAmerica: 3, Africa: 3, Australia: 3},
+    this.scales = const {Asia: 1, Africa: 1, Europe: 1, SouthAmerica: 1, NorthAmerica: 1, Australia: 1},
+    this.elevations = const {Asia: 3, Africa: 3, Europe: 3, SouthAmerica: 3, NorthAmerica: 3, Australia: 3},
     this.colors,
   });
 
@@ -30,7 +30,7 @@ class InteractiveMap extends StatelessWidget {
         deads: deads,
         scales: scales,
         elevations: elevations,
-        colors: colors ?? {Europe: defaultColor, Asia: defaultColor, NorthAmerica: defaultColor, SouthAmerica: defaultColor, Africa: defaultColor, Australia: defaultColor},
+        colors: colors ?? {Asia: defaultColor, Africa: defaultColor, Europe: defaultColor, SouthAmerica: defaultColor, NorthAmerica: defaultColor, Australia: defaultColor},
         deadColor: theme.colorScheme.surface,
         outlineColor: theme.colorScheme.outline,
         shadowColor: theme.colorScheme.shadow,
@@ -162,11 +162,11 @@ class InteractiveMapData {
   final Map<Type, ({Rect bounds, List<Path> paths})> regions;
 
   static const _regionsToPaths = {
-    Europe: [5, 6, 7, 8, 9, 10, 12],
     Asia: [3, 20, 23, 24, 25, 26, 27, 28, 30, 31, 32, 33, 34],
-    NorthAmerica: [0, 1, 2, 4, 13, 14, 15, 16, 17, 18, 19, 21],
-    SouthAmerica: [22],
     Africa: [11, 36],
+    Europe: [5, 6, 7, 8, 9, 10, 12],
+    SouthAmerica: [22],
+    NorthAmerica: [0, 1, 2, 4, 13, 14, 15, 16, 17, 18, 19, 21],
     Australia: [29, 35, 37, 38, 39],
   };
   static Future<InteractiveMapData> load() async {
@@ -174,7 +174,7 @@ class InteractiveMapData {
     final paths = pathsFile.split('\n').map((e) => parseSvgPath(e)).toList();
 
     final regions = <Type, ({Rect bounds, List<Path> paths})>{};
-    for (final region in [Europe, Asia, NorthAmerica, SouthAmerica, Africa, Australia]) {
+    for (final region in [Asia, Africa, Europe, SouthAmerica, NorthAmerica, Australia]) {
       final regionPaths = _regionsToPaths[region]!.map((e) => paths[e]).toList();
       final regionBounds = regionPaths.map((e) => e.getBounds()).reduce((rect, e) => rect.expandToInclude(e));
       regions[region] = (bounds: regionBounds, paths: regionPaths);
@@ -203,29 +203,29 @@ class InteractiveMapData {
   }
 
   static const _regionNames = {
-    Europe: 'Europa',
     Asia: 'Asien',
-    NorthAmerica: 'Nordamerika',
-    SouthAmerica: 'Südamerika',
     Africa: 'Afrika',
+    Europe: 'Europa',
+    SouthAmerica: 'Südamerika',
+    NorthAmerica: 'Nordamerika',
     Australia: 'Australien',
   };
   String getRegionName(Type region) => _regionNames[region]!;
   static const _regionsCenters = {
-    Europe: Offset(1000, 580),
     Asia: Offset(1400, 600),
-    NorthAmerica: Offset(300, 620),
-    SouthAmerica: Offset(530, 1000),
     Africa: Offset(1020, 850),
+    Europe: Offset(1000, 580),
+    SouthAmerica: Offset(530, 1000),
+    NorthAmerica: Offset(300, 620),
     Australia: Offset(1760, 1080),
   };
   Offset getRegionCenter(Size size, Type region) => pathToLocal(size, _regionsCenters[region]!);
   static const _regionsDrawPopupUpwards = {
-    Europe: false,
     Asia: false,
-    NorthAmerica: false,
-    SouthAmerica: true,
     Africa: false,
+    Europe: false,
+    SouthAmerica: true,
+    NorthAmerica: false,
     Australia: true,
   };
   bool getRegionDrawPopupUpwards(Type region) => _regionsDrawPopupUpwards[region]!;

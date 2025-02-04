@@ -13,6 +13,7 @@ class Popup<T extends Object> extends StatefulWidget {
   const Popup({
     super.key,
     this.controller,
+    this.clickable = true,
     this.getDataAt,
     this.getPosition,
     this.getDirection,
@@ -23,6 +24,7 @@ class Popup<T extends Object> extends StatefulWidget {
         assert(getDataAt != null || T == Object);
 
   final PopupController<T>? controller;
+  final bool clickable;
   final T Function(Offset localPosition)? getDataAt;
   final Offset Function(T data)? getPosition;
   final Direction Function(T data)? getDirection;
@@ -125,7 +127,7 @@ class _PopupState<T extends Object> extends State<Popup<T>> {
           final direction = widget.getDirection == null ? widget.direction! : widget.getDirection!(data);
 
           return Listener(
-            onPointerDown: _onTapOverlay,
+            onPointerDown: widget.clickable ? _onTapOverlay : null,
             child: MouseRegion(
               onEnter: _onPointerEnterOverlay,
               onExit: _onPointerExitOverlay,
@@ -141,8 +143,8 @@ class _PopupState<T extends Object> extends State<Popup<T>> {
         },
       ),
       child: TapRegion(
-        onTapOutside: _onTapOutside,
-        onTapInside: _onTapChild,
+        onTapOutside: widget.clickable ? _onTapOutside : null,
+        onTapInside: widget.clickable ? _onTapChild : null,
         child: MouseRegion(
           onEnter: _onPointerEnterChild,
           onExit: (event) => Future.microtask(_onPointerExitChild),

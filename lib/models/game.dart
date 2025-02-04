@@ -7,15 +7,18 @@ import 'package:geocibus/models/region.dart';
 
 class Game extends ChangeNotifier {
   final regions = [
-    Europe(),
     Asia(),
-    NorthAmerica(),
-    SouthAmerica(),
     Africa(),
+    Europe(),
+    SouthAmerica(),
+    NorthAmerica(),
     Australia(),
   ];
 
-  int score = 0;
+  late final yearlyPopulation = [
+    {for (final region in regions) region: region.startPopulation},
+  ];
+  int get score => yearlyPopulation.skip(1).map((e) => e.values.sum).sum;
 
   int round = 0;
   RoundState roundState = RoundState.beginning;
@@ -122,7 +125,7 @@ class Game extends ChangeNotifier {
       region.finishRound();
     }
 
-    score += regions.fold(0, (sum, e) => sum + e.population);
+    yearlyPopulation.add({for (final region in regions) region: region.population});
 
     newEvents = round == 10 ? [] : events[round];
     finishedEvents = activeEvents.where((e) => e.duration == e.round).toList();

@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:flutter/material.dart';
 import 'package:geocibus/models/event.dart';
 
 const _maximumPopulationGrowthRate = 0.1;
@@ -9,6 +10,7 @@ sealed class Region {
   Region({
     required this.name,
     required this.character,
+    required this.diagramColor,
     required this.startPopulation,
     required this.defaultPopulationGrowthRate,
     required this.waterPerPerson,
@@ -18,6 +20,7 @@ sealed class Region {
 
   final String name;
   final String character;
+  final Color diagramColor;
 
   final int startPopulation;
   late int population = startPopulation;
@@ -82,24 +85,12 @@ enum ResourceState { good, normal, bad, panic }
 
 enum ResourceTrend { rising, stable, falling }
 
-class Europe extends Region {
-  Europe()
-      : super(
-          name: 'Europa',
-          character: 'europe.png',
-          startPopulation: 746,
-          defaultPopulationGrowthRate: -0.001,
-          waterPerPerson: 5,
-          waterGenerationRate: 7,
-          foodGenerationRate: 3.555,
-        );
-}
-
 class Asia extends Region {
   Asia()
       : super(
           name: 'Asien',
           character: 'asia.png',
+          diagramColor: Colors.orange,
           startPopulation: 4778,
           defaultPopulationGrowthRate: 0.0058,
           waterPerPerson: 8,
@@ -108,37 +99,12 @@ class Asia extends Region {
         );
 }
 
-class NorthAmerica extends Region {
-  NorthAmerica()
-      : super(
-          name: 'Nordamerika',
-          character: 'north-america.png',
-          startPopulation: 383,
-          defaultPopulationGrowthRate: 0.0056,
-          waterPerPerson: 10,
-          waterGenerationRate: 15,
-          foodGenerationRate: 3.881,
-        );
-}
-
-class SouthAmerica extends Region {
-  SouthAmerica()
-      : super(
-          name: 'Südamerika',
-          character: 'south-america.png',
-          startPopulation: 659,
-          defaultPopulationGrowthRate: 0.0065,
-          waterPerPerson: 5,
-          waterGenerationRate: 7,
-          foodGenerationRate: 3.111,
-        );
-}
-
 class Africa extends Region {
   Africa()
       : super(
           name: 'Afrika',
           character: 'africa.png',
+          diagramColor: Colors.yellow,
           startPopulation: 1481,
           defaultPopulationGrowthRate: 0.0226,
           waterPerPerson: 10,
@@ -147,11 +113,54 @@ class Africa extends Region {
         );
 }
 
+class Europe extends Region {
+  Europe()
+      : super(
+          name: 'Europa',
+          character: 'europe.png',
+          diagramColor: Colors.red,
+          startPopulation: 746,
+          defaultPopulationGrowthRate: -0.001,
+          waterPerPerson: 5,
+          waterGenerationRate: 7,
+          foodGenerationRate: 3.555,
+        );
+}
+
+class SouthAmerica extends Region {
+  SouthAmerica()
+      : super(
+          name: 'Südamerika',
+          character: 'south-america.png',
+          diagramColor: Colors.green,
+          startPopulation: 659,
+          defaultPopulationGrowthRate: 0.0065,
+          waterPerPerson: 5,
+          waterGenerationRate: 7,
+          foodGenerationRate: 3.111,
+        );
+}
+
+class NorthAmerica extends Region {
+  NorthAmerica()
+      : super(
+          name: 'Nordamerika',
+          character: 'north-america.png',
+          diagramColor: Colors.lightGreen,
+          startPopulation: 383,
+          defaultPopulationGrowthRate: 0.0056,
+          waterPerPerson: 10,
+          waterGenerationRate: 15,
+          foodGenerationRate: 3.881,
+        );
+}
+
 class Australia extends Region {
   Australia()
       : super(
           name: 'Australien',
           character: 'australia.png',
+          diagramColor: Colors.purple,
           startPopulation: 46,
           defaultPopulationGrowthRate: 0.0111,
           waterPerPerson: 9,

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:geocibus/models/game.dart';
-import 'package:geocibus/pages/finish/page.dart';
+import 'package:geocibus/pages/finish.dart';
 import 'package:geocibus/pages/main/end_year.dart';
 import 'package:geocibus/pages/main/events.dart';
 import 'package:geocibus/pages/main/exchange.dart';

@@ -60,7 +60,7 @@ class _StartPageState extends State<StartPage> {
                         aspectRatio: _mapData!.bounds.width / _mapData!.bounds.height,
                         child: InteractiveMap(
                           data: _mapData!,
-                          colors: {Europe: mapColor, Asia: mapColor, NorthAmerica: mapColor, SouthAmerica: mapColor, Africa: mapColor, Australia: mapColor},
+                          colors: {Asia: mapColor, Africa: mapColor, Europe: mapColor, SouthAmerica: mapColor, NorthAmerica: mapColor, Australia: mapColor},
                         ),
                       ),
                     ),
