@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gap/gap.dart';
 import 'package:geocibus/models/game.dart';
+import 'package:geocibus/pages/sources.dart';
 import 'package:geocibus/pages/start.dart';
 import 'package:geocibus/widgets/button.dart';
 import 'package:geocibus/widgets/card.dart';
@@ -36,7 +37,7 @@ class MainTop extends StatelessWidget {
             children: [
               TextCard(text: 'Score: ${game.score}', style: textStyle),
               const Gap(8),
-              Button.icon(icon: FontAwesomeIcons.gear, tooltip: 'Einstellungen', onPressed: () {}),
+              Button.icon(icon: FontAwesomeIcons.info, tooltip: 'Quellen', onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (context) => const SourcesPage()))),
             ],
           ),
         ),

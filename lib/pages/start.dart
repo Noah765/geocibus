@@ -4,6 +4,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gap/gap.dart';
 import 'package:geocibus/models/region.dart';
 import 'package:geocibus/pages/main/page.dart';
+import 'package:geocibus/pages/sources.dart';
 import 'package:geocibus/widgets/button.dart';
 import 'package:geocibus/widgets/icon_span.dart';
 import 'package:geocibus/widgets/interactive_map.dart';
@@ -26,7 +27,7 @@ class _StartPageState extends State<StartPage> {
 
   void _start(BuildContext context) => Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => const MainPage()));
 
-  void _options() {}
+  void _sources(BuildContext context) => Navigator.of(context).push(MaterialPageRoute(builder: (context) => const SourcesPage()));
 
   void _leave() => appWindow.close();
 
@@ -73,7 +74,7 @@ class _StartPageState extends State<StartPage> {
                         children: [
                           Button(text: 'Start', style: buttonStyle, elevation: 3, borderWidth: 3, onPressed: () => _start(context)),
                           const Gap(16),
-                          Button(text: 'Optionen', style: buttonStyle, elevation: 3, borderWidth: 3, onPressed: _options),
+                          Button(text: 'Quellen', style: buttonStyle, elevation: 3, borderWidth: 3, onPressed: () => _sources(context)),
                           const Gap(16),
                           Button(text: 'Spiel verlassen', style: buttonStyle, elevation: 3, borderWidth: 3, onPressed: _leave),
                         ],
