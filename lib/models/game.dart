@@ -148,6 +148,7 @@ class Game extends ChangeNotifier {
       event.round++;
       if (event.duration < event.round) {
         removedEvents.add(event);
+        event.onFinished(this);
       } else {
         event.apply(this);
       }
@@ -158,6 +159,7 @@ class Game extends ChangeNotifier {
 
     for (final event in newEvents) {
       activeEvents.add(event);
+      event.onInitialize(this);
       event.apply(this);
     }
 

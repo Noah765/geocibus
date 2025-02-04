@@ -103,8 +103,8 @@ class InflationEvent extends Event {
   @override
   void onInitialize(Game game) {
     for (final region in game.regions) {
-      region.foodGenerationRate /= level / 4;
-      region.waterGenerationRate /= level / 4;
+      region.foodGenerationRate /= 1 + level / 4;
+      region.waterGenerationRate /= 1 + level / 4;
     }
   }
 
@@ -117,8 +117,8 @@ class InflationEvent extends Event {
   @override
   void onFinished(Game game) {
     for (final region in game.regions) {
-      region.foodGenerationRate *= level / 4;
-      region.waterGenerationRate *= level / 4;
+      region.foodGenerationRate *= 1 + level / 4;
+      region.waterGenerationRate *= 1 + level / 4;
     }
   }
 }
@@ -218,7 +218,7 @@ class PlantDiseaseEvent extends Event {
   @override
   void onInitialize(Game game) {
     for (final region in game.regions) {
-      region.foodGenerationRate /= level / 4;
+      region.foodGenerationRate /= 1 + level / 4;
     }
   }
 
@@ -231,7 +231,7 @@ class PlantDiseaseEvent extends Event {
   @override
   void onFinished(Game game) {
     for (final region in game.regions) {
-      region.foodGenerationRate *= level / 4;
+      region.foodGenerationRate *= 1 + level / 4;
     }
   }
 }
@@ -250,7 +250,7 @@ class WaterPollutionEvent extends Event {
   @override
   void onInitialize(Game game) {
     for (final region in game.regions) {
-      region.waterGenerationRate /= level / 4;
+      region.waterGenerationRate /= 1 + level / 4;
     }
   }
 
@@ -263,7 +263,7 @@ class WaterPollutionEvent extends Event {
   @override
   void onFinished(Game game) {
     for (final region in game.regions) {
-      region.waterGenerationRate *= level / 4;
+      region.waterGenerationRate *= 1 + level / 4;
     }
   }
 }
