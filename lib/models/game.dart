@@ -99,11 +99,12 @@ class Game extends ChangeNotifier {
   Region selectRandomRegion() => regions[Random().nextInt(regions.length)];
 
   void distributeResources(Region region, int water, int food) {
-    this.food -= food;
     this.water -= water;
+    this.food -= food;
 
-    region.food += food;
+    region.updateResourceTrends(region.water + water, region.food + food);
     region.water += water;
+    region.food += food;
 
     movesLeft--;
 

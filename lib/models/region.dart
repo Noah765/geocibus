@@ -59,12 +59,7 @@ sealed class Region {
   ResourceTrend waterTrend = ResourceTrend.stable;
   ResourceTrend foodTrend = ResourceTrend.stable;
 
-  void finishRound() {
-    population = (min(population * (1 + _maximumPopulationGrowthRate), min(food / _foodPerPerson, water / waterPerPerson)) * (1 + defaultPopulationGrowthRate)).floor();
-
-    final newWater = water - requiredWater + generatedWater;
-    final newFood = food - requiredFood + generatedFood;
-
+  void updateResourceTrends(int newWater, int newFood) {
     waterTrend = switch (newWater / water) {
       > 1.1 => ResourceTrend.rising,
       > 0.9 => ResourceTrend.stable,
@@ -75,7 +70,14 @@ sealed class Region {
       > 0.9 => ResourceTrend.stable,
       _ => ResourceTrend.falling,
     };
+  }
 
+  void finishRound() {
+    population = (min(population * (1 + _maximumPopulationGrowthRate), min(food / _foodPerPerson, water / waterPerPerson)) * (1 + defaultPopulationGrowthRate)).floor();
+
+    final newWater = water - requiredWater + generatedWater;
+    final newFood = food - requiredFood + generatedFood;
+    updateResourceTrends(newWater, newFood);
     water = newWater;
     food = newFood;
   }
