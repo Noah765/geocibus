@@ -268,7 +268,10 @@ class _Interaction {
       }
     }
 
-    if (event == null || Random().nextDouble() < 0.25) {
+    if (event == null ||
+        (event is PlantDiseaseEvent && region.foodState != ResourceState.bad) ||
+        (event is WaterPollutionEvent && region.waterState != ResourceState.bad) ||
+        Random().nextDouble() < 0.25) {
       return switch ((region.waterState == ResourceState.bad, region.waterTrend == ResourceTrend.falling, region.foodState == ResourceState.bad, region.foodTrend == ResourceTrend.falling)) {
         (true, true, true, true) => 'Momentan sehen unsere Ressourcenwerte nicht gut aus. Hoffentlich werden sie nicht noch knapper.',
         (true, true, _, _) when Random().nextBool() => 'Unsere Wasserbestände werden immer knapper! Wir benötigen Hilfe.',
@@ -289,26 +292,28 @@ class _Interaction {
       PandemicEvent(level: 1) when Random().nextBool() =>
         'Wir brauchen unbedingt Hilfe. Aufgrund einer Epidemie in einigen unserer Länder sind viele unserer Lieferketten eingeschränkt. Können Sie uns helfen?',
       PandemicEvent(level: 1) => 'Wegen dem länderweiten Shutdown, gehen unsere Lagerbestände zuneige. Unsere Lage ist sehr prekär.',
-      PandemicEvent() => [
-          'Einige meiner Länder stecken gerade in einer tiefen Krise. Zu viele Menschen stecken gerade in Quarantäne und die Wirtschaft fährt herunter. Sie sind auf Waren von außen angewiesen. Helft uns!',
-          'Viele Menschen können wegen der Pandemie nicht zur Arbeit erscheinen. Unsere Wirtschaft fährt herunter und die Supermärkte stehen leer. Wir sind auf Hilfspakete angewiesen.',
-          'Unsere Bekölkerung hamstert panisch Lebensmittel. Dabei sind unsere Vorräte so gut wie ausgeschöpft. Wir brauchen Hilfe!',
-        ][Random().nextInt(3)],
-      InflationEvent() => [
-          'Durch die hohe Inflation herrscht bei uns gerade eine Verknappung an Nahrungsmittel. Unsere Büger*innen können sich die Preise nicht leisten. Wir brauchen Hilfe.',
-          'Aufgrund verschiedensten Krisen, steigen die Nahrungsmittelpreise. Viele Menschen können sich keine gesunde Ernährung mehr leisten. Können Sie uns Abhilfe verschaffen?',
-          'Die Inflationsrate ist so hoch wie nie. Der Lebensstandard unserer Bevölkerung sinkt deswegen. Können Sie uns zumindest in einem Aspekt helfen, damit es unserer Bevölkerung besser geht?',
-        ][Random().nextInt(3)],
-      WarEvent() when region.exportBlockingEvents.contains(event) => [
-          'Handelsblockaden verhindern den Import von lebenswichtigen Nahrungsmitteln. Unsere Bevölkerung hungert. Wir brauchen dringend Hilfspakete.',
-          'Eine Kriegspartei droht, Weizenexporte teurer zu machen. Selbst wenn man nach Ersatzlieferanten sucht, wird es nicht unbedingt günstiger, schließlich sind sie die größten Weizenexporteure! Können Sie uns helfen, etwas unabhängiger von ihren Lieferungen zu machen?',
-          'Der Handel mit verschiedenen Ländern ist aufgrund des Krieges eingeschränkt. Dabei sind wir sehr von deren Importen abhängig. Wir brauchen Hilfe!',
-        ][Random().nextInt(3)],
+      PandemicEvent() when region.foodState == ResourceState.bad && Random().nextBool() =>
+        'Unsere Bekölkerung hamstert panisch Nahrungsmittel. Dabei sind unsere Vorräte so gut wie ausgeschöpft. Wir brauchen Hilfe!',
+      PandemicEvent() when Random().nextBool() =>
+        'Einige meiner Länder stecken gerade in einer tiefen Krise. Zu viele Menschen stecken gerade in Quarantäne und die Wirtschaft fährt herunter. Sie sind auf Waren von außen angewiesen. Helft uns!',
+      PandemicEvent() => 'Viele Menschen können wegen der Pandemie nicht zur Arbeit erscheinen. Unsere Wirtschaft fährt herunter und die Supermärkte stehen leer. Wir sind auf Hilfspakete angewiesen.',
+      InflationEvent() when region.foodState == ResourceState.bad && Random().nextBool() =>
+        'Durch die hohe Inflation herrscht bei uns gerade eine Verknappung an Nahrungsmittel. Unsere Büger*innen können sich die Preise nicht leisten. Wir brauchen Hilfe.',
+      InflationEvent() when region.foodState == ResourceState.bad =>
+        'Aufgrund verschiedensten Krisen, steigen die Nahrungsmittelpreise. Viele Menschen können sich keine gesunde Ernährung mehr leisten. Können Sie uns Abhilfe verschaffen?',
+      InflationEvent() =>
+        'Die Inflationsrate ist so hoch wie nie. Der Lebensstandard unserer Bevölkerung sinkt deswegen. Können Sie uns zumindest in einem Aspekt helfen, damit es unserer Bevölkerung besser geht?',
+      WarEvent() when region.exportBlockingEvents.contains(event) && region.foodState == ResourceState.bad =>
+        'Handelsblockaden verhindern den Import von lebenswichtigen Nahrungsmitteln. Unsere Bevölkerung hungert. Wir brauchen dringend Hilfspakete.',
+      WarEvent() when region.exportBlockingEvents.contains(event) && Random().nextBool() =>
+        'Eine Kriegspartei droht, Lebensmittelexporte teurer zu machen. Können Sie uns helfen, uns etwas unabhängiger von ihren Lieferungen zu machen?',
+      WarEvent() when region.exportBlockingEvents.contains(event) =>
+        'Der Handel mit verschiedenen Ländern ist aufgrund des Krieges eingeschränkt. Dabei sind wir sehr von deren Importen abhängig. Wir brauchen Hilfe!',
       WarEvent() when Random().nextBool() => 'Wir haben viele Geflüchtete aufgenommen und die Preissteigerungen aufgrund des Krieges setzen uns sehr zu. Können Sie uns helfen?',
-      WarEvent() => 'Auch wenn wir keine direkte Kriegspartei sind, treffen uns die Sanktionen und Handelsembargos sehr. Können Sie uns Essen bereitstellen?',
+      WarEvent() => 'Auch wenn wir keine direkte Kriegspartei sind, treffen uns die Sanktionen und Handelsembargos sehr. Können Sie uns die benötigten Ressourcen bereitstellen?',
       NatureEvent() when Random().nextDouble() < 0.3 =>
         'Der Klimawandel trifft uns sehr hart. Ernten werden zerstört, Wasser verschmutzt und viele Menschen sterben, was auch die Zahl der Arbeitskräfte beeinflusst. Können wir auf Hilfspakete zählen?',
-      NatureEvent(level: 1) => 'Wir haben durch die großen Überflutungen in vielen Ländern kaum sauberes Wasser mehr. Wir können Hilfspakete gut gebrauchen.',
+      NatureEvent(level: 1) => 'Wir haben durch die großen Überflutungen in vielen Ländern kaum Lebensmittel und sauberes Trinkwasser mehr. Wir können Hilfspakete gut gebrauchen.',
       NatureEvent(level: 2) => 'Tsunamis haben Teile unseres Kontinentes komplett flachgelegt. Wir können Hilfe gut gebrauchen.',
       NatureEvent(level: 3) =>
         'Ein gewaltiges Erdbeben hat einige Länder schwergetroffen. Die Infrastruktur ist komplett in Schutt und Asche gelegt worden. Die Kriminalität ist hoch und sanitäre Einrichtungen sind praktisch non-existent. Es ist Ihre Pflicht, uns humanitäre Hilfe zu leisten! Jede Unterstützung zählt!',
