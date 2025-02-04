@@ -3,6 +3,7 @@ import 'package:gap/gap.dart';
 import 'package:geocibus/models/event.dart';
 import 'package:geocibus/models/game.dart';
 import 'package:geocibus/widgets/button.dart';
+import 'package:geocibus/widgets/card.dart';
 import 'package:geocibus/widgets/icon_span.dart';
 import 'package:geocibus/widgets/popup.dart';
 import 'package:provider/provider.dart';
@@ -39,6 +40,7 @@ class _Event extends StatelessWidget {
     final titleStyle = Theme.of(context).textTheme.titleLarge;
 
     return Popup(
+      clickable: false,
       direction: Direction.right,
       builder: (context, data) => SizedBox(
         width: 400,
@@ -54,7 +56,7 @@ class _Event extends StatelessWidget {
           ],
         ),
       ),
-      child: Button.icon(icon: event.icon, onPressed: () {}),
+      child: IconCard(icon: event.icon),
     );
   }
 }
