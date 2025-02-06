@@ -15,6 +15,7 @@ dependencies:
   shared_preferences: ^2.3.5
   svg_path_parser: ^1.1.2
   url_launcher: ^6.3.1
+  vector_math: ^2.1.4
   window_manager: ^0.4.3
 dev_dependencies:
   lint: ^2.3.0
