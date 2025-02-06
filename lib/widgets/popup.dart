@@ -83,6 +83,7 @@ class _PopupState<T extends Object> extends State<Popup<T>> with TickerProviderS
   }
 
   void _onTapChild(PointerDownEvent event) {
+    if (_childHovered && !widget.clickable) return;
     final position = (context.findRenderObject()! as RenderBox).globalToLocal(event.position);
     final data = _getDataAt(position);
     if (_controller.pressed != null && _controller.pressed != data) {
@@ -90,6 +91,7 @@ class _PopupState<T extends Object> extends State<Popup<T>> with TickerProviderS
       _inactivePopups.remove(data);
       setState(() {});
     }
+    if (_controller.hovered == null) setState(() => _controller.pressed == data ? _inactivePopups.add(data) : null);
     _controller.pressed = data == _controller.pressed ? null : data;
   }
 
@@ -108,6 +110,7 @@ class _PopupState<T extends Object> extends State<Popup<T>> with TickerProviderS
   }
 
   void _onChildHover(PointerHoverEvent event) {
+    if (_controller.hovered == null) return;
     final data = _getDataAt(event.localPosition);
     if (data == _controller.hovered) return;
     if (_controller.pressed == null) {
@@ -142,7 +145,7 @@ class _PopupState<T extends Object> extends State<Popup<T>> with TickerProviderS
           onExit: (event) => Future.microtask(() => _onPointerExitPopup(data)),
           hitTestBehavior: HitTestBehavior.deferToChild,
           child: TweenAnimationBuilder(
-            tween: active ? Tween(begin: 0.0, end: 1.0) : Tween(begin: 1.0, end: 0.0),
+            tween: Tween(begin: 0.0, end: active ? 1.0 : 0.0),
             duration: const Duration(milliseconds: 300),
             curve: Curves.fastOutSlowIn,
             onEnd: active ? null : () => setState(() => _inactivePopups.remove(data)),
@@ -163,7 +166,7 @@ class _PopupState<T extends Object> extends State<Popup<T>> with TickerProviderS
 
   @override
   Widget build(BuildContext buildContext) {
-    return OverlayPortal(
+    return OverlayPortal.targetsRootOverlay(
       controller: _overlayController,
       overlayChildBuilder: (context) => LayoutBuilder(
         builder: (context, constraints) => Stack(
@@ -174,8 +177,8 @@ class _PopupState<T extends Object> extends State<Popup<T>> with TickerProviderS
         ),
       ),
       child: TapRegion(
-        onTapOutside: widget.clickable ? _onTapOutside : null,
-        onTapInside: widget.clickable ? _onTapChild : null,
+        onTapOutside: _onTapOutside,
+        onTapInside: _onTapChild,
         child: MouseRegion(
           onEnter: _onPointerEnterChild,
           onExit: (event) => Future.microtask(_onPointerExitChild),
