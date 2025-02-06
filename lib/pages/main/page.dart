@@ -4,10 +4,10 @@ import 'package:geocibus/models/game.dart';
 import 'package:geocibus/pages/finish.dart';
 import 'package:geocibus/pages/main/end_year.dart';
 import 'package:geocibus/pages/main/events.dart';
-import 'package:geocibus/pages/main/exchange.dart';
 import 'package:geocibus/pages/main/map.dart';
 import 'package:geocibus/pages/main/resources.dart';
 import 'package:geocibus/pages/main/round_beginning_overlay.dart';
+import 'package:geocibus/pages/main/shop.dart';
 import 'package:geocibus/pages/main/top.dart';
 import 'package:provider/provider.dart';
 
@@ -71,7 +71,7 @@ class _MainPageState extends State<MainPage> {
               ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: [MainResources(), Gap(8), MainExchange()],
+                children: [MainResources(), Gap(8), MainShop()],
               ),
             ],
           ),

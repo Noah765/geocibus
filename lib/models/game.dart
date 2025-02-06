@@ -113,7 +113,7 @@ class Game extends ChangeNotifier {
     notifyListeners();
   }
 
-  void exchangeResources(int water, int food) {
+  void trade(int water, int food) {
     if (water == 0 && food == 0) return;
     this.water += water;
     this.food += food;

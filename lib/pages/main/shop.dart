@@ -8,11 +8,12 @@ import 'package:geocibus/theme.dart';
 import 'package:geocibus/widgets/bidirectional_slider.dart';
 import 'package:geocibus/widgets/button.dart';
 import 'package:geocibus/widgets/card.dart';
+import 'package:geocibus/widgets/icon_span.dart';
 import 'package:geocibus/widgets/popup.dart';
 import 'package:provider/provider.dart';
 
-class MainExchange extends StatelessWidget {
-  const MainExchange({super.key});
+class MainShop extends StatelessWidget {
+  const MainShop({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -59,15 +60,17 @@ class _PopupState extends State<_Popup> {
     _food = min(_food, _foodMax);
   }
 
-  bool get _isExchangePossible => (_water.round() * widget.game.waterPrice).ceil() + (_food.round() * widget.game.foodPrice).ceil() <= widget.game.money;
+  int get _costs => (_water.round() * widget.game.waterPrice).ceil() + (_food.round() * widget.game.foodPrice).ceil();
 
-  void _exchange() {
-    widget.game.exchangeResources(_water.round(), _food.round());
+  void _trade() {
+    widget.game.trade(_water.round(), _food.round());
     setState(() {
       _water = 0;
       _food = 0;
     });
   }
+
+  String _formatMoney(double value) => value.toStringAsFixed(2).replaceFirst('.', ',');
 
   @override
   Widget build(BuildContext context) {
@@ -75,23 +78,35 @@ class _PopupState extends State<_Popup> {
     final iconSize = MediaQuery.textScalerOf(context).scale(20);
     final sliderHeight = iconSize + getIconPadding(context, iconSize, 3).vertical;
 
-    const resourceDisplay = Column(
-      children: [
-        IconCard(icon: FontAwesomeIcons.glassWater, size: 20),
-        Gap(8),
-        IconCard(icon: FontAwesomeIcons.bowlFood, size: 20),
-      ],
-    );
-
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Text('Markt', style: textTheme.headlineMedium),
-        const Gap(8),
+        Text('Markt', style: textTheme.headlineLarge),
+        const Gap(4),
+        Text.rich(
+          style: textTheme.titleMedium,
+          TextSpan(
+            children: [
+              TextSpan(text: _formatMoney(widget.game.waterPrice), children: [IconSpan(icon: FontAwesomeIcons.dollarSign)], style: const TextStyle(color: Colors.red)),
+              const TextSpan(text: ' ↔ '),
+              TextSpan(text: '1', children: [IconSpan(icon: FontAwesomeIcons.glassWater)], style: const TextStyle(color: Colors.blue)),
+            ],
+          ),
+        ),
+        Text.rich(
+          style: textTheme.titleMedium,
+          TextSpan(
+            children: [
+              TextSpan(text: _formatMoney(widget.game.foodPrice), children: [IconSpan(icon: FontAwesomeIcons.dollarSign)], style: const TextStyle(color: Colors.red)),
+              const TextSpan(text: ' ↔ '),
+              TextSpan(text: '1', children: [IconSpan(icon: FontAwesomeIcons.bowlFood, removedTop: 4, removedBottom: 5)], style: const TextStyle(color: Colors.green)),
+            ],
+          ),
+        ),
         Row(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            resourceDisplay,
+            const Column(children: [IconCard(icon: FontAwesomeIcons.glassWater, size: 20), Gap(8), IconCard(icon: FontAwesomeIcons.bowlFood, size: 20)]),
             const Gap(16),
             Expanded(
               child: Column(
@@ -124,14 +139,22 @@ class _PopupState extends State<_Popup> {
               ),
             ),
             const Gap(16),
-            resourceDisplay,
+            const Column(children: [IconCard(icon: FontAwesomeIcons.glassWater, size: 20), Gap(8), IconCard(icon: FontAwesomeIcons.bowlFood, size: 20)]),
           ],
         ),
-        const Gap(16),
+        Text.rich(
+          TextSpan(
+            children: [
+              TextSpan(text: _costs < 0 ? 'Profit: ' : 'Preis: '),
+              TextSpan(text: _costs.abs().toString(), children: [IconSpan(icon: FontAwesomeIcons.dollarSign)], style: const TextStyle(color: Colors.red)),
+            ],
+          ),
+        ),
+        const Gap(24),
         Button(
           text: 'Handeln',
           style: textTheme.titleMedium,
-          onPressed: _isExchangePossible ? _exchange : null,
+          onPressed: _costs <= widget.game.money ? _trade : null,
         ),
       ],
     );
