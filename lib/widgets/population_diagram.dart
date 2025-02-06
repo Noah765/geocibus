@@ -218,7 +218,7 @@ class _BarState extends State<_Bar> {
             listenable: _popupController,
             builder: (context, child) => Stack(
               children: [
-                for (final (i, e) in widget.regions.indexed.whereNot((e) => e.$2.region == _popupController.hovered))
+                for (final (i, e) in widget.regions.indexed.whereNot((e) => e.$2.region == (_popupController.pressed ?? _popupController.hovered)))
                   Positioned(
                     key: ObjectKey(e.region),
                     top: paddingTop + widget.regions.take(i).map((e) => e.height).sum,
@@ -226,13 +226,13 @@ class _BarState extends State<_Bar> {
                     height: e.height,
                     child: _BarSegment(active: false, color: e.region.diagramColor),
                   ),
-                if (_popupController.hovered != null)
+                if (_popupController.pressed != null || _popupController.hovered != null)
                   Positioned(
-                    key: ObjectKey(_popupController.hovered),
-                    top: paddingTop + widget.regions.take(widget.regions.indexWhere((e) => e.region == _popupController.hovered)).map((e) => e.height).sum,
+                    key: ObjectKey(_popupController.pressed ?? _popupController.hovered),
+                    top: paddingTop + widget.regions.take(widget.regions.indexWhere((e) => e.region == (_popupController.pressed ?? _popupController.hovered))).map((e) => e.height).sum,
                     width: constraints.maxWidth,
-                    height: widget.regions.firstWhere((e) => e.region == _popupController.hovered).height,
-                    child: _BarSegment(active: true, color: _popupController.hovered!.diagramColor),
+                    height: widget.regions.firstWhere((e) => e.region == (_popupController.pressed ?? _popupController.hovered)).height,
+                    child: _BarSegment(active: true, color: (_popupController.pressed ?? _popupController.hovered!).diagramColor),
                   ),
               ],
             ),
