@@ -3,10 +3,10 @@ import 'dart:math';
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:geocibus/theme.dart';
 
 const _trackHeight = 8.0;
 const _activeTrackHeight = 10.0;
-const _thumbPadding = 4.0;
 
 class SnappingSlider extends StatefulWidget {
   const SnappingSlider({
@@ -110,9 +110,10 @@ class _SnappingSliderState extends State<SnappingSlider> {
   Widget build(BuildContext context) {
     final defaultTextStyle = DefaultTextStyle.of(context).style;
     final thumbTextStyle = defaultTextStyle.copyWith(fontSize: MediaQuery.textScalerOf(context).scale(defaultTextStyle.fontSize!));
+    final thumbPadding = getTextPadding(context, thumbTextStyle, 0, 1);
     _thumbTextPainter.text = TextSpan(text: max(widget.leftMax ?? 0, widget.rightMax).toString(), style: thumbTextStyle);
     _thumbTextPainter.layout();
-    _thumbSize = Size(_thumbTextPainter.width + 2 * _thumbPadding, _thumbTextPainter.height + 2 * _thumbPadding);
+    _thumbSize = Size(_thumbTextPainter.width + thumbPadding.horizontal, _thumbTextPainter.height + thumbPadding.vertical);
 
     final colors = Theme.of(context).colorScheme;
     final activeColor = widget.value <= 0 || widget.leftMax == null ? colors.onPrimary : colors.onSecondary;
