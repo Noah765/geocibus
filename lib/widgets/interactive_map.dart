@@ -126,9 +126,9 @@ class _Painter extends CustomPainter {
     ..strokeWidth = 2
     ..color = outlineColor;
   void _paintRegion(Canvas canvas, Type region) {
-    final fillPaint = Paint()..color = colors[region]!;
+    final fillPaint = Paint()..color = deads.contains(region) ? outlineColor.withOpacity(0.1) : colors[region]!;
     for (final path in data.regions[region]!.paths) {
-      if (!deads.contains(region)) canvas.drawPath(path, fillPaint);
+      canvas.drawPath(path, fillPaint);
       canvas.drawPath(path, strokePaint);
     }
   }
