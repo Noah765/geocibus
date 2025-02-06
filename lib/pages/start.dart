@@ -1,4 +1,5 @@
 import 'package:bitsdojo_window/bitsdojo_window.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gap/gap.dart';
@@ -43,6 +44,7 @@ class _StartPageState extends State<StartPage> {
         child: Column(
           children: [
             Text.rich(
+              textAlign: TextAlign.center,
               TextSpan(
                 style: theme.textTheme.displayLarge!.copyWith(color: theme.colorScheme.surfaceContainerLow, fontSize: theme.textTheme.displayLarge!.fontSize! * 3),
                 children: [
@@ -66,18 +68,23 @@ class _StartPageState extends State<StartPage> {
                       ),
                     ),
                   Center(
-                    child: FractionallySizedBox(
-                      widthFactor: 1 / 3,
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Button(text: 'Start', style: buttonStyle, elevation: 3, borderWidth: 3, onPressed: () => _start(context)),
-                          const Gap(16),
-                          Button(text: 'Quellen', style: buttonStyle, elevation: 3, borderWidth: 3, onPressed: () => _sources(context)),
-                          const Gap(16),
-                          Button(text: 'Spiel verlassen', style: buttonStyle, elevation: 3, borderWidth: 3, onPressed: _leave),
-                        ],
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: SizedBox(
+                        width: MediaQuery.textScalerOf(context).scale(600),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Button(text: 'Start', style: buttonStyle, elevation: 3, borderWidth: 3, onPressed: () => _start(context)),
+                            const Gap(16),
+                            Button(text: 'Quellen', style: buttonStyle, elevation: 3, borderWidth: 3, onPressed: () => _sources(context)),
+                            if (!kIsWeb) ...[
+                              const Gap(16),
+                              Button(text: 'Spiel verlassen', style: buttonStyle, elevation: 3, borderWidth: 3, onPressed: _leave),
+                            ],
+                          ],
+                        ),
                       ),
                     ),
                   ),

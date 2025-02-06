@@ -6,9 +6,10 @@ import 'package:gap/gap.dart';
 import 'package:geocibus/models/region.dart';
 
 class ResourceIndicator extends StatelessWidget {
-  const ResourceIndicator(this.region, {super.key});
+  const ResourceIndicator(this.region, {super.key, this.direction = Axis.vertical});
 
   final Region region;
+  final Axis direction;
 
   @override
   Widget build(BuildContext context) {
@@ -20,34 +21,43 @@ class ResourceIndicator extends StatelessWidget {
     );
     final resourceLabelTextHeight = (resourceLabelTextStyle.fontSize! * resourceLabelTextStyle.height!).roundToDouble();
 
-    return Column(
+    return Flex(
+      direction: direction,
       children: [
-        Text('Wasser', style: theme.textTheme.titleMedium),
-        CustomPaint(
-          painter: _Painter(
-            current: region.water,
-            required: region.requiredWater,
-            maximum: region.maximumWater,
-            currentColor: theme.colorScheme.primary,
-            requiredColor: theme.colorScheme.secondary,
-            maximumColor: theme.colorScheme.tertiary,
-            textStyle: resourceLabelTextStyle,
-          ),
-          size: Size(240, resourceLabelTextHeight * 2 + 12),
+        Column(
+          children: [
+            Text('Wasser', style: theme.textTheme.titleMedium),
+            CustomPaint(
+              painter: _Painter(
+                current: region.water,
+                required: region.requiredWater,
+                maximum: region.maximumWater,
+                currentColor: theme.colorScheme.primary,
+                requiredColor: theme.colorScheme.secondary,
+                maximumColor: theme.colorScheme.tertiary,
+                textStyle: resourceLabelTextStyle,
+              ),
+              size: Size(240, resourceLabelTextHeight * 2 + 12),
+            ),
+          ],
         ),
-        const Gap(8),
-        Text('Essen', style: theme.textTheme.titleMedium),
-        CustomPaint(
-          painter: _Painter(
-            current: region.food,
-            required: region.requiredFood,
-            maximum: region.maximumFood,
-            currentColor: theme.colorScheme.primary,
-            requiredColor: theme.colorScheme.secondary,
-            maximumColor: theme.colorScheme.tertiary,
-            textStyle: resourceLabelTextStyle,
-          ),
-          size: Size(240, resourceLabelTextHeight * 2 + 12),
+        Gap(direction == Axis.vertical ? 8 : 16),
+        Column(
+          children: [
+            Text('Essen', style: theme.textTheme.titleMedium),
+            CustomPaint(
+              painter: _Painter(
+                current: region.food,
+                required: region.requiredFood,
+                maximum: region.maximumFood,
+                currentColor: theme.colorScheme.primary,
+                requiredColor: theme.colorScheme.secondary,
+                maximumColor: theme.colorScheme.tertiary,
+                textStyle: resourceLabelTextStyle,
+              ),
+              size: Size(240, resourceLabelTextHeight * 2 + 12),
+            ),
+          ],
         ),
       ],
     );

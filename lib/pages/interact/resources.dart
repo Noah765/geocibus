@@ -9,7 +9,9 @@ import 'package:geocibus/widgets/resource_indicator.dart';
 import 'package:provider/provider.dart';
 
 class InteractResources extends StatelessWidget {
-  const InteractResources({super.key});
+  const InteractResources({super.key, required this.direction});
+
+  final Axis direction;
 
   @override
   Widget build(BuildContext context) {
@@ -19,32 +21,43 @@ class InteractResources extends StatelessWidget {
 
     return ContainerCard(
       size: ContainerCardSize.large,
-      child: Column(
+      child: Flex(
+        direction: direction,
         mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: direction == Axis.vertical ? CrossAxisAlignment.center : CrossAxisAlignment.start,
         children: [
-          Text(region.name, style: textTheme.headlineSmall),
-          Text('${region.population} Mio. Einwohner'),
-          const Gap(8),
-          ResourceIndicator(region),
-          const Gap(32),
-          Text('Du', style: textTheme.headlineSmall),
-          Text.rich(
-            style: textTheme.titleLarge!.copyWith(color: Colors.blue),
-            TextSpan(
-              children: [
-                TextSpan(text: game.water.toString()),
-                IconSpan(icon: FontAwesomeIcons.glassWater),
-              ],
-            ),
+          Column(
+            children: [
+              Text(region.name, style: textTheme.headlineSmall),
+              Text('${region.population} Mio. Einwohner'),
+              const Gap(8),
+              ResourceIndicator(region, direction: direction),
+            ],
           ),
-          Text.rich(
-            TextSpan(
-              style: textTheme.titleLarge!.copyWith(color: Colors.green),
-              children: [
-                TextSpan(text: game.food.toString()),
-                IconSpan(icon: FontAwesomeIcons.bowlFood, removedTop: 4, removedBottom: 5),
-              ],
-            ),
+          SizedBox(width: direction == Axis.vertical ? null : 32, height: direction == Axis.vertical ? 32 : null),
+          Column(
+            children: [
+              Text('Du', style: textTheme.headlineSmall),
+              const Gap(4),
+              Text.rich(
+                style: textTheme.titleLarge!.copyWith(color: Colors.blue),
+                TextSpan(
+                  children: [
+                    TextSpan(text: game.water.toString()),
+                    IconSpan(icon: FontAwesomeIcons.glassWater),
+                  ],
+                ),
+              ),
+              Text.rich(
+                TextSpan(
+                  style: textTheme.titleLarge!.copyWith(color: Colors.green),
+                  children: [
+                    TextSpan(text: game.food.toString()),
+                    IconSpan(icon: FontAwesomeIcons.bowlFood, removedTop: 4, removedBottom: 5),
+                  ],
+                ),
+              ),
+            ],
           ),
         ],
       ),
