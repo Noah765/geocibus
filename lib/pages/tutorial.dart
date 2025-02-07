@@ -1,5 +1,6 @@
 import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
+import 'package:gap/gap.dart';
 import 'package:geocibus/pages/main/page.dart';
 import 'package:geocibus/pages/start.dart';
 import 'package:geocibus/widgets/button.dart';
@@ -25,7 +26,7 @@ class _TutorialPageState extends State<TutorialPage> {
   void initState() {
     super.initState();
     _videoPlayerController = VideoPlayerController.asset('assets/tutorial.mp4')..initialize();
-    _chewieController = ChewieController(videoPlayerController: _videoPlayerController, autoPlay: true);
+    _chewieController = ChewieController(videoPlayerController: _videoPlayerController, autoPlay: true, showOptions: false);
     SharedPreferences.getInstance().then((value) => value.setBool('watchedTutorial', true));
   }
 
@@ -46,21 +47,23 @@ class _TutorialPageState extends State<TutorialPage> {
 
   @override
   Widget build(BuildContext context) {
-    // TODO Improve UI (settings, remove material design widgets), look at video_player_control_panel
     return Scaffold(
       body: Padding(
         padding: const EdgeInsets.all(8),
         child: Column(
           children: [
             Expanded(child: Chewie(controller: _chewieController)),
+            const Gap(16),
             Button(
               text: switch (widget.navigationTarget) {
                 TutorialNavigationTarget.startPage => 'Zurück zum Hauptmenü',
                 TutorialNavigationTarget.mainPage => 'Spiel starten',
                 TutorialNavigationTarget.back => 'Zurück',
               },
+              style: Theme.of(context).textTheme.headlineMedium,
               onPressed: _onNavigate,
             ),
+            const Gap(8),
           ],
         ),
       ),
