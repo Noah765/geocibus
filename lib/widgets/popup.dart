@@ -195,7 +195,7 @@ class _PopupState<T extends Object> extends State<Popup<T>> with RouteAware {
         onTapOutside: _onTapOutside,
         onTapInside: _onTapChild,
         child: MouseRegion(
-          onEnter: _onPointerEnterChild,
+          onEnter: (event) => Future.microtask(() => _onPointerEnterChild(event)),
           onExit: (event) => Future.microtask(_onPointerExitChild),
           onHover: _onChildHover,
           hitTestBehavior: HitTestBehavior.deferToChild,
