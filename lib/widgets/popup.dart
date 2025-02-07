@@ -91,7 +91,7 @@ class _PopupState<T extends Object> extends State<Popup<T>> with TickerProviderS
       _inactivePopups.remove(data);
       setState(() {});
     }
-    if (_controller.hovered == null) setState(() => _controller.pressed == data ? _inactivePopups.add(data) : null);
+    if (_controller.hovered == null) setState(() => _controller.pressed == data ? _inactivePopups.add(data) : _inactivePopups.remove(data));
     _controller.pressed = data == _controller.pressed ? null : data;
   }
 
