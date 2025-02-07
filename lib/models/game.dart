@@ -125,11 +125,7 @@ class Game extends ChangeNotifier {
   }
 
   void finishRound() {
-    for (final region in regions) {
-      region.finishRound();
-    }
-
-    yearlyPopulation.add({for (final region in regions) region: region.population});
+    yearlyPopulation.add({for (final region in regions) region: region.expectedPopulation});
 
     newEvents = round == 10 ? [] : events[round];
     finishedEvents = activeEvents.where((e) => e.duration == e.round).toList();

@@ -25,6 +25,7 @@ sealed class Region {
   final int startPopulation;
   late int population = startPopulation;
   final double defaultPopulationGrowthRate;
+  int get expectedPopulation => (min(population * (1 + _maximumPopulationGrowthRate), min(food / _foodPerPerson, water / waterPerPerson)) * (1 + defaultPopulationGrowthRate)).floor();
 
   late int food = generatedFood;
   late int water = generatedWater;
@@ -72,9 +73,8 @@ sealed class Region {
     };
   }
 
-  void finishRound() => population = (min(population * (1 + _maximumPopulationGrowthRate), min(food / _foodPerPerson, water / waterPerPerson)) * (1 + defaultPopulationGrowthRate)).floor();
-
   void startRound() {
+    population = (min(population * (1 + _maximumPopulationGrowthRate), min(food / _foodPerPerson, water / waterPerPerson)) * (1 + defaultPopulationGrowthRate)).floor();
     final newWater = water - requiredWater + generatedWater;
     final newFood = food - requiredFood + generatedFood;
     updateResourceTrends(newWater, newFood);
