@@ -2,13 +2,18 @@
   inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
 
   outputs = inputs: let
-    pkgs = inputs.nixpkgs.legacyPackages.x86_64-linux;
+    pkgs = import inputs.nixpkgs {
+      system = "x86_64-linux";
+      config.allowUnfree = true;
+    };
     inherit (inputs.nixpkgs) lib;
   in {
-    # Only necessary for the first build (for more details see https://github.com/NixOS/nixpkgs/issues/341147)
-    devShell.x86_64-linux = pkgs.mkShell {
-      buildInputs = with pkgs; [pkg-config gtk3];
-      shellHook = "flutter clean; flutter run";
+    devShells.x86_64-linux = {
+      default = pkgs.mkShell {buildInputs = with pkgs; [flutter pkg-config gtk3];};
+      web = pkgs.mkShell {
+        buildInputs = [pkgs.flutter];
+        CHROME_EXECUTABLE = lib.getExe pkgs.google-chrome;
+      };
     };
     packages.x86_64-linux = {
       download = pkgs.writeShellScriptBin "windows-vm-download" "cd windows-vm; ${lib.getExe' pkgs.quickemu "quickget"} windows 11";
