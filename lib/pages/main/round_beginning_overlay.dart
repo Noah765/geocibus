@@ -102,7 +102,7 @@ class _EventCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final titleStyle = Theme.of(context).textTheme.titleLarge!;
+    final textTheme = Theme.of(context).textTheme;
 
     return ContainerCard(
       size: ContainerCardSize.small,
@@ -110,11 +110,13 @@ class _EventCard extends StatelessWidget {
         children: [
           Text.rich(
             TextSpan(children: [IconSpan(icon: event.icon), TextSpan(text: ' ${event.name} (Lvl. ${event.level})')]),
-            style: titleStyle,
+            style: textTheme.titleLarge,
             textAlign: TextAlign.center,
           ),
-          const Gap(4),
+          const Gap(8),
           Text(event.description, textAlign: TextAlign.center),
+          const Gap(8),
+          Text(event.effects, style: textTheme.labelSmall, textAlign: TextAlign.center),
         ],
       ),
     );

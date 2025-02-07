@@ -44,15 +44,14 @@ class Game extends ChangeNotifier {
   int get additionalFoodMaximum => regions.map((e) => max(0, e.maximumFood - e.food)).sum;
 
   int money = 5000;
-  int generatedMoney = 100; // TODO Change based on events
-  double moneyMultiplicationRate = 1.1;
+  int generatedMoney = 500;
+  static const moneyMultiplicationRate = 1.1;
 
   late final List<List<Event>> events = _generateEvents();
   final activeEvents = <Event>[];
   List<Event> newEvents = [];
   List<Event> finishedEvents = [];
 
-  // TODO More sophisticated generator (same events in a row should be unlikely)
   List<List<Event>> _generateEvents() {
     final events = List.generate(10, (i) => <Event>[]);
 
@@ -80,7 +79,7 @@ class Game extends ChangeNotifier {
           NatureEvent(game: this, level: level),
           PlantDiseaseEvent(game: this, level: level),
           WaterPollutionEvent(game: this, level: level),
-        ].where((e) => e.maximumRound >= round && !activeEvents.any((activeEvent) => e.runtimeType == activeEvent.runtimeType)).toList();
+        ].where((e) => !activeEvents.any((activeEvent) => e.runtimeType == activeEvent.runtimeType)).toList();
 
         if (possibleEvents.isEmpty) continue;
 
@@ -94,9 +93,13 @@ class Game extends ChangeNotifier {
     return events;
   }
 
-  void scheduleEvent(Event event, {int waitRounds = 0}) => events[round + waitRounds].add(event);
-
-  Region selectRandomRegion() => regions[Random().nextInt(regions.length)];
+  void scheduleEvent(Event event) {
+    if (round == 10 || events[round].where((e) => e.runtimeType == event.runtimeType).isNotEmpty) return;
+    events[round].add(event);
+    for (var i = round; i < round + event.duration; i++) {
+      events.removeWhere((e) => e.runtimeType == event.runtimeType);
+    }
+  }
 
   void distributeResources(Region region, int water, int food) {
     this.water -= water;
@@ -139,6 +142,10 @@ class Game extends ChangeNotifier {
   void startRound() {
     round++;
     movesLeft = 6;
+
+    for (final region in regions) {
+      region.startRound();
+    }
 
     money += generatedMoney;
     money = (money * moneyMultiplicationRate).floor();

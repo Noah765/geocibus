@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:geocibus/models/event.dart';
 
 const _maximumPopulationGrowthRate = 0.1;
-const _foodPerPerson = 2.2;
+const _foodPerPerson = 4;
 
 sealed class Region {
   Region({
@@ -72,9 +72,9 @@ sealed class Region {
     };
   }
 
-  void finishRound() {
-    population = (min(population * (1 + _maximumPopulationGrowthRate), min(food / _foodPerPerson, water / waterPerPerson)) * (1 + defaultPopulationGrowthRate)).floor();
+  void finishRound() => population = (min(population * (1 + _maximumPopulationGrowthRate), min(food / _foodPerPerson, water / waterPerPerson)) * (1 + defaultPopulationGrowthRate)).floor();
 
+  void startRound() {
     final newWater = water - requiredWater + generatedWater;
     final newFood = food - requiredFood + generatedFood;
     updateResourceTrends(newWater, newFood);
@@ -97,7 +97,7 @@ class Asia extends Region {
           defaultPopulationGrowthRate: 0.0058,
           waterPerPerson: 8,
           waterGenerationRate: 6,
-          foodGenerationRate: 2.944,
+          foodGenerationRate: 5.888,
         );
 }
 
@@ -111,7 +111,7 @@ class Africa extends Region {
           defaultPopulationGrowthRate: 0.0226,
           waterPerPerson: 10,
           waterGenerationRate: 6,
-          foodGenerationRate: 2.567,
+          foodGenerationRate: 5.134,
         );
 }
 
@@ -125,7 +125,7 @@ class Europe extends Region {
           defaultPopulationGrowthRate: -0.001,
           waterPerPerson: 5,
           waterGenerationRate: 7,
-          foodGenerationRate: 3.555,
+          foodGenerationRate: 7.11,
         );
 }
 
@@ -139,7 +139,7 @@ class SouthAmerica extends Region {
           defaultPopulationGrowthRate: 0.0065,
           waterPerPerson: 5,
           waterGenerationRate: 7,
-          foodGenerationRate: 3.111,
+          foodGenerationRate: 6.222,
         );
 }
 
@@ -153,7 +153,7 @@ class NorthAmerica extends Region {
           defaultPopulationGrowthRate: 0.0056,
           waterPerPerson: 10,
           waterGenerationRate: 15,
-          foodGenerationRate: 3.881,
+          foodGenerationRate: 7.762,
         );
 }
 
@@ -167,6 +167,6 @@ class Australia extends Region {
           defaultPopulationGrowthRate: 0.0111,
           waterPerPerson: 9,
           waterGenerationRate: 5,
-          foodGenerationRate: 3.6,
+          foodGenerationRate: 7.2,
         );
 }

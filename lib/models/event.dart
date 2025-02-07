@@ -10,9 +10,6 @@ sealed class Event {
 
   Game game;
 
-  int get minimumRound => 1;
-  int get maximumRound => 10;
-
   int get duration => 1;
   int round = 1;
 
@@ -21,6 +18,7 @@ sealed class Event {
   String get name;
   IconData get icon;
   String get description;
+  String get effects;
 
   void onInitialize(Game game) {}
 
@@ -38,11 +36,11 @@ extension on List<Region> {
 
 class PandemicEvent extends Event {
   PandemicEvent({required super.game, required super.level}) {
-    regions.add(game.selectRandomRegion());
+    regions.add(game.regions[Random().nextInt(game.regions.length)]);
   }
 
   @override
-  int get duration => 2;
+  int get duration => 3;
 
   @override
   String get name => switch (level) { 1 => 'Epidemie', _ => 'Pandemie' };
@@ -51,14 +49,19 @@ class PandemicEvent extends Event {
   @override
   String get description =>
       'Eine Krankheit verbreitet sich ${level == 1 ? 'in ${regions[0].name}.' : 'auf der Welt.\n${regions.length == 1 ? '${regions[0].name} ist' : '${regions.displayNames()} sind'} bereits betroffen.'} Viele Grenzen machen dicht, weswegen der Handel ins Stocken gerät. Dazu kommt noch eine hohe Inflationsrate, die vielen Menschen durch hohe Lebensmittelpreise das Leben erschwert. Und das Schlimmste von allen ist: Es gibt kein Toilettenpapier mehr!';
+  @override
+  String get effects => '''
+Dauer: 3 Jahre${level == 1 ? '' : '\nDie Pandemie kann sich jedes Jahr weiter ausbreiten'}
+Löst eine Inflation der Stufe $level aus, solange noch keine Inflation aktiv ist
+Die Lebensmittelpreise sind während des Events um 21,8% höher
+Die betroffenen Regionen blockieren jegliche Exporte''';
+
   final regions = <Region>[];
 
   @override
   void onInitialize(Game game) {
     game.scheduleEvent(InflationEvent(game: game, level: level));
-
     game.foodPrice *= 1.218;
-
     regions[0].exportBlockingEvents.add(this);
   }
 
@@ -87,10 +90,7 @@ class InflationEvent extends Event {
   InflationEvent({required super.game, required super.level});
 
   @override
-  int get maximumRound => 7;
-
-  @override
-  int get duration => 3;
+  int get duration => 2;
 
   @override
   String get name => 'Inflation';
@@ -99,6 +99,12 @@ class InflationEvent extends Event {
   @override
   String get description =>
       'Aufgrund einer instabilen Wirtschaft steigt die Inflationsrate und damit auch die Lebensmittelpreise. Viele Teile der Bevölkerung muss darum bangen, ob sie noch genügend Nahrung auf ihren Teller bekommen.';
+  @override
+  String get effects => '''
+Dauer: 2 Jahre
+Die Wasser- und Lebensmittelproduktion jeder Region sinkt während des Events um ${(100 - 100 / (1 + level / 4)).round()}%
+Die Preise für Wasser und Lebensmittel steigen jedes Jahr um ${10 * level}%
+Du generierst jede Runde ${8 * level}% mehr Geld (unabhängig von der konstanten Geldvermehrungsrate von 10% pro Jahr)''';
 
   @override
   void onInitialize(Game game) {
@@ -110,8 +116,9 @@ class InflationEvent extends Event {
 
   @override
   void apply(Game game) {
-    game.foodPrice *= 1.1 * level;
-    game.waterPrice *= 1.1 * level;
+    game.foodPrice *= 1 + 0.1 * level;
+    game.waterPrice *= 1 + 0.1 * level;
+    game.generatedMoney = (game.generatedMoney * 0.08 * level).floor();
   }
 
   @override
@@ -130,8 +137,6 @@ class WarEvent extends Event {
   }
 
   @override
-  int get maximumRound => 9;
-  @override
   int get duration => 2;
 
   @override
@@ -141,6 +146,13 @@ class WarEvent extends Event {
   @override
   String get description =>
       'Ein Krieg wird zwischen ${regions.displayNames()} ausgefochten. Doch das betrifft nicht nur die Kriegsparteien, dessen Populationen unter Nahrungs- und Wasserknappheit leiden. Die Inflation steigt. Und Handelembargos verhindern den reibungslosen Austausch von Gütern.';
+  @override
+  String get effects => '''
+Dauer: 2 Jahre
+Löst eine Inflation der Stufe $level aus, solange noch keine Inflation aktiv ist
+Jedes Jahr verlieren die betroffenen Regionen ${(100 - 100 / (1 + level / 2)).round()}% ihrer Lebensmittel und ihres Wassers
+Die betroffenen Regionen blockieren jegliche Exporte''';
+
   final regions = <Region>[];
 
   @override
@@ -149,6 +161,14 @@ class WarEvent extends Event {
 
     for (final region in regions) {
       region.exportBlockingEvents.add(this);
+    }
+  }
+
+  @override
+  void apply(Game game) {
+    for (final region in regions) {
+      region.food = (region.food / (1 + level / 2)).floor();
+      region.water = (region.water / (1 + level / 2)).floor();
     }
   }
 
@@ -180,29 +200,44 @@ class NatureEvent extends Event {
   @override
   String get description =>
       'Naturkatastrophen sind zwar natürlich, aber durch den Klimawandel werden sie immer stärker und kommen viel häufiger vor. Mangelnde Hygiene, die durch zerstörte Infrastruktur hervorgerufen wird, steuern zur Verbreitung von Krankheiten bei und die Nahrungs- und Wasserversorung leidet. Der Wiederaufbau dieser Infrastruktur kostet viel Geld.';
+  @override
+  String get effects => '''
+Dauer: 1 Jahr${level == 1 ? '' : '\nKann eine ${level == 2 ? 'Epidemie' : 'Pandemie der Stufe ${level - 1}'} auslösen'}
+Du verlierst ${10 * level}% deines Geldes
+Die Wasser- und Lebensmittelproduktion jeder Region sinkt während des Events um ${(100 - 100 / (1 + level / 2)).round()}%''';
 
   @override
   void onInitialize(Game game) {
+    print('init');
     if (level > 1 && Random().nextBool()) game.scheduleEvent(PandemicEvent(game: game, level: level - 1));
     game.money -= (game.money * 0.1 * level).ceil();
 
     for (final region in game.regions) {
-      region.foodGenerationRate *= min(0.5, 1 - level * 0.1);
-      region.waterGenerationRate *= min(0.5, 1 - level * 0.1);
+      region.foodGenerationRate /= 1 + level / 2;
+      region.waterGenerationRate /= 1 + level / 2;
     }
   }
 
   @override
+  void apply(Game game) {
+    print('apply');
+  }
+
+  @override
   void onFinished(Game game) {
+    print('finish');
     for (final region in game.regions) {
-      region.foodGenerationRate /= min(0.5, 1 - level * 0.1);
-      region.waterGenerationRate /= min(0.5, 1 - level * 0.1);
+      region.foodGenerationRate *= 1 + level / 2;
+      region.waterGenerationRate *= 1 + level / 2;
     }
   }
 }
 
 class PlantDiseaseEvent extends Event {
   PlantDiseaseEvent({required super.game, required super.level});
+
+  @override
+  int get duration => 4;
 
   @override
   String get name => switch (level) { 1 => 'Pflanzenkrankheit', _ => 'Viehkrankheit' };
@@ -214,6 +249,12 @@ class PlantDiseaseEvent extends Event {
           'Eine Pflanzenkrankheit geht herum. Es kommt zu Ernteausfällen, sodass bei vielen sowohl Essens- als auch Lebensgrundlage verloren geht. Durch das mangelnde Angebot aber hohe Nachfrage steigen die Lebensmittelpreise.',
         _ => 'Eine Viehkrankheit geht in Teilen der Welt herum. Reihenweise Tiere sterben. Man hat nicht mehr genug proteinreiche Nahrung, weswegen die Preise ansteigen.',
       };
+  @override
+  String get effects => '''
+Dauer: 4 Jahre
+Die Lebensmittelproduktion jeder Region sinkt während des Events um ${(100 - 100 / (1 + level / 4)).round()}%
+Du verlierst jedes Jahr ${10 * level}% deines übrigen Essens
+Die Lebensmittelpreise steigen jedes Jahr um ${10 * level}% und fallen nach dem Event um den gleichen Betrag''';
 
   @override
   void onInitialize(Game game) {
@@ -225,11 +266,12 @@ class PlantDiseaseEvent extends Event {
   @override
   void apply(Game game) {
     game.food -= (game.food * 0.1 * level).ceil();
-    game.foodPrice *= 1.1 * level;
+    game.foodPrice *= 1 + 0.1 * level;
   }
 
   @override
   void onFinished(Game game) {
+    game.foodPrice /= pow(1 + 0.1 * level, 4);
     for (final region in game.regions) {
       region.foodGenerationRate *= 1 + level / 4;
     }
@@ -240,12 +282,21 @@ class WaterPollutionEvent extends Event {
   WaterPollutionEvent({required super.game, required super.level});
 
   @override
+  int get duration => 4;
+
+  @override
   String get name => 'Wasserverschmutzung';
   @override
   IconData get icon => FontAwesomeIcons.handHoldingDroplet;
   @override
   String get description =>
       'Wasserverschmutzung hat viele Ursachen. Zerstörte Infrastruktur durch Krieg oder Naturkatastrophen oder auch ein Unfall, welcher dazu führt, dass Chemikalien in die Wasserversorgung gelangen. So wird das Wasser immer knapper.';
+  @override
+  String get effects => '''
+Dauer: 4 Jahre
+Die Wasserproduktion jeder Region sinkt während des Events um ${(100 - 100 / (1 + level / 4)).round()}%
+Du verlierst jedes Jahr ${10 * level}% deines übrigen Wassers
+Die Wasserpreise steigen jedes Jahr um ${10 * level}% und fallen nach dem Event um den gleichen Betrag''';
 
   @override
   void onInitialize(Game game) {
@@ -257,11 +308,12 @@ class WaterPollutionEvent extends Event {
   @override
   void apply(Game game) {
     game.water -= (game.water * 0.1 * level).ceil();
-    game.waterPrice *= 1.1 * level;
+    game.waterPrice *= 1 + 0.1 * level;
   }
 
   @override
   void onFinished(Game game) {
+    game.waterPrice /= pow(1 + 0.1 * level, 4);
     for (final region in game.regions) {
       region.waterGenerationRate *= 1 + level / 4;
     }

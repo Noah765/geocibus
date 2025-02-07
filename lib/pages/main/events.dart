@@ -37,22 +37,24 @@ class _Event extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final titleStyle = Theme.of(context).textTheme.titleLarge;
+    final textTheme = Theme.of(context).textTheme;
 
     return Popup(
       clickable: false,
       direction: Direction.right,
       builder: (context, data) => SizedBox(
-        width: 400,
+        width: 600,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Text.rich(
               TextSpan(children: [IconSpan(icon: event.icon), TextSpan(text: ' ${event.name} (Lvl. ${event.level})')]),
-              style: titleStyle,
+              style: textTheme.titleLarge,
             ),
-            const Gap(4),
+            const Gap(8),
             Text(event.description, textAlign: TextAlign.center),
+            const Gap(8),
+            Text(event.effects, style: textTheme.labelSmall, textAlign: TextAlign.center),
           ],
         ),
       ),
