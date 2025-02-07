@@ -208,7 +208,6 @@ Die Wasser- und Lebensmittelproduktion jeder Region sinkt während des Events um
 
   @override
   void onInitialize(Game game) {
-    print('init');
     if (level > 1 && Random().nextBool()) game.scheduleEvent(PandemicEvent(game: game, level: level - 1));
     game.money -= (game.money * 0.1 * level).ceil();
 
@@ -219,13 +218,7 @@ Die Wasser- und Lebensmittelproduktion jeder Region sinkt während des Events um
   }
 
   @override
-  void apply(Game game) {
-    print('apply');
-  }
-
-  @override
   void onFinished(Game game) {
-    print('finish');
     for (final region in game.regions) {
       region.foodGenerationRate *= 1 + level / 2;
       region.waterGenerationRate *= 1 + level / 2;
