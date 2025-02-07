@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -6,9 +8,11 @@ import 'package:gap/gap.dart';
 import 'package:geocibus/models/region.dart';
 import 'package:geocibus/pages/main/page.dart';
 import 'package:geocibus/pages/sources.dart';
+import 'package:geocibus/pages/tutorial.dart';
 import 'package:geocibus/widgets/button.dart';
 import 'package:geocibus/widgets/icon_span.dart';
 import 'package:geocibus/widgets/interactive_map.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class StartPage extends StatefulWidget {
   const StartPage({super.key});
@@ -26,9 +30,17 @@ class _StartPageState extends State<StartPage> {
     InteractiveMapData.load().then((value) => setState(() => _mapData = value));
   }
 
-  void _start(BuildContext context) => Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => const MainPage()));
+  Future<void> _start() async {
+    final sharedPreferences = await SharedPreferences.getInstance();
 
-  void _sources(BuildContext context) => Navigator.of(context).push(MaterialPageRoute(builder: (context) => const SourcesPage()));
+    if (!mounted) return;
+    final showTutorial = sharedPreferences.getBool('watchedTutorial') != true && (kIsWeb || !Platform.isLinux);
+    Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => showTutorial ? const TutorialPage(navigationTarget: TutorialNavigationTarget.mainPage) : const MainPage()));
+  }
+
+  void _tutorial() => Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => const TutorialPage(navigationTarget: TutorialNavigationTarget.startPage)));
+
+  void _sources() => Navigator.of(context).push(MaterialPageRoute(builder: (context) => const SourcesPage()));
 
   void _leave() => appWindow.close();
 
@@ -76,9 +88,13 @@ class _StartPageState extends State<StartPage> {
                           mainAxisSize: MainAxisSize.min,
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            Button(text: 'Start', style: buttonStyle, elevation: 3, borderWidth: 3, onPressed: () => _start(context)),
+                            Button(text: 'Start', style: buttonStyle, elevation: 3, borderWidth: 3, onPressed: _start),
+                            if (kIsWeb || !Platform.isLinux) ...[
+                              const Gap(16),
+                              Button(text: 'Tutorial', style: buttonStyle, elevation: 3, borderWidth: 3, onPressed: _tutorial),
+                            ],
                             const Gap(16),
-                            Button(text: 'Quellen', style: buttonStyle, elevation: 3, borderWidth: 3, onPressed: () => _sources(context)),
+                            Button(text: 'Quellen', style: buttonStyle, elevation: 3, borderWidth: 3, onPressed: _sources),
                             if (!kIsWeb) ...[
                               const Gap(16),
                               Button(text: 'Spiel verlassen', style: buttonStyle, elevation: 3, borderWidth: 3, onPressed: _leave),
