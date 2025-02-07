@@ -1,19 +1,10 @@
-import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:flutter/material.dart';
 import 'package:geocibus/pages/start.dart';
 import 'package:geocibus/theme.dart';
-import 'package:window_manager/window_manager.dart';
 
 final routeObserver = RouteObserver();
 
-void main() {
-  runApp(const _App());
-
-  doWhenWindowReady(() {
-    windowManager.setFullScreen(true);
-    appWindow.show();
-  });
-}
+void main() => runApp(const _App());
 
 class _App extends StatelessWidget {
   const _App();

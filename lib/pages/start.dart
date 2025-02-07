@@ -1,8 +1,8 @@
 import 'dart:io';
 
-import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gap/gap.dart';
 import 'package:geocibus/models/region.dart';
@@ -42,7 +42,7 @@ class _StartPageState extends State<StartPage> {
 
   void _sources() => Navigator.of(context).push(MaterialPageRoute(builder: (context) => const SourcesPage()));
 
-  void _leave() => appWindow.close();
+  void _leave() => SystemNavigator.pop();
 
   @override
   Widget build(BuildContext context) {
