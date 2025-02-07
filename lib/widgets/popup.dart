@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:geocibus/main.dart';
 import 'package:geocibus/widgets/card.dart';
 import 'package:vector_math/vector_math_64.dart';
 
@@ -36,7 +37,7 @@ class Popup<T extends Object> extends StatefulWidget {
   State<Popup> createState() => _PopupState<T>();
 }
 
-class _PopupState<T extends Object> extends State<Popup<T>> with TickerProviderStateMixin {
+class _PopupState<T extends Object> extends State<Popup<T>> with RouteAware {
   late final PopupController<T> _controller;
   final _inactivePopups = <T>{};
   final _overlayController = OverlayPortalController()..show();
@@ -51,9 +52,23 @@ class _PopupState<T extends Object> extends State<Popup<T>> with TickerProviderS
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    routeObserver.subscribe(this, ModalRoute.of(context)!);
+  }
+
+  @override
   void dispose() {
     if (widget.controller == null) _controller.dispose();
+    routeObserver.unsubscribe(this);
     super.dispose();
+  }
+
+  @override
+  void didPushNext() {
+    if (_controller.pressed == null) return;
+    if (_controller.hovered == null) setState(() => _inactivePopups.add(_controller.pressed!));
+    _controller.pressed = null;
   }
 
   T _getDataAt(Offset localPosition) => widget.getDataAt == null ? true as T : widget.getDataAt!(localPosition);
@@ -166,7 +181,7 @@ class _PopupState<T extends Object> extends State<Popup<T>> with TickerProviderS
 
   @override
   Widget build(BuildContext buildContext) {
-    return OverlayPortal.targetsRootOverlay(
+    return OverlayPortal(
       controller: _overlayController,
       overlayChildBuilder: (context) => LayoutBuilder(
         builder: (context, constraints) => Stack(
